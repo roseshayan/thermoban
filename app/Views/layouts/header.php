@@ -30,11 +30,22 @@
             </ul>
         </nav>
 
-        <!-- CTA Action Button -->
+        <!-- Header Actions: Cart, Profile & CTA -->
         <div class="header-action">
+            <a href="<?= url('cart') ?>" class="header-icon-btn header-cart-btn" title="سبد خرید" aria-label="سبد خرید">
+                <?= icon('cart', 'header-svg-icon', 22) ?>
+                <span class="cart-count-badge">۲</span>
+            </a>
+
+            <a href="<?= url('profile') ?>" class="header-icon-btn header-user-btn" title="حساب کاربری" aria-label="حساب کاربری">
+                <?= icon('user', 'header-svg-icon', 22) ?>
+                <span class="user-text-label">پروفایل من</span>
+            </a>
+
             <a href="<?= url('#quick-order') ?>" class="btn btn-primary btn-header">
                 ثبت سفارش سریع
             </a>
+
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="منوی موبایل">
                 <span></span>
                 <span></span>
@@ -50,12 +61,14 @@
             <button class="mobile-drawer-close" id="mobileDrawerClose" aria-label="بستن منو">&times;</button>
         </div>
         <ul class="mobile-nav-list">
-            <li><a href="<?= url() ?>" class="mobile-nav-link <?= ($currentPage ?? 'home') === 'home' ? 'active' : '' ?>">صفحه اصلی</a></li>
-            <li><a href="<?= url('services') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>">خدمات ما</a></li>
-            <li><a href="<?= url('shop') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>">فروشگاه</a></li>
-            <li><a href="<?= url('blog') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'blog' ? 'active' : '' ?>">مقالات</a></li>
-            <li><a href="<?= url('about') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>">درباره ما</a></li>
-            <li><a href="<?= url('contact') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'contact' ? 'active' : '' ?>">تماس با ما</a></li>
+            <li><a href="<?= url() ?>" class="mobile-nav-link <?= ($currentPage ?? 'home') === 'home' ? 'active' : '' ?>"><?= icon('building', '', 18) ?> <span>صفحه اصلی</span></a></li>
+            <li><a href="<?= url('services') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>"><?= icon('wrench', '', 18) ?> <span>خدمات ما</span></a></li>
+            <li><a href="<?= url('shop') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>"><?= icon('flame', '', 18) ?> <span>فروشگاه پکیج</span></a></li>
+            <li><a href="<?= url('blog') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'blog' ? 'active' : '' ?>"><?= icon('calendar', '', 18) ?> <span>مقالات آموزشی</span></a></li>
+            <li><a href="<?= url('profile') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'profile' ? 'active' : '' ?>"><?= icon('user', '', 18) ?> <span>پروفایل کاربری</span></a></li>
+            <li><a href="<?= url('cart') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'cart' ? 'active' : '' ?>"><?= icon('cart', '', 18) ?> <span>سبد خرید (۲ کالا)</span></a></li>
+            <li><a href="<?= url('about') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>"><?= icon('shield', '', 18) ?> <span>درباره ما</span></a></li>
+            <li><a href="<?= url('contact') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'contact' ? 'active' : '' ?>"><?= icon('phone', '', 18) ?> <span>تماس با ما</span></a></li>
         </ul>
         <div class="mobile-drawer-footer">
             <a href="<?= url('#quick-order') ?>" class="btn btn-primary w-100">ثبت سفارش سریع</a>

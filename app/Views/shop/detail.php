@@ -55,7 +55,11 @@
                     <h1 class="single-product-title"><?= e($product['title']) ?></h1>
                     <div class="single-product-model"><?= e($product['model']) ?></div>
                     <div class="single-product-rating">
-                        <span class="stars">⭐⭐⭐⭐⭐</span>
+                        <span class="stars text-orange">
+                            <?php for ($si = 0; $si < 5; $si++): ?>
+                                <?= icon('star', 'star-fill', 16) ?>
+                            <?php endfor; ?>
+                        </span>
                         <span class="score"><?= $product['rating'] ?></span>
                         <span class="reviews-count">(<?= $product['reviews_count'] ?> دیدگاه خریداران)</span>
                     </div>
@@ -84,15 +88,15 @@
                 <!-- Warranty & Delivery Box -->
                 <div class="product-services-box">
                     <div class="service-row">
-                        <span class="srv-icon">🛡️</span>
+                        <span class="srv-icon"><?= icon('shield', 'text-orange') ?></span>
                         <span><strong>گارانتی رسمی:</strong> <?= e($product['warranty']) ?></span>
                     </div>
                     <div class="service-row">
-                        <span class="srv-icon">🚚</span>
+                        <span class="srv-icon"><?= icon('truck', 'text-orange') ?></span>
                         <span><strong>ارسال در تهران:</strong> تحویل اکسپرس کمتر از ۳ ساعت + امکان پرداخت در محل</span>
                     </div>
                     <div class="service-row">
-                        <span class="srv-icon">👨‍🔧</span>
+                        <span class="srv-icon"><?= icon('technician', 'text-orange') ?></span>
                         <span><strong>اعزام نصاب مجاز:</strong> همزمان با تحویل دستگاه جهت تایید و فعال‌سازی گارانتی</span>
                     </div>
                 </div>
@@ -117,10 +121,10 @@
 
                     <div class="order-action-buttons">
                         <button type="button" class="btn btn-primary btn-lg btn-buy-now" onclick="document.getElementById('serviceModal').classList.add('active')">
-                            <span>🛒 ثبت سفارش و اعزام نصاب</span>
+                            <span><?= icon('cart', '', 18) ?> ثبت سفارش و اعزام نصاب</span>
                         </button>
                         <a href="tel:02177428596" class="btn btn-outline btn-lg btn-phone-order">
-                            <span>📞 مشاوره قبل از خرید: ۰۲۱-۷۷۴۲۸۵۹۶</span>
+                            <span><?= icon('phone', '', 18) ?> مشاوره قبل از خرید: ۰۲۱-۷۷۴۲۸۵۹۶</span>
                         </a>
                         <a href="https://ble.ir/thermoban_support" target="_blank" rel="noopener" class="btn btn-navy btn-bale-order">
                             <span>پیام‌رسان بله</span>
@@ -167,7 +171,7 @@
                     <h4>ویژگی‌ها و مزایای برجسته این مدل:</h4>
                     <ul class="features-checklist">
                         <?php foreach ($product['features'] as $f): ?>
-                            <li>✔️ <?= e($f) ?></li>
+                            <li><?= icon('check', 'text-orange', 16) ?> <?= e($f) ?></li>
                         <?php endforeach; ?>
                     </ul>
 
@@ -181,7 +185,7 @@
                 <h3 class="tab-panel-title">شرایط و لوازم مورد نیاز جهت نصب رایگان</h3>
                 <div class="install-conditions-body">
                     <div class="article-callout alert-info">
-                        <div class="callout-icon">ℹ️</div>
+                        <div class="callout-icon"><?= icon('info', 'text-orange', 24) ?></div>
                         <div class="callout-body">
                             <h4>اجرت نصب دستگاه کاملاً رایگان است</h4>
                             <p>طبق مصوبه شرکت، هزینه نصب پکیج رایگان می‌باشد و توسط نصاب رسمی انجام می‌گردد. تنها هزینه لوازم جانبی و اتصالات استاندارد (در صورت نیاز به تعویض) طبق فاکتور شرکتی محاسبه می‌شود.</p>

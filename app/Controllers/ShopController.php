@@ -244,4 +244,106 @@ class ShopController extends Controller {
 
         $this->view('shop/detail', $data);
     }
+
+    public function cart(): void {
+        $cartItems = [
+            [
+                'id' => 1,
+                'title' => 'پکیج شوفاژ دیواری بوتان ۲۴۰۰۰ مدل Bita 24 Sealed فن دار',
+                'price_raw' => 28500000,
+                'price' => '۲۸,۵۰۰,۰۰۰',
+                'old_price' => '۳۱,۲۰۰,۰۰۰',
+                'quantity' => 1,
+                'image' => 'package-bita-24.png',
+                'warranty' => '۲۴ ماه ضمانت طلایی بوتان + نصب رایگان'
+            ],
+            [
+                'id' => 2,
+                'title' => 'فیلتر مغناطیسی مدار گرمایش و رسوب‌گیر پکیج Mag-Filter',
+                'price_raw' => 650000,
+                'price' => '۶۵۰,۰۰۰',
+                'old_price' => '۷۸۰,۰۰۰',
+                'quantity' => 1,
+                'image' => 'badge-shield.png',
+                'warranty' => 'ضمانت تعویض ۱۲ ماهه شرکتی'
+            ]
+        ];
+
+        $subtotal = 28500000 + 650000;
+        $discount = 2700000 + 130000;
+        $shipping = 0; // Free in Tehran
+        $total = $subtotal;
+
+        $data = [
+            'pageTitle' => 'سبد خرید | ترموبان',
+            'currentPage' => 'cart',
+            'csrfToken' => Security::generateCsrf(),
+            'cartItems' => $cartItems,
+            'subtotal' => number_format($subtotal),
+            'discount' => number_format($discount),
+            'shipping' => 'رایگان',
+            'install' => 'رایگان (کد ۷۲۷۳)',
+            'total' => number_format($total)
+        ];
+
+        $this->view('shop/cart', $data);
+    }
+
+    public function checkout(): void {
+        $addresses = [
+            [
+                'id' => 1,
+                'title' => 'منزل (سعادت‌آباد)',
+                'address' => 'تهران، سعادت‌آباد، میدان کاج، خیابان سرو غربی، کوچه مروارید، پلاک ۱۸، واحد ۴',
+                'phone' => '۰۹۱۲۲۸۴۵۸۳۲',
+                'district' => 'منطقه ۲'
+            ],
+            [
+                'id' => 2,
+                'title' => 'محل کار (میرداماد)',
+                'address' => 'تهران، بلوار میرداماد، جنب مترو، ساختمان اداری نگین، طبقه ۳، واحد ۹',
+                'phone' => '۰۲۱-۲۲۱۴۵۶۷۸',
+                'district' => 'منطقه ۳'
+            ]
+        ];
+
+        $data = [
+            'pageTitle' => 'تسویه حساب و نهایی‌سازی سفارش | ترموبان',
+            'currentPage' => 'checkout',
+            'csrfToken' => Security::generateCsrf(),
+            'addresses' => $addresses,
+            'totalAmount' => '۲۹,۱۵۰,۰۰۰',
+            'itemsCount' => 2
+        ];
+
+        $this->view('shop/checkout', $data);
+    }
+
+    public function paymentSuccess(): void {
+        $data = [
+            'pageTitle' => 'پرداخت موفق و ثبت سفارش | ترموبان',
+            'currentPage' => 'checkout',
+            'orderId' => 'TB-' . rand(10000, 99999),
+            'refId' => 'SHP-' . time(),
+            'date' => '۱۴۰۵/۰۸/۱۵ - ساعت ۱۶:۴۵',
+            'amount' => '۲۹,۱۵۰,۰۰۰',
+            'gateway' => 'درگاه پرداخت اینترنتی بانک سامان (سپهر)',
+            'delivery_time' => 'فردا - شیفت صبح (۱۰:۰۰ الی ۱۳:۰۰)'
+        ];
+
+        $this->view('shop/payment-success', $data);
+    }
+
+    public function paymentFailed(): void {
+        $data = [
+            'pageTitle' => 'تراکنش ناموفق | ترموبان',
+            'currentPage' => 'checkout',
+            'orderId' => 'TB-' . rand(10000, 99999),
+            'errorCode' => 'ERR-1049',
+            'reason' => 'انصراف کاربر از پرداخت یا عدم تایید اطلاعات کارت توسط بانک صادرکننده.',
+            'date' => '۱۴۰۵/۰۸/۱۵ - ساعت ۱۶:۴۸'
+        ];
+
+        $this->view('shop/payment-failed', $data);
+    }
 }

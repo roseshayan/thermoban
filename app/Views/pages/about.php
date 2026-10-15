@@ -35,21 +35,21 @@
                 <!-- Core Pillars Checklist -->
                 <div class="about-pillars">
                     <div class="pillar-item">
-                        <span class="pillar-icon">🎖️</span>
+                        <span class="pillar-icon"><?= icon('medal', 'text-orange', 22) ?></span>
                         <div>
                             <strong>کد مجاز نمایندگی ۷۲۷۳</strong>
                             <p>فعالیت رسمی تحت نظارت اتحادیه شوفاژکاران و تأسیسات مکانیکی تهران</p>
                         </div>
                     </div>
                     <div class="pillar-item">
-                        <span class="pillar-icon">🛡️</span>
+                        <span class="pillar-icon"><?= icon('shield', 'text-orange', 22) ?></span>
                         <div>
                             <strong>۶ ماه ضمانت کتبی خدمات</strong>
                             <p>تضمین بی‌قیدوشرط کارکرد قطعات تعویض شده و خدمات انجام‌شده</p>
                         </div>
                     </div>
                     <div class="pillar-item">
-                        <span class="pillar-icon">⏱️</span>
+                        <span class="pillar-icon"><?= icon('clock', 'text-orange', 22) ?></span>
                         <div>
                             <strong>حضور در محل در کمتر از ۱ ساعت</strong>
                             <p>بهره‌گیری از شبکه تکنسین‌های سیار مستقر در ۲۲ منطقه پایتخت</p>
@@ -152,7 +152,7 @@
             </div>
             <div class="cta-actions">
                 <a href="tel:02177428596" class="btn btn-primary btn-lg">
-                    <span>📞 ۰۲۱-۷۷۴۲۸۵۹۶</span>
+                    <span><?= icon('phone', '', 18) ?> ۰۲۱-۷۷۴۲۸۵۹۶</span>
                 </a>
                 <a href="<?= url('contact') ?>" class="btn btn-outline btn-lg">
                     <span>ارتباط با شعب</span>

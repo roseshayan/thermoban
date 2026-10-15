@@ -42,11 +42,22 @@ class Application {
         $this->router->get('/articles', [\App\Controllers\BlogController::class, 'index']);
         $this->router->get('/blog/{slug}', [\App\Controllers\BlogController::class, 'detail']);
         
-        // Shop / Products
+        // Shop / Products / Cart / Checkout
         $this->router->get('/shop', [\App\Controllers\ShopController::class, 'index']);
         $this->router->get('/products', [\App\Controllers\ShopController::class, 'index']);
         $this->router->get('/product/{id}', [\App\Controllers\ShopController::class, 'detail']);
         $this->router->get('/shop/{id}', [\App\Controllers\ShopController::class, 'detail']);
+        $this->router->get('/cart', [\App\Controllers\ShopController::class, 'cart']);
+        $this->router->get('/checkout', [\App\Controllers\ShopController::class, 'checkout']);
+        $this->router->get('/payment/success', [\App\Controllers\ShopController::class, 'paymentSuccess']);
+        $this->router->get('/payment/failed', [\App\Controllers\ShopController::class, 'paymentFailed']);
+        
+        // User Profile & Invoices
+        $this->router->get('/profile', [\App\Controllers\UserController::class, 'profile']);
+        $this->router->get('/invoice/{id}', [\App\Controllers\UserController::class, 'invoice']);
+        $this->router->post('/api/user/update-info', [\App\Controllers\UserController::class, 'updateInfo']);
+        $this->router->post('/api/user/add-address', [\App\Controllers\UserController::class, 'addAddress']);
+        $this->router->post('/api/user/create-ticket', [\App\Controllers\UserController::class, 'createTicket']);
         
         // Pages & Services
         $this->router->get('/about', [\App\Controllers\PageController::class, 'about']);

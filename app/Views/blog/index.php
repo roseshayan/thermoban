@@ -54,7 +54,7 @@
                 
                 <?php if (empty($articles)): ?>
                     <div class="no-results-box">
-                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-icon"><?= icon('search', '', 40) ?></div>
                         <h3>مقاله‌ای با این مشخصات یافت نشد</h3>
                         <p>لطفاً عبارت دیگری را جستجو کنید یا فیلتر دسته‌بندی را تغییر دهید.</p>
                         <a href="<?= url('blog') ?>" class="btn btn-primary">مشاهده همه مقالات</a>
@@ -71,8 +71,8 @@
                             <div class="featured-card-body">
                                 <div class="article-meta">
                                     <span class="meta-item meta-category"><?= e($featuredArticle['category']) ?></span>
-                                    <span class="meta-item meta-date"><?= e($featuredArticle['date']) ?></span>
-                                    <span class="meta-item meta-read"><?= e($featuredArticle['read_time']) ?> مطالعه</span>
+                                    <span class="meta-item meta-date"><?= icon('calendar', '', 14) ?> <?= e($featuredArticle['date']) ?></span>
+                                    <span class="meta-item meta-read"><?= icon('clock', '', 14) ?> <?= e($featuredArticle['read_time']) ?> مطالعه</span>
                                 </div>
                                 <h2 class="featured-card-title">
                                     <a href="<?= url('blog/' . $featuredArticle['slug']) ?>"><?= e($featuredArticle['title']) ?></a>
@@ -80,7 +80,7 @@
                                 <p class="featured-card-excerpt"><?= e($featuredArticle['excerpt']) ?></p>
                                 <div class="featured-card-footer">
                                     <div class="author-info">
-                                        <div class="author-avatar">👨‍🔧</div>
+                                        <div class="author-avatar"><?= icon('technician', '', 20) ?></div>
                                         <div class="author-text">
                                             <strong><?= e($featuredArticle['author']) ?></strong>
                                             <span><?= e($featuredArticle['author_role']) ?></span>
@@ -107,8 +107,8 @@
                                 </div>
                                 <div class="article-card-body">
                                     <div class="article-card-meta">
-                                        <span class="meta-date">📅 <?= e($art['date']) ?></span>
-                                        <span class="meta-time">⏱️ <?= e($art['read_time']) ?></span>
+                                        <span class="meta-date"><?= icon('calendar', '', 14) ?> <?= e($art['date']) ?></span>
+                                        <span class="meta-time"><?= icon('clock', '', 14) ?> <?= e($art['read_time']) ?></span>
                                     </div>
                                     <h3 class="article-card-title">
                                         <a href="<?= url('blog/' . $art['slug']) ?>"><?= e($art['title']) ?></a>
@@ -116,7 +116,7 @@
                                     <p class="article-card-excerpt"><?= e($art['excerpt']) ?></p>
                                 </div>
                                 <div class="article-card-footer">
-                                    <span class="author-name">👤 <?= e($art['author']) ?></span>
+                                    <span class="author-name"><?= icon('user', '', 14) ?> <?= e($art['author']) ?></span>
                                     <a href="<?= url('blog/' . $art['slug']) ?>" class="card-link-more">
                                         <span>ادامه مطلب</span>
                                         <span class="arrow">←</span>
@@ -150,7 +150,8 @@
                     <h3 class="widget-cta-title">پکیج شما ارور داده یا روشن نمی‌شود؟</h3>
                     <p class="widget-cta-desc">تکنسین‌های مجاز ترموبان در کمتر از ۱ ساعت با قطعات اصل شرکتی و ۶ ماه گارانتی در محل شما حاضر می‌شوند.</p>
                     <a href="tel:02177428596" class="btn btn-primary w-100 widget-cta-btn">
-                        <span>📞 تماس فوری: ۰۲۱-۷۷۴۲۸۵۹۶</span>
+                        <?= icon('phone', '', 18) ?>
+                        <span>تماس فوری: ۰۲۱-۷۷۴۲۸۵۹۶</span>
                     </a>
                     <a href="https://ble.ir/thermoban_support" target="_blank" rel="noopener" class="widget-bale-link">
                         <span>یا ارتباط آنلاین در پیام‌رسان بله</span>

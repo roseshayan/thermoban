@@ -28,17 +28,17 @@
             <?php foreach ($branches as $branch): ?>
                 <div class="branch-card">
                     <div class="branch-header">
-                        <div class="branch-icon">📍</div>
+                        <div class="branch-icon"><?= icon('map-pin', 'text-orange', 22) ?></div>
                         <h3 class="branch-title"><?= e($branch['area']) ?></h3>
                     </div>
                     <p class="branch-districts"><strong>مناطق تحت پوشش:</strong> <?= e($branch['districts']) ?></p>
                     <div class="branch-phones">
                         <a href="tel:<?= str_replace('-', '', $branch['phone']) ?>" class="branch-phone-link">
-                            <span class="phone-icon">📞</span>
+                            <span class="phone-icon"><?= icon('phone', 'text-orange', 16) ?></span>
                             <span class="phone-text"><?= e($branch['phone']) ?></span>
                         </a>
                         <a href="tel:<?= str_replace('-', '', $branch['mobile']) ?>" class="branch-mobile-link">
-                            <span class="phone-icon">📱</span>
+                            <span class="phone-icon"><?= icon('mobile', 'text-orange', 16) ?></span>
                             <span class="phone-text"><?= e($branch['mobile']) ?></span>
                         </a>
                     </div>
@@ -140,7 +140,7 @@
                         می‌توانید عکس یا ویدیوی کوتاه از صدای غیرعادی یا کد خطای پکیج خود را در پیام‌رسان بله ارسال فرمایید تا تکنسین کشیک فوراً شما را راهنمایی کند.
                     </p>
                     <a href="https://ble.ir/thermoban_support" target="_blank" rel="noopener noreferrer" class="btn btn-bale-full w-100">
-                        <span>💬 شروع گفتگو در پیام‌رسان بله</span>
+                        <span><?= icon('ticket', '', 18) ?> شروع گفتگو در پیام‌رسان بله</span>
                     </a>
                 </div>
 
@@ -149,21 +149,21 @@
                     <h4 class="office-title">اطلاعات دفتر مرکزی و هماهنگی</h4>
                     <ul class="office-info-list">
                         <li>
-                            <span class="info-icon">🏢</span>
+                            <span class="info-icon"><?= icon('building', 'text-orange', 20) ?></span>
                             <div>
                                 <strong>آدرس دفتر مرکزی:</strong>
                                 <span>تهران، خیابان دماوند، بعد از پل خاقانی، پلاک ۳۴</span>
                             </div>
                         </li>
                         <li>
-                            <span class="info-icon">⏰</span>
+                            <span class="info-icon"><?= icon('clock', 'text-orange', 20) ?></span>
                             <div>
                                 <strong>ساعات کاری و پذیرش:</strong>
                                 <span>شنبه تا پنجشنبه ۸ صبح الی ۱۰ شب (پشتیبانی تلفنی و تکنسین‌های اضطراری: ۲۴ ساعته)</span>
                             </div>
                         </li>
                         <li>
-                            <span class="info-icon">✉️</span>
+                            <span class="info-icon"><?= icon('mail', 'text-orange', 20) ?></span>
                             <div>
                                 <strong>ایمیل پشتیبانی:</strong>
                                 <span>info@devshayan.ir</span>

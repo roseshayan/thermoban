@@ -41,7 +41,7 @@
                         <ul class="service-features-list">
                             <?php foreach ($srv['features'] as $f): ?>
                                 <li>
-                                    <span class="check-icon">✓</span>
+                                    <span class="check-icon"><?= icon('check', 'text-orange', 16) ?></span>
                                     <span><?= e($f) ?></span>
                                 </li>
                             <?php endforeach; ?>
@@ -50,14 +50,14 @@
 
                     <div class="service-card-footer">
                         <div class="guarantee-chip">
-                            🛡️ <?= e($srv['guarantee']) ?>
+                            <?= icon('shield', 'text-orange', 16) ?> <?= e($srv['guarantee']) ?>
                         </div>
                         <div class="service-cta-buttons">
                             <button type="button" class="btn btn-primary" onclick="openServiceBooking('<?= e($srv['title']) ?>')">
                                 ثبت درخواست این خدمت
                             </button>
                             <a href="tel:02177428596" class="btn btn-outline">
-                                📞 مشاوره تلفنی فوری
+                                <?= icon('phone', '', 16) ?> مشاوره تلفنی فوری
                             </a>
                         </div>
                     </div>

@@ -489,3 +489,334 @@ window.openServiceBooking = function(serviceTitle) {
         document.body.style.overflow = 'hidden';
     }
 };
+
+/* ==========================================================================
+   Comprehensive Client-Side Form Validation Engine
+   ========================================================================== */
+function validateField(input) {
+    let isValid = true;
+    let errorMsg = '';
+
+    // Remove existing error message
+    input.classList.remove('is-invalid');
+    const existingMsg = input.parentNode.querySelector('.field-error-msg');
+    if (existingMsg) existingMsg.remove();
+
+    const val = input.value.trim();
+    const customMsg = input.getAttribute('data-msg');
+    const dataType = input.getAttribute('data-type');
+    const isRequired = input.hasAttribute('required');
+
+    if (isRequired && !val) {
+        isValid = false;
+        errorMsg = customMsg || 'تکمیل این فیلد الزامی است.';
+    } else if (val) {
+        // Phone / Mobile validation
+        if (input.type === 'tel' || dataType === 'phone') {
+            const phoneDigits = val.replace(/[\s\-\+]/g, '');
+            const mobileRegex = /^(\+98|0)?9\d{9}$/;
+            if (!mobileRegex.test(phoneDigits)) {
+                isValid = false;
+                errorMsg = customMsg || 'شماره موبایل معتبر ۱۱ رقمی (مثال: ۰۹۱۲۳۴۵۶۷۸۹) وارد کنید.';
+            }
+        }
+        // National ID (10 digits)
+        else if (dataType === 'national_id') {
+            const cleanId = val.replace(/\D/g, '');
+            if (cleanId.length !== 10) {
+                isValid = false;
+                errorMsg = customMsg || 'کد ملی باید دقیقاً ۱۰ رقم باشد.';
+            }
+        }
+        // Postal Code (10 digits)
+        else if (dataType === 'postal_code') {
+            const cleanPostal = val.replace(/\D/g, '');
+            if (cleanPostal.length !== 10) {
+                isValid = false;
+                errorMsg = customMsg || 'کد پستی باید ۱۰ رقم باشد.';
+            }
+        }
+        // Email validation
+        else if (input.type === 'email' || dataType === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(val)) {
+                isValid = false;
+                errorMsg = customMsg || 'فرمت آدرس ایمیل نامعتبر است.';
+            }
+        }
+    }
+
+    if (!isValid) {
+        input.classList.add('is-invalid');
+        const msgEl = document.createElement('span');
+        msgEl.className = 'field-error-msg';
+        msgEl.textContent = errorMsg;
+        input.parentNode.appendChild(msgEl);
+    }
+
+    return isValid;
+}
+
+function initFormValidation() {
+    const forms = document.querySelectorAll('.js-validate-form, #quickOrderForm, #contactMainForm, #commentForm');
+    forms.forEach(form => {
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', () => validateField(input));
+            input.addEventListener('input', () => {
+                if (input.classList.contains('is-invalid')) {
+                    validateField(input);
+                }
+            });
+        });
+
+        form.addEventListener('submit', (e) => {
+            let formIsValid = true;
+            inputs.forEach(input => {
+                if (!validateField(input)) {
+                    formIsValid = false;
+                }
+            });
+
+            if (!formIsValid) {
+                e.preventDefault();
+                const firstInvalid = form.querySelector('.is-invalid');
+                if (firstInvalid) firstInvalid.focus();
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initFormValidation);
+
+/* ==========================================================================
+   User Profile Suite (Tabs, Map Picker, Tickets)
+   ========================================================================== */
+window.switchProfileTab = function(targetTabId) {
+    const navLinks = document.querySelectorAll('.profile-nav-link[data-tab]');
+    const tabPanels = document.querySelectorAll('.profile-tab-panel');
+
+    navLinks.forEach(link => {
+        if (link.getAttribute('data-tab') === targetTabId) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+
+    tabPanels.forEach(panel => {
+        if (panel.id === targetTabId) {
+            panel.classList.add('active');
+        } else {
+            panel.classList.remove('active');
+        }
+    });
+
+    // Update URL hash/query without page reload
+    const cleanTab = targetTabId.replace('tab-', '');
+    const newUrl = window.location.pathname + '?tab=' + cleanTab;
+    window.history.replaceState(null, '', newUrl);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Bind profile nav tab clicks
+    const navLinks = document.querySelectorAll('.profile-nav-link[data-tab]');
+    navLinks.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            if (tabId) switchProfileTab(tabId);
+        });
+    });
+
+    // Toggle New Ticket Form
+    const btnOpenTicket = document.getElementById('btnOpenNewTicket');
+    const newTicketBox = document.getElementById('newTicketBox');
+    if (btnOpenTicket && newTicketBox) {
+        btnOpenTicket.addEventListener('click', () => {
+            const isHidden = newTicketBox.style.display === 'none' || !newTicketBox.style.display;
+            newTicketBox.style.display = isHidden ? 'block' : 'none';
+            btnOpenTicket.textContent = isHidden ? 'بستن فرم تیکت' : 'ثبت تیکت جدید';
+            if (isHidden) newTicketBox.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    // Toggle Add Address Map Section
+    const btnOpenAddr = document.getElementById('btnOpenAddressModal');
+    const addrSection = document.getElementById('addressMapSection');
+    if (btnOpenAddr && addrSection) {
+        btnOpenAddr.addEventListener('click', () => {
+            addrSection.scrollIntoView({ behavior: 'smooth' });
+            const titleInput = document.getElementById('addr_title');
+            if (titleInput) titleInput.focus();
+        });
+    }
+
+    // Initialize Interactive Map Location Picker
+    initInteractiveMap();
+});
+
+/**
+ * Interactive Map Location Picker for Tehran
+ */
+function initInteractiveMap() {
+    const mapBox = document.getElementById('interactiveMap');
+    const pin = document.getElementById('mapMarkerPin');
+    const coordsDisplay = document.getElementById('coordsDisplay');
+    const inputLat = document.getElementById('inputLat');
+    const inputLng = document.getElementById('inputLng');
+    const zoomInBtn = document.getElementById('mapZoomIn');
+    const zoomOutBtn = document.getElementById('mapZoomOut');
+    const resetBtn = document.getElementById('mapReset');
+
+    if (!mapBox || !pin) return;
+
+    let zoomLevel = 1;
+
+    mapBox.addEventListener('click', (e) => {
+        // Prevent click if clicking zoom buttons
+        if (e.target.closest('.map-controls')) return;
+
+        const rect = mapBox.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        const percentX = Math.max(5, Math.min(95, (clickX / rect.width) * 100));
+        const percentY = Math.max(10, Math.min(90, (clickY / rect.height) * 100));
+
+        pin.style.left = percentX + '%';
+        pin.style.top = percentY + '%';
+
+        // Calculate realistic Tehran Coordinates
+        // Tehran Bounding Box: Lat 35.60 to 35.80, Lng 51.20 to 51.55
+        const lat = (35.80 - (percentY / 100) * 0.20).toFixed(4);
+        const lng = (51.20 + (percentX / 100) * 0.35).toFixed(4);
+
+        if (coordsDisplay) {
+            coordsDisplay.textContent = `${lat}° شمالی، ${lng}° شرقی`;
+        }
+        if (inputLat) inputLat.value = lat;
+        if (inputLng) inputLng.value = lng;
+    });
+
+    if (zoomInBtn) {
+        zoomInBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (zoomLevel < 1.6) zoomLevel += 0.2;
+            mapBox.style.backgroundSize = `${100 * zoomLevel}%`;
+        });
+    }
+
+    if (zoomOutBtn) {
+        zoomOutBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (zoomLevel > 0.8) zoomLevel -= 0.2;
+            mapBox.style.backgroundSize = `${100 * zoomLevel}%`;
+        });
+    }
+
+    if (resetBtn) {
+        resetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zoomLevel = 1;
+            mapBox.style.backgroundSize = 'cover';
+            pin.style.left = '50%';
+            pin.style.top = '50%';
+            if (coordsDisplay) coordsDisplay.textContent = '۳۵.۷۲۱۹° شمالی، ۵۱.۴۰۵۶° شرقی';
+            if (inputLat) inputLat.value = '35.7219';
+            if (inputLng) inputLng.value = '51.4056';
+        });
+    }
+}
+
+/* ==========================================================================
+   Shopping Cart & Checkout Calculations
+   ========================================================================== */
+window.updateCartItemQty = function(btn, delta) {
+    const row = btn.closest('.cart-item-row');
+    if (!row) return;
+
+    const input = row.querySelector('.qty-input');
+    if (!input) return;
+
+    let qty = parseInt(input.value, 10) || 1;
+    qty += delta;
+    if (qty < 1) qty = 1;
+    input.value = qty;
+
+    recalculateCartTotals();
+};
+
+window.removeCartItemRow = function(btn) {
+    const row = btn.closest('.cart-item-row');
+    if (!row) return;
+
+    if (confirm('آیا از حذف این کالا از سبد خرید اطمینان دارید؟')) {
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(20px)';
+        setTimeout(() => {
+            row.remove();
+            recalculateCartTotals();
+            checkCartEmptyState();
+        }, 300);
+    }
+};
+
+function recalculateCartTotals() {
+    const rows = document.querySelectorAll('.cart-item-row');
+    let subtotal = 0;
+
+    rows.forEach(row => {
+        const rawPrice = parseInt(row.getAttribute('data-price'), 10) || 0;
+        const input = row.querySelector('.qty-input');
+        const qty = input ? parseInt(input.value, 10) || 1 : 1;
+        subtotal += rawPrice * qty;
+    });
+
+    const discount = 850000;
+    const finalTotal = Math.max(0, subtotal - discount);
+
+    const subtotalEl = document.getElementById('summarySubtotal');
+    const totalEl = document.getElementById('summaryTotal');
+
+    if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('fa-IR') + ' تومان';
+    if (totalEl) totalEl.textContent = finalTotal.toLocaleString('fa-IR');
+}
+
+function checkCartEmptyState() {
+    const rows = document.querySelectorAll('.cart-item-row');
+    if (rows.length === 0) {
+        const container = document.querySelector('.cart-section .site-container');
+        if (container) {
+            container.innerHTML = `
+                <div class="no-results-box" style="padding: 60px 20px; text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 16px; color: #94a3b8;">🛒</div>
+                    <h3 style="font-size: 1.4rem; color: #011C39; margin-bottom: 10px;">سبد خرید شما در حال حاضر خالی است</h3>
+                    <p style="color: #64748b; margin-bottom: 24px;">می‌توانید مدل‌های متنوع پکیج دیواری را در فروشگاه مشاهده کرده و به سبد خرید اضافه نمایید.</p>
+                    <a href="/thermoban/shop" class="btn btn-primary">مشاهده محصولات فروشگاه</a>
+                </div>
+            `;
+        }
+    }
+}
+
+window.applyPromoCode = function(e) {
+    e.preventDefault();
+    const input = document.getElementById('promoInput');
+    if (!input) return;
+
+    const code = input.value.trim().toUpperCase();
+    if (!code) {
+        alert('لطفاً کد تخفیف را وارد کنید.');
+        return;
+    }
+
+    if (code === 'THERMO5' || code === 'NOROOZ' || code === 'SHAYAN') {
+        alert('کد تخفیف معتبر است! مبلغ ۵۰۰,۰۰۰ تومان از فاکتور شما کسر شد.');
+        const discountEl = document.getElementById('summaryDiscount');
+        if (discountEl) discountEl.textContent = '۱,۳۵۰,۰۰۰ تومان';
+        recalculateCartTotals();
+    } else {
+        alert('کد تخفیف وارد شده معتبر نمی‌باشد یا مهلت استفاده از آن به پایان رسیده است.');
+    }
+};
+

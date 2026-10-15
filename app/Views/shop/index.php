@@ -22,28 +22,28 @@
         <!-- Trust Badges Bar -->
         <div class="shop-trust-badges">
             <div class="trust-badge-item">
-                <div class="trust-badge-icon">🚚</div>
+                <div class="trust-badge-icon"><?= icon('truck', 'text-orange', 24) ?></div>
                 <div class="trust-badge-text">
                     <strong>ارسال فوری در تهران</strong>
                     <span>تحویل ۲ ساعته درب منزل</span>
                 </div>
             </div>
             <div class="trust-badge-item">
-                <div class="trust-badge-icon">🔧</div>
+                <div class="trust-badge-icon"><?= icon('wrench', 'text-orange', 24) ?></div>
                 <div class="trust-badge-text">
                     <strong>نصب رایگان شرکتی</strong>
                     <span>توسط نصاب دارای کد مجاز</span>
                 </div>
             </div>
             <div class="trust-badge-item">
-                <div class="trust-badge-icon">🛡️</div>
+                <div class="trust-badge-icon"><?= icon('shield', 'text-orange', 24) ?></div>
                 <div class="trust-badge-text">
                     <strong>۲۴ ماه ضمانت طلایی</strong>
                     <span>گارانتی معتبر شرکتی</span>
                 </div>
             </div>
             <div class="trust-badge-item">
-                <div class="trust-badge-icon">💳</div>
+                <div class="trust-badge-icon"><?= icon('credit-card', 'text-orange', 24) ?></div>
                 <div class="trust-badge-text">
                     <strong>پرداخت در محل</strong>
                     <span>پس از رویت و تایید اصالت کالا</span>
@@ -101,9 +101,9 @@
                     <div class="filter-widget">
                         <h4 class="filter-widget-title">نوع مبدل و فن</h4>
                         <ul class="filter-static-list">
-                            <li>✔️ تمامی مدل‌ها دو مبدل حرارتی می‌باشند</li>
-                            <li>✔️ مجهز به فن دودکش ایمن FF</li>
-                            <li>✔️ هیدرولیک تمام برنجی ضد رسوب</li>
+                            <li><?= icon('check', 'text-green', 14) ?> <span>تمامی مدل‌ها دو مبدل حرارتی می‌باشند</span></li>
+                            <li><?= icon('check', 'text-green', 14) ?> <span>مجهز به فن دودکش ایمن FF</span></li>
+                            <li><?= icon('check', 'text-green', 14) ?> <span>هیدرولیک تمام برنجی ضد رسوب</span></li>
                         </ul>
                     </div>
 
@@ -112,7 +112,8 @@
                         <h4 class="widget-cta-title">نیاز به راهنمایی در انتخاب مدل دارید؟</h4>
                         <p class="widget-cta-desc">کارشناسان فروش ترموبان متراژ و شرایط لوله‌کشی شما را بررسی کرده و بهترین مدل را پیشنهاد می‌دهند.</p>
                         <a href="tel:02177428596" class="btn btn-primary w-100 widget-cta-btn">
-                            <span>📞 مشاوره رایگان خرید: ۰۲۱-۷۷۴۲۸۵۹۶</span>
+                            <?= icon('phone', '', 18) ?>
+                            <span>مشاوره رایگان خرید: ۰۲۱-۷۷۴۲۸۵۹۶</span>
                         </a>
                     </div>
 
@@ -141,7 +142,7 @@
                 <!-- Products Grid -->
                 <?php if (empty($products)): ?>
                     <div class="no-results-box">
-                        <div class="no-results-icon">📦</div>
+                        <div class="no-results-icon"><?= icon('cart', '', 48) ?></div>
                         <h3>محصولی مطابق فیلترهای انتخابی یافت نشد</h3>
                         <p>لطفاً فیلترها را حذف کنید یا با بخش فروش تماس بگیرید.</p>
                         <a href="<?= url('shop') ?>" class="btn btn-primary">مشاهده همه محصولات</a>
@@ -178,13 +179,14 @@
 
                                     <!-- Key Specs Chips -->
                                     <div class="product-specs-chips">
-                                        <span class="spec-chip">🔥 ظرفیت: <?= number_format($p['capacity']) ?></span>
-                                        <span class="spec-chip">📐 <?= e($p['area']) ?></span>
-                                        <span class="spec-chip">⚙️ <?= e($p['heat_exchanger']) ?></span>
+                                        <span class="spec-chip"><?= icon('flame', '', 12) ?> <?= number_format($p['capacity']) ?></span>
+                                        <span class="spec-chip"><?= icon('ruler', '', 12) ?> <?= e($p['area']) ?></span>
+                                        <span class="spec-chip"><?= icon('gear', '', 12) ?> <?= e($p['heat_exchanger']) ?></span>
                                     </div>
 
                                     <div class="product-guarantee-note">
-                                        🛡️ <?= e($p['warranty']) ?>
+                                        <?= icon('shield', '', 14) ?>
+                                        <span><?= e($p['warranty']) ?></span>
                                     </div>
                                 </div>
 
