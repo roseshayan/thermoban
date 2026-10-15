@@ -131,7 +131,8 @@ class InstallController extends Controller {
             $schemaFiles = [
                 ROOT_PATH . '/database/schema.sql',
                 ROOT_PATH . '/database/upgrade_schema.sql',
-                ROOT_PATH . '/database/v2_update.sql'
+                ROOT_PATH . '/database/v2_update.sql',
+                ROOT_PATH . '/database/v3_update.sql'
             ];
 
             foreach ($schemaFiles as $file) {

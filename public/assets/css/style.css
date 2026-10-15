@@ -1078,6 +1078,12 @@ input, button, select, textarea {
     gap: 40px;
 }
 
+.showcase-grid.single-column-grid {
+    grid-template-columns: 1fr;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 .showcase-column {
     background-color: var(--color-bg-light);
     border-radius: var(--radius-xl);

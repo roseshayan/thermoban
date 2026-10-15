@@ -193,11 +193,17 @@
 
         <div class="brands-grid">
             <?php foreach ($brands as $brand): ?>
-                <div class="brand-card <?= $brand['badge'] ? 'has-badge' : '' ?>">
+                <?php
+                $bLogo = $brand['logo'] ?? 'brand-iranradiator-logo.png';
+                $logoUrl = (str_starts_with($bLogo, 'http') || str_starts_with($bLogo, '/uploads') || str_starts_with($bLogo, 'uploads/'))
+                    ? (str_starts_with($bLogo, 'http') ? $bLogo : url($bLogo))
+                    : asset('images/' . $bLogo);
+                ?>
+                <div class="brand-card <?= !empty($brand['badge']) ? 'has-badge' : '' ?>">
                     <div class="brand-logo-box">
-                        <img src="<?= asset('images/' . $brand['logo']) ?>" alt="<?= e($brand['name']) ?>" class="brand-logo-img">
+                        <img src="<?= $logoUrl ?>" alt="<?= e($brand['name']) ?>" class="brand-logo-img">
                     </div>
-                    <?php if ($brand['badge']): ?>
+                    <?php if (!empty($brand['badge'])): ?>
                         <div class="brand-pill-badge"><?= e($brand['badge']) ?></div>
                     <?php endif; ?>
                     <h3 class="brand-name"><?= e($brand['name']) ?></h3>
@@ -208,10 +214,12 @@
 </section>
 
 <!-- Shop & Articles Section -->
+<?php if (!empty($shopEnabled) || !empty($blogEnabled)): ?>
 <section class="showcase-section" id="shop">
     <div class="site-container">
-        <div class="showcase-grid">
+        <div class="showcase-grid <?= (empty($shopEnabled) || empty($blogEnabled)) ? 'single-column-grid' : '' ?>">
             
+            <?php if (!empty($shopEnabled)): ?>
             <!-- Right in RTL: Product Showcase (فروشگاه) -->
             <div class="showcase-column products-column">
                 <div class="column-heading">
@@ -224,9 +232,15 @@
                     
                     <div class="products-slider" id="productsSlider">
                         <?php foreach ($products as $prod): ?>
+                            <?php 
+                            $pImg = $prod['image'] ?? 'package-bita-24.png';
+                            $pImgUrl = (str_starts_with($pImg, 'http') || str_starts_with($pImg, '/uploads') || str_starts_with($pImg, 'uploads/'))
+                                ? (str_starts_with($pImg, 'http') ? $pImg : url($pImg))
+                                : asset('images/' . $pImg);
+                            ?>
                             <div class="product-card">
                                 <div class="product-img-box">
-                                    <img src="<?= asset('images/' . $prod['image']) ?>" alt="<?= e($prod['title']) ?>" class="product-img">
+                                    <img src="<?= $pImgUrl ?>" alt="<?= e($prod['title']) ?>" class="product-img">
                                 </div>
                                 <h3 class="product-title"><?= e($prod['title']) ?></h3>
                                 <span class="product-model"><?= e($prod['model']) ?></span>
@@ -248,7 +262,9 @@
                     <a href="<?= url('shop') ?>" class="btn btn-outline btn-pill">مشاهده همه محصولات</a>
                 </div>
             </div>
+            <?php endif; ?>
 
+            <?php if (!empty($blogEnabled)): ?>
             <!-- Left in RTL: Blog / Articles (آخرین مقالات) -->
             <div class="showcase-column articles-column" id="blog">
                 <div class="column-heading">
@@ -258,6 +274,12 @@
 
                 <div class="articles-list">
                     <?php foreach ($articles as $art): ?>
+                        <?php 
+                        $aImg = $art['image'] ?? 'technician-thumb.jpg';
+                        $aImgUrl = (str_starts_with($aImg, 'http') || str_starts_with($aImg, '/uploads') || str_starts_with($aImg, 'uploads/'))
+                            ? (str_starts_with($aImg, 'http') ? $aImg : url($aImg))
+                            : asset('images/' . $aImg);
+                        ?>
                         <article class="article-card">
                             <div class="article-text-side">
                                 <h3 class="article-title">
@@ -269,7 +291,7 @@
                                 </div>
                             </div>
                             <div class="article-thumb-side">
-                                <img src="<?= asset('images/' . $art['image']) ?>" alt="<?= e($art['title']) ?>" class="article-thumb-img">
+                                <img src="<?= $aImgUrl ?>" alt="<?= e($art['title']) ?>" class="article-thumb-img">
                             </div>
                         </article>
                     <?php endforeach; ?>
@@ -279,10 +301,12 @@
                     <a href="<?= url('blog') ?>" class="btn btn-outline btn-pill">مشاهده همه مقالات</a>
                 </div>
             </div>
+            <?php endif; ?>
 
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- Interactive Tehran Coverage Modal -->
 <div class="site-modal" id="coverageModal">

@@ -214,44 +214,68 @@
     </div>
 </div>
 
-<!-- Modal: Edit Role & Status -->
+<!-- Modal: Edit All User Info -->
 <div id="editModal" class="site-modal" style="display: none;">
-    <div class="modal-dialog" style="max-width: 440px;">
-        <div class="modal-content" style="border-radius: 14px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-            <div class="modal-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 24px; border-radius: 14px 14px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0; font-size: 1.15rem; color: #011C39; font-weight: 800;">ویرایش نقش و وضعیت حساب</h3>
-                <button type="button" onclick="closeEditModal()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #94a3b8;">&times;</button>
+    <div class="modal-dialog" style="max-width: 520px;">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: #011C39; color: #fff; padding: 18px 24px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;"><i class="fa-solid fa-user-pen text-orange" style="margin-left: 8px;"></i>ویرایش کامل مشخصات کاربر</h3>
+                <button type="button" onclick="closeEditModal()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #fff; line-height: 1;">&times;</button>
             </div>
             <form action="<?= url('admin/users') ?>" method="POST" style="padding: 24px;">
                 <?= csrf_field() ?>
-                <input type="hidden" name="action" value="update_role">
+                <input type="hidden" name="action" value="update_info">
                 <input type="hidden" name="user_id" id="editUserId">
 
-                <p style="font-size: 0.95rem; color: #334155; margin-bottom: 18px;">کاربر: <strong id="editUserName" style="color: #011C39;"></strong></p>
-
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">نقش کاربری</label>
-                    <select name="role" id="editRole" class="form-control" style="border-radius: 8px; font-size: 0.9rem; padding: 10px;">
-                        <option value="user">مشتری / کاربر عادی</option>
-                        <option value="technician">تکنسین نصب و تعمیر</option>
-                        <option value="admin">مدیر سیستم</option>
-                        <?php if (\App\Core\Auth::isSuperAdmin()): ?>
-                            <option value="super_admin">سوپر ادمین</option>
-                        <?php endif; ?>
-                    </select>
+                <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group">
+                        <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">نام و نام خانوادگی <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="editUserNameInput" class="admin-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">شماره همراه <span class="text-danger">*</span></label>
+                        <input type="text" name="phone" id="editUserPhoneInput" class="admin-input" dir="ltr" required>
+                    </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 22px;">
-                    <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">وضعیت حساب</label>
-                    <select name="status" id="editStatus" class="form-control" style="border-radius: 8px; font-size: 0.9rem; padding: 10px;">
-                        <option value="active">فعال</option>
-                        <option value="blocked">مسدود (غیرفعال)</option>
-                    </select>
+                <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group">
+                        <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">کد ملی</label>
+                        <input type="text" name="national_id" id="editUserNationalIdInput" class="admin-input" dir="ltr">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">آدرس ایمیل</label>
+                        <input type="email" name="email" id="editUserEmailInput" class="admin-input" dir="ltr">
+                    </div>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px;">
+                    <div class="form-group">
+                        <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">نقش کاربری</label>
+                        <select name="role" id="editRole" class="admin-input">
+                            <option value="user">مشتری / کاربر عادی</option>
+                            <option value="technician">تکنسین نصب و تعمیر</option>
+                            <option value="admin">مدیر سیستم</option>
+                            <?php if (\App\Core\Auth::isSuperAdmin()): ?>
+                                <option value="super_admin">سوپر ادمین</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 700; font-size: 0.86rem; display: block; margin-bottom: 4px; color: #1e293b;">وضعیت حساب</label>
+                        <select name="status" id="editStatus" class="admin-input">
+                            <option value="active">فعال</option>
+                            <option value="blocked">مسدود (غیرفعال)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
                     <button type="button" class="btn btn-outline" onclick="closeEditModal()" style="border-radius: 8px; padding: 8px 18px;">انصراف</button>
-                    <button type="submit" class="btn btn-primary" style="padding: 9px 22px; font-weight: 700; border-radius: 8px;">ذخیره تغییرات</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 9px 24px; font-weight: 700; border-radius: 8px;">
+                        <i class="fa-solid fa-check"></i>
+                        ذخیره مشخصات کاربر
+                    </button>
                 </div>
             </form>
         </div>
@@ -299,9 +323,12 @@ function closeNewUserModal() {
 
 function openEditModal(user) {
     document.getElementById('editUserId').value = user.id;
-    document.getElementById('editUserName').innerText = user.name + ' (' + user.phone + ')';
-    document.getElementById('editRole').value = user.role;
-    document.getElementById('editStatus').value = user.status || 'active';
+    if (document.getElementById('editUserNameInput')) document.getElementById('editUserNameInput').value = user.name || '';
+    if (document.getElementById('editUserPhoneInput')) document.getElementById('editUserPhoneInput').value = user.phone || '';
+    if (document.getElementById('editUserNationalIdInput')) document.getElementById('editUserNationalIdInput').value = user.national_id || '';
+    if (document.getElementById('editUserEmailInput')) document.getElementById('editUserEmailInput').value = user.email || '';
+    if (document.getElementById('editRole')) document.getElementById('editRole').value = user.role;
+    if (document.getElementById('editStatus')) document.getElementById('editStatus').value = user.status || 'active';
     var m = document.getElementById('editModal');
     if (m) { m.style.display = 'flex'; m.classList.add('active'); }
 }

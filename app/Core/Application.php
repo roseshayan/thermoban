@@ -52,6 +52,7 @@ class Application {
         $this->router->post('/api/cart/remove', [\App\Controllers\ShopController::class, 'removeFromCart']);
         $this->router->post('/api/cart/clear', [\App\Controllers\ShopController::class, 'clearCart']);
         $this->router->get('/checkout', [\App\Controllers\ShopController::class, 'checkout']);
+        $this->router->post('/checkout', [\App\Controllers\ShopController::class, 'processCheckout']);
         $this->router->get('/payment/success', [\App\Controllers\ShopController::class, 'paymentSuccess']);
         $this->router->get('/payment/failed', [\App\Controllers\ShopController::class, 'paymentFailed']);
         
@@ -112,6 +113,14 @@ class Application {
         $this->router->post('/admin/modules', [\App\Controllers\AdminController::class, 'modules']);
         $this->router->get('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
         $this->router->post('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
+        
+        $this->router->get('/admin/brands', [\App\Controllers\AdminController::class, 'brands']);
+        $this->router->post('/admin/brands', [\App\Controllers\AdminController::class, 'brands']);
+        $this->router->get('/admin/media', [\App\Controllers\AdminController::class, 'media']);
+        $this->router->post('/admin/media/upload', [\App\Controllers\AdminController::class, 'uploadMedia']);
+        $this->router->post('/admin/media/delete', [\App\Controllers\AdminController::class, 'deleteMedia']);
+        $this->router->get('/admin/profile', [\App\Controllers\AdminController::class, 'profile']);
+        $this->router->post('/admin/profile', [\App\Controllers\AdminController::class, 'profile']);
         
         // Admin Backups, Analytics & Comments
         $this->router->get('/admin/backups', [\App\Controllers\AdminController::class, 'backups']);

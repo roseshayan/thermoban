@@ -84,9 +84,13 @@
             <div class="footer-col footer-col-links">
                 <h4 class="footer-col-title">لینک های مفید</h4>
                 <ul class="footer-nav-list">
-                    <li><a href="<?= url('shop') ?>">فروشگاه</a></li>
+                    <?php if (\App\Models\Setting::get('module_shop', '0') === '1'): ?>
+                        <li><a href="<?= url('shop') ?>">فروشگاه</a></li>
+                    <?php endif; ?>
                     <li><a href="<?= url('services') ?>">گارانتی و خدمات</a></li>
-                    <li><a href="<?= url('blog') ?>">مقالات آموزشی</a></li>
+                    <?php if (\App\Models\Setting::get('module_blog', '1') === '1'): ?>
+                        <li><a href="<?= url('blog') ?>">مقالات آموزشی</a></li>
+                    <?php endif; ?>
                     <li><a href="<?= url('contact') ?>">تماس با ما</a></li>
                     <li><a href="<?= url('about') ?>">درباره ما</a></li>
                 </ul>

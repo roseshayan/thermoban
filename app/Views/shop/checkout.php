@@ -39,8 +39,8 @@
             </div>
         </div>
 
-        <form action="<?= url('payment/success') ?>" method="GET" class="checkout-form js-validate-form" id="checkoutMainForm">
-            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+        <form action="<?= url('checkout') ?>" method="POST" class="checkout-form js-validate-form" id="checkoutMainForm">
+            <?= csrf_field() ?>
 
             <div class="checkout-layout-grid">
                 

@@ -64,6 +64,38 @@ class AdminController extends Controller {
             $action = $_POST['action'] ?? 'create';
 
             if ($action === 'create') {
+                $image = $this->handleUpload('image_file', 'uploads/products');
+                if (!$image) {
+                    $image = trim($_POST['image'] ?? '') ?: 'package-thumb.png';
+                }
+
+                $gallery = [];
+                if (!empty($_POST['gallery']) && is_array($_POST['gallery'])) {
+                    $gallery = array_values(array_filter($_POST['gallery']));
+                }
+                if (!empty($_FILES['gallery_files']['name']) && is_array($_FILES['gallery_files']['name'])) {
+                    $destDir = ROOT_PATH . '/public/uploads/products';
+                    if (!is_dir($destDir)) @mkdir($destDir, 0755, true);
+                    foreach ($_FILES['gallery_files']['name'] as $idx => $fname) {
+                        if ($_FILES['gallery_files']['error'][$idx] === UPLOAD_ERR_OK) {
+                            $ext = strtolower(pathinfo($fname, PATHINFO_EXTENSION));
+                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'svg'], true)) {
+                                $newName = time() . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
+                                if (move_uploaded_file($_FILES['gallery_files']['tmp_name'][$idx], $destDir . '/' . $newName)) {
+                                    $gallery[] = 'uploads/products/' . $newName;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $features = [];
+                if (!empty($_POST['features']) && is_array($_POST['features'])) {
+                    $features = array_values(array_filter(array_map('trim', $_POST['features'])));
+                } elseif (!empty($_POST['features']) && is_string($_POST['features'])) {
+                    $features = array_values(array_filter(array_map('trim', explode("\n", $_POST['features']))));
+                }
+
                 Product::create([
                     'brand_id'       => (int) ($_POST['brand_id'] ?? 1),
                     'title'          => trim($_POST['title']),
@@ -76,9 +108,10 @@ class AdminController extends Controller {
                     'price'          => (int) str_replace(',', '', $_POST['price']),
                     'old_price'      => !empty($_POST['old_price']) ? (int) str_replace(',', '', $_POST['old_price']) : null,
                     'warranty'       => trim($_POST['warranty']),
-                    'image'          => trim($_POST['image'] ?: 'package-thumb.png'),
+                    'image'          => $image,
+                    'gallery'        => !empty($gallery) ? json_encode($gallery, JSON_UNESCAPED_UNICODE) : null,
                     'description'    => trim($_POST['description']),
-                    'features'       => json_encode(array_filter(array_map('trim', explode("\n", $_POST['features'] ?? ''))), JSON_UNESCAPED_UNICODE),
+                    'features'       => json_encode($features, JSON_UNESCAPED_UNICODE),
                     'specs'          => json_encode(['ظرفیت' => $_POST['capacity'], 'متراژ' => $_POST['area']], JSON_UNESCAPED_UNICODE),
                     'stock'          => (int) ($_POST['stock'] ?? 10),
                     'is_active'      => 1
@@ -119,6 +152,43 @@ class AdminController extends Controller {
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $image = $this->handleUpload('image_file', 'uploads/products');
+            if (!$image) {
+                $image = trim($_POST['image'] ?? '') ?: ($product['image'] ?? 'package-thumb.png');
+            }
+
+            $gallery = [];
+            if (!empty($_POST['existing_gallery']) && is_array($_POST['existing_gallery'])) {
+                $gallery = array_values(array_filter($_POST['existing_gallery']));
+            } elseif (!empty($product['gallery'])) {
+                $decoded = json_decode($product['gallery'], true);
+                if (is_array($decoded) && empty($_POST['gallery_cleared'])) {
+                    $gallery = $decoded;
+                }
+            }
+            if (!empty($_FILES['gallery_files']['name']) && is_array($_FILES['gallery_files']['name'])) {
+                $destDir = ROOT_PATH . '/public/uploads/products';
+                if (!is_dir($destDir)) @mkdir($destDir, 0755, true);
+                foreach ($_FILES['gallery_files']['name'] as $idx => $fname) {
+                    if ($_FILES['gallery_files']['error'][$idx] === UPLOAD_ERR_OK) {
+                        $ext = strtolower(pathinfo($fname, PATHINFO_EXTENSION));
+                        if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'svg'], true)) {
+                            $newName = time() . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
+                            if (move_uploaded_file($_FILES['gallery_files']['tmp_name'][$idx], $destDir . '/' . $newName)) {
+                                $gallery[] = 'uploads/products/' . $newName;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $features = [];
+            if (!empty($_POST['features']) && is_array($_POST['features'])) {
+                $features = array_values(array_filter(array_map('trim', $_POST['features'])));
+            } elseif (!empty($_POST['features']) && is_string($_POST['features'])) {
+                $features = array_values(array_filter(array_map('trim', explode("\n", $_POST['features']))));
+            }
+
             Product::update($id, [
                 'brand_id'       => (int) ($_POST['brand_id'] ?? 1),
                 'title'          => trim($_POST['title']),
@@ -130,9 +200,10 @@ class AdminController extends Controller {
                 'price'          => (int) str_replace(',', '', $_POST['price']),
                 'old_price'      => !empty($_POST['old_price']) ? (int) str_replace(',', '', $_POST['old_price']) : null,
                 'warranty'       => trim($_POST['warranty']),
-                'image'          => trim($_POST['image'] ?: 'package-thumb.png'),
+                'image'          => $image,
+                'gallery'        => !empty($gallery) ? json_encode($gallery, JSON_UNESCAPED_UNICODE) : null,
                 'description'    => trim($_POST['description']),
-                'features'       => json_encode(array_filter(array_map('trim', explode("\n", $_POST['features'] ?? ''))), JSON_UNESCAPED_UNICODE),
+                'features'       => json_encode($features, JSON_UNESCAPED_UNICODE),
                 'stock'          => (int) ($_POST['stock'] ?? 10),
                 'is_active'      => isset($_POST['is_active']) ? 1 : 0
             ]);
@@ -363,15 +434,24 @@ class AdminController extends Controller {
             $action = $_POST['action'] ?? 'create';
 
             if ($action === 'create') {
+                $image = $this->handleUpload('image_file', 'uploads/media');
+                if (!$image) {
+                    $image = trim($_POST['image'] ?: 'hero-technician.jpg');
+                }
+
                 Article::create([
-                    'title'        => trim($_POST['title']),
-                    'slug'         => trim($_POST['slug'] ?? ('article-' . time())),
-                    'excerpt'      => trim($_POST['excerpt']),
-                    'content'      => trim($_POST['content']),
-                    'image'        => trim($_POST['image'] ?: 'hero-technician.jpg'),
-                    'author_name'  => 'تیم فنی ترموبان',
-                    'reading_time' => trim($_POST['reading_time'] ?: '۵ دقیقه'),
-                    'is_published' => 1
+                    'title'            => trim($_POST['title']),
+                    'slug'             => trim($_POST['slug'] ?? ('article-' . time())),
+                    'excerpt'          => trim($_POST['excerpt']),
+                    'content'          => trim($_POST['content']),
+                    'image'            => $image,
+                    'author_name'      => 'تیم فنی ترموبان',
+                    'reading_time'     => trim($_POST['reading_time'] ?: '۵ دقیقه'),
+                    'is_published'     => 1,
+                    'meta_title'       => trim($_POST['meta_title'] ?? '') ?: null,
+                    'meta_description' => trim($_POST['meta_description'] ?? '') ?: null,
+                    'focus_keyword'    => trim($_POST['focus_keyword'] ?? '') ?: null,
+                    'canonical_url'    => trim($_POST['canonical_url'] ?? '') ?: null
                 ]);
                 $_SESSION['admin_success'] = 'مقاله جدید با موفقیت منتشر گردید.';
             } elseif ($action === 'delete') {
@@ -405,14 +485,23 @@ class AdminController extends Controller {
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $image = $this->handleUpload('image_file', 'uploads/media');
+            if (!$image) {
+                $image = trim($_POST['image'] ?? '') ?: ($article['image'] ?? 'hero-technician.jpg');
+            }
+
             Article::update($id, [
-                'title'        => trim($_POST['title']),
-                'slug'         => trim($_POST['slug']),
-                'excerpt'      => trim($_POST['excerpt']),
-                'content'      => trim($_POST['content']),
-                'image'        => trim($_POST['image'] ?: 'hero-technician.jpg'),
-                'reading_time' => trim($_POST['reading_time'] ?: '۵ دقیقه'),
-                'is_published' => isset($_POST['is_published']) ? 1 : 0
+                'title'            => trim($_POST['title']),
+                'slug'             => trim($_POST['slug']),
+                'excerpt'          => trim($_POST['excerpt']),
+                'content'          => trim($_POST['content']),
+                'image'            => $image,
+                'reading_time'     => trim($_POST['reading_time'] ?: '۵ دقیقه'),
+                'is_published'     => isset($_POST['is_published']) ? 1 : 0,
+                'meta_title'       => trim($_POST['meta_title'] ?? '') ?: null,
+                'meta_description' => trim($_POST['meta_description'] ?? '') ?: null,
+                'focus_keyword'    => trim($_POST['focus_keyword'] ?? '') ?: null,
+                'canonical_url'    => trim($_POST['canonical_url'] ?? '') ?: null
             ]);
 
             $_SESSION['admin_success'] = 'محتوای مقاله آموزشی با موفقیت بروزرسانی شد.';
@@ -645,6 +734,31 @@ class AdminController extends Controller {
                     ]);
                     $_SESSION['admin_success'] = 'نقش و وضعیت کاربر بروزرسانی شد.';
                 }
+            } elseif ($action === 'update_info') {
+                $userId = (int) $_POST['user_id'];
+                $target = User::find($userId);
+                if ($target) {
+                    $name = trim($_POST['name'] ?? $target['name']);
+                    $phone = trim($_POST['phone'] ?? $target['phone']);
+                    $nationalId = trim($_POST['national_id'] ?? ($target['national_id'] ?? ''));
+                    $email = trim($_POST['email'] ?? ($target['email'] ?? ''));
+                    $role = $_POST['role'] ?? $target['role'];
+                    $status = $_POST['status'] ?? $target['status'];
+
+                    if ($target['role'] === 'super_admin' && !Auth::isSuperAdmin()) {
+                        $_SESSION['admin_error'] = 'شما دسترسی لازم برای ویرایش اطلاعات سوپر ادمین را ندارید.';
+                    } else {
+                        User::update($userId, [
+                            'name'        => $name,
+                            'phone'       => $phone,
+                            'national_id' => $nationalId ?: null,
+                            'email'       => $email ?: null,
+                            'role'        => $role,
+                            'status'      => $status
+                        ]);
+                        $_SESSION['admin_success'] = "اطلاعات کاربر {$name} با موفقیت ویرایش شد.";
+                    }
+                }
             } elseif ($action === 'reset_password') {
                 $userId = (int) $_POST['user_id'];
                 $newPassword = $_POST['new_password'] ?? '';
@@ -871,5 +985,307 @@ class AdminController extends Controller {
             'error'     => $_SESSION['admin_error'] ?? null
         ], 'layouts/admin');
         unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Brand Management under coverage
+     */
+    public function brands(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? 'create';
+
+            if ($action === 'create') {
+                $name = trim($_POST['name'] ?? '');
+                $slug = trim($_POST['slug'] ?? '') ?: ('brand-' . time());
+                $badge = trim($_POST['badge'] ?? '') ?: null;
+                $description = trim($_POST['description'] ?? '') ?: null;
+                $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+                $logo = $this->handleUpload('logo_file', 'uploads/brands');
+                if (!$logo) {
+                    $logo = trim($_POST['logo'] ?? '') ?: 'brand-iranradiator-logo.png';
+                }
+
+                if (!empty($name)) {
+                    \App\Models\Brand::create([
+                        'name'        => $name,
+                        'slug'        => $slug,
+                        'logo'        => $logo,
+                        'badge'       => $badge,
+                        'description' => $description,
+                        'is_active'   => $isActive
+                    ]);
+                    $_SESSION['admin_success'] = "برند «{$name}» با موفقیت افزوده شد.";
+                } else {
+                    $_SESSION['admin_error'] = 'نام برند الزامی است.';
+                }
+            } elseif ($action === 'update') {
+                $id = (int) ($_POST['brand_id'] ?? 0);
+                $brand = \App\Models\Brand::find($id);
+                if ($brand) {
+                    $name = trim($_POST['name'] ?? $brand['name']);
+                    $slug = trim($_POST['slug'] ?? $brand['slug']);
+                    $badge = trim($_POST['badge'] ?? '') ?: null;
+                    $description = trim($_POST['description'] ?? '') ?: null;
+                    $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+                    $logo = $this->handleUpload('logo_file', 'uploads/brands');
+                    if (!$logo) {
+                        $logo = trim($_POST['logo'] ?? '') ?: $brand['logo'];
+                    }
+
+                    \App\Models\Brand::update($id, [
+                        'name'        => $name,
+                        'slug'        => $slug,
+                        'logo'        => $logo,
+                        'badge'       => $badge,
+                        'description' => $description,
+                        'is_active'   => $isActive
+                    ]);
+                    $_SESSION['admin_success'] = "اطلاعات برند «{$name}» بروزرسانی گردید.";
+                }
+            } elseif ($action === 'toggle_status') {
+                $id = (int) ($_POST['brand_id'] ?? 0);
+                $brand = \App\Models\Brand::find($id);
+                if ($brand) {
+                    $newStatus = ($brand['is_active'] ?? 1) ? 0 : 1;
+                    \App\Models\Brand::update($id, ['is_active' => $newStatus]);
+                    $_SESSION['admin_success'] = 'وضعیت نمایش برند تغییر یافت.';
+                }
+            } elseif ($action === 'delete') {
+                $id = (int) ($_POST['brand_id'] ?? 0);
+                \App\Models\Brand::delete($id);
+                $_SESSION['admin_success'] = 'برند با موفقیت حذف گردید.';
+            }
+
+            $this->redirect('admin/brands');
+        }
+
+        $brands = \App\Models\Brand::all('id DESC');
+
+        $this->view('admin/brands', [
+            'pageTitle' => 'مدیریت برندهای تحت پوشش | CMS ترموبان',
+            'brands'    => $brands,
+            'activeNav' => 'brands',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Media Manager Library
+     */
+    public function media(): void {
+        if (isset($_GET['format']) && $_GET['format'] === 'json') {
+            $mediaItems = \App\Models\Media::getRecent(60);
+            $this->json(['success' => true, 'media' => $mediaItems]);
+            return;
+        }
+
+        $mediaList = \App\Models\Media::all('id DESC');
+
+        $this->view('admin/media', [
+            'pageTitle' => 'کتابخانه پرونده‌های چندرسانه‌ای و فایل منیجر | CMS ترموبان',
+            'mediaList' => $mediaList,
+            'activeNav' => 'media',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * AJAX/Form Upload to Media Manager
+     */
+    public function uploadMedia(): void {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/media');
+        }
+
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || isset($_POST['ajax']);
+
+        if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            if ($isAjax) {
+                $this->json(['success' => false, 'message' => 'فایلی برای آپلود انتخاب نشده یا خطایی رخ داده است.'], 400);
+                return;
+            }
+            $_SESSION['admin_error'] = 'فایلی برای آپلود انتخاب نشده است.';
+            $this->redirect('admin/media');
+        }
+
+        $file = $_FILES['file'];
+        $origName = basename($file['name']);
+        $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'pdf'];
+
+        if (!in_array($ext, $allowed, true)) {
+            if ($isAjax) {
+                $this->json(['success' => false, 'message' => 'فرمت فایل مجاز نیست. فرمت‌های مجاز: ' . implode(', ', $allowed)], 400);
+                return;
+            }
+            $_SESSION['admin_error'] = 'فرمت فایل انتخابی مجاز نمی‌باشد.';
+            $this->redirect('admin/media');
+        }
+
+        $newFilename = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $destDir = ROOT_PATH . '/public/uploads/media';
+        if (!is_dir($destDir)) @mkdir($destDir, 0755, true);
+        $destPath = $destDir . '/' . $newFilename;
+        $relPath = 'uploads/media/' . $newFilename;
+
+        if (move_uploaded_file($file['tmp_name'], $destPath)) {
+            $mediaId = \App\Models\Media::create([
+                'filename'      => $newFilename,
+                'original_name' => $origName,
+                'file_path'     => $relPath,
+                'file_size'     => (int) $file['size'],
+                'mime_type'     => $file['type'] ?? 'image/' . $ext,
+                'uploader_id'   => Auth::id()
+            ]);
+
+            if ($isAjax) {
+                $this->json([
+                    'success'  => true,
+                    'message'  => 'فایل با موفقیت آپلود شد.',
+                    'media'    => [
+                        'id'            => $mediaId,
+                        'filename'      => $newFilename,
+                        'original_name' => $origName,
+                        'file_path'     => $relPath,
+                        'url'           => url($relPath)
+                    ]
+                ]);
+                return;
+            }
+
+            $_SESSION['admin_success'] = 'فایل با موفقیت در کتابخانه چندرسانه‌ای ذخیره شد.';
+        } else {
+            if ($isAjax) {
+                $this->json(['success' => false, 'message' => 'خطا در ذخیره‌سازی فایل در سرور.'], 500);
+                return;
+            }
+            $_SESSION['admin_error'] = 'خطا در آپلود فایل روی سرور.';
+        }
+
+        $this->redirect('admin/media');
+    }
+
+    /**
+     * Delete Media item
+     */
+    public function deleteMedia(): void {
+        $id = (int) ($_POST['media_id'] ?? 0);
+        $media = \App\Models\Media::find($id);
+
+        if ($media) {
+            $filePath = ROOT_PATH . '/public/' . ltrim($media['file_path'], '/');
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            \App\Models\Media::delete($id);
+            $_SESSION['admin_success'] = 'پرونده با موفقیت حذف گردید.';
+        }
+
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || isset($_POST['ajax']);
+        if ($isAjax) {
+            $this->json(['success' => true]);
+            return;
+        }
+
+        $this->redirect('admin/media');
+    }
+
+    /**
+     * Admin Profile Settings
+     */
+    public function profile(): void {
+        $user = Auth::user();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = trim($_POST['name'] ?? $user['name']);
+            $email = trim($_POST['email'] ?? $user['email']);
+            $phone = trim($_POST['phone'] ?? $user['phone']);
+            $nationalId = trim($_POST['national_id'] ?? ($user['national_id'] ?? ''));
+
+            $updateData = [
+                'name'        => $name,
+                'email'       => $email ?: null,
+                'phone'       => $phone,
+                'national_id' => $nationalId ?: null,
+            ];
+
+            $avatar = $this->handleUpload('avatar_file', 'uploads/avatars');
+            if ($avatar) {
+                $updateData['avatar'] = $avatar;
+            }
+
+            $currentPassword = $_POST['current_password'] ?? '';
+            $newPassword = $_POST['new_password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
+
+            if (!empty($newPassword)) {
+                if (strlen($newPassword) < 6) {
+                    $_SESSION['admin_error'] = 'رمز عبور جدید باید حداقل ۶ کاراکتر باشد.';
+                    $this->redirect('admin/profile');
+                }
+                if ($newPassword !== $confirmPassword) {
+                    $_SESSION['admin_error'] = 'تکرار کلمه عبور جدید مطابقت ندارد.';
+                    $this->redirect('admin/profile');
+                }
+                if (!password_verify($currentPassword, $user['password_hash'] ?? '')) {
+                    $_SESSION['admin_error'] = 'کلمه عبور فعلی نادرست است.';
+                    $this->redirect('admin/profile');
+                }
+                $updateData['password_hash'] = Auth::hashPassword($newPassword);
+            }
+
+            User::update($user['id'], $updateData);
+            $_SESSION['user'] = User::find($user['id']);
+
+            $_SESSION['admin_success'] = 'مشخصات حساب کاربری مدیریت با موفقیت بروزرسانی شد.';
+            $this->redirect('admin/profile');
+        }
+
+        $this->view('admin/profile', [
+            'pageTitle' => 'ویرایش مشخصات و پروفایل مدیر سامانه | CMS ترموبان',
+            'user'      => $user,
+            'activeNav' => 'profile',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Helper for single file upload
+     */
+    private function handleUpload(string $inputName, string $targetFolder = 'uploads/media'): ?string {
+        if (empty($_FILES[$inputName]) || $_FILES[$inputName]['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        $file = $_FILES[$inputName];
+        $origName = basename($file['name']);
+        $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'pdf'];
+
+        if (!in_array($ext, $allowed, true)) {
+            return null;
+        }
+
+        $destDir = ROOT_PATH . '/public/' . trim($targetFolder, '/');
+        if (!is_dir($destDir)) {
+            @mkdir($destDir, 0755, true);
+        }
+
+        $newFilename = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $destPath = $destDir . '/' . $newFilename;
+
+        if (move_uploaded_file($file['tmp_name'], $destPath)) {
+            return trim($targetFolder, '/') . '/' . $newFilename;
+        }
+
+        return null;
     }
 }

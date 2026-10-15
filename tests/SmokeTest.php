@@ -232,6 +232,7 @@ class SmokeTestRunner {
         $this->assert("InstallController Class Exists", class_exists(\App\Controllers\InstallController::class));
         $this->assert("Installer View Template Exists", file_exists(VIEW_PATH . '/install/index.php'));
         $this->assert("Database v2 Schema File Exists", file_exists(ROOT_PATH . '/database/v2_update.sql'));
+        $this->assert("Database v3 Schema File Exists", file_exists(ROOT_PATH . '/database/v3_update.sql'));
     }
 
     private function testZeroCdnCompliance(): void {
@@ -280,7 +281,8 @@ class SmokeTestRunner {
         $actions = [
             'dashboard', 'orders', 'products', 'tickets', 'leads', 
             'articles', 'comments', 'analytics', 'backups', 'users', 
-            'seo', 'gateways', 'sms', 'modules', 'settings'
+            'seo', 'gateways', 'sms', 'modules', 'settings',
+            'brands', 'media', 'profile'
         ];
 
         $failedActions = [];
@@ -295,7 +297,7 @@ class SmokeTestRunner {
             }
         }
 
-        $this->assert("All 15 Admin Pages Return HTTP 200 (No 500 Errors)", empty($failedActions), implode(', ', $failedActions));
+        $this->assert("All " . count($actions) . " Admin Pages Return HTTP 200 (No 500 Errors)", empty($failedActions), implode(', ', $failedActions));
     }
 
     private function testErrorTemplates(): void {

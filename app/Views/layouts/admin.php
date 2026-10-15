@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="<?= asset('css/fonts.css') ?>">
     <link rel="stylesheet" href="<?= asset('vendor/fontawesome/css/all.min.css') ?>">
     <link rel="stylesheet" href="<?= asset('vendor/sweetalert2/sweetalert2.min.css') ?>">
+    <link rel="stylesheet" href="<?= asset('vendor/quill/quill.snow.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
     <style>
         :root {
@@ -357,6 +358,10 @@
                 <i class="fa-solid fa-boxes-stacked" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>محصولات پکیج</span>
             </a>
+            <a href="<?= url('admin/brands') ?>" class="admin-nav-item <?= ($activeNav === 'brands') ? 'active' : '' ?>">
+                <i class="fa-solid fa-certificate" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>برندهای تحت پوشش</span>
+            </a>
             <a href="<?= url('admin/tickets') ?>" class="admin-nav-item <?= ($activeNav === 'tickets') ? 'active' : '' ?>">
                 <i class="fa-solid fa-headset" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>تیکت‌های پشتیبانی</span>
@@ -368,6 +373,10 @@
             <a href="<?= url('admin/articles') ?>" class="admin-nav-item <?= ($activeNav === 'articles') ? 'active' : '' ?>">
                 <i class="fa-solid fa-newspaper" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>مقالات آموزشی</span>
+            </a>
+            <a href="<?= url('admin/media') ?>" class="admin-nav-item <?= ($activeNav === 'media') ? 'active' : '' ?>">
+                <i class="fa-solid fa-photo-film" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>کتابخانه پرونده‌ها</span>
             </a>
             <a href="<?= url('admin/comments') ?>" class="admin-nav-item <?= ($activeNav === 'comments') ? 'active' : '' ?>">
                 <i class="fa-solid fa-comments" style="font-size: 1.1rem; width: 22px;"></i>
@@ -403,6 +412,10 @@
                     <span>ماژول‌ها و پلن‌ها</span>
                 </a>
             <?php endif; ?>
+            <a href="<?= url('admin/profile') ?>" class="admin-nav-item <?= ($activeNav === 'profile') ? 'active' : '' ?>">
+                <i class="fa-solid fa-id-badge" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>پروفایل من</span>
+            </a>
             <a href="<?= url('admin/settings') ?>" class="admin-nav-item <?= ($activeNav === 'settings') ? 'active' : '' ?>">
                 <i class="fa-solid fa-gears" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>تنظیمات نمایندگی</span>
@@ -428,10 +441,14 @@
                     <?= icon('eye', '', 16) ?>
                     <span>مشاهده سایت اصلی</span>
                 </a>
-                <div class="admin-user-pill">
-                    <img src="<?= asset('images/hero-technician.jpg') ?>" alt="مدیر" class="admin-user-avatar">
-                    <span>مدیریت سیستم</span>
-                </div>
+                <?php 
+                $currAdmin = \App\Core\Auth::user();
+                $adminAvatar = !empty($currAdmin['avatar']) ? (str_starts_with($currAdmin['avatar'], 'http') ? $currAdmin['avatar'] : url($currAdmin['avatar'])) : asset('images/hero-technician.jpg');
+                ?>
+                <a href="<?= url('admin/profile') ?>" class="admin-user-pill" style="text-decoration: none; color: inherit;" title="مشاهده و ویرایش مشخصات من">
+                    <img src="<?= $adminAvatar ?>" alt="مدیر" class="admin-user-avatar">
+                    <span><?= e($currAdmin['name'] ?? 'مدیریت سیستم') ?></span>
+                </a>
                 <a href="<?= url('logout') ?>" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.82rem; color: #ef4444; border-color: #fca5a5;">
                     خروج
                 </a>
@@ -502,6 +519,161 @@
                 });
             }
         })();
+    </script>
+    <script src="<?= asset('vendor/quill/quill.js') ?>"></script>
+
+    <!-- Global Media Picker Modal -->
+    <div id="globalMediaPickerModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:16px; width:100%; max-width:850px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+            <div style="padding:16px 24px; background:#011C39; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; font-size:1.1rem; font-weight:800;"><i class="fa-solid fa-photo-film" style="margin-left:8px;"></i>انتخاب تصویر از کتابخانه رسانه</h3>
+                <button type="button" onclick="closeMediaPicker()" style="background:none; border:none; color:#fff; font-size:1.6rem; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <div style="padding:14px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; gap:12px; background:#f8fafc;">
+                <input type="text" id="mediaPickerSearch" placeholder="جستجو در نام فایل..." oninput="filterMediaPickerItems(this.value)" style="padding:8px 14px; border:1px solid #cbd5e1; border-radius:8px; width:260px; font-size:0.88rem;">
+                <label style="cursor:pointer; background:#EF5C16; color:#fff; padding:8px 16px; border-radius:8px; font-size:0.88rem; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>آپلود فایل جدید</span>
+                    <input type="file" id="mediaPickerFileInput" accept="image/*" style="display:none;" onchange="uploadFromMediaPicker(this)">
+                </label>
+            </div>
+            <div id="mediaPickerGrid" style="padding:20px; overflow-y:auto; flex-grow:1; display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:14px; min-height:260px;">
+                <div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#64748b;">در حال بارگذاری فایل‌ها...</div>
+            </div>
+            <div style="padding:14px 24px; background:#f1f5f9; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="closeMediaPicker()" style="padding:8px 18px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-weight:700;">انصراف</button>
+                <button type="button" id="mediaPickerConfirmBtn" onclick="confirmMediaPickerSelection()" disabled style="padding:8px 22px; border-radius:8px; border:none; background:#011C39; color:#fff; cursor:pointer; font-weight:700;">انتخاب و درج</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window._mediaPickerCallback = null;
+        window._mediaPickerSelectedUrl = null;
+        window._mediaPickerItems = [];
+
+        window.openMediaPicker = function(callback) {
+            window._mediaPickerCallback = callback;
+            window._mediaPickerSelectedUrl = null;
+            var modal = document.getElementById('globalMediaPickerModal');
+            var confirmBtn = document.getElementById('mediaPickerConfirmBtn');
+            if (confirmBtn) confirmBtn.disabled = true;
+            if (modal) modal.style.display = 'flex';
+            loadMediaPickerItems();
+        };
+
+        window.closeMediaPicker = function() {
+            var modal = document.getElementById('globalMediaPickerModal');
+            if (modal) modal.style.display = 'none';
+            window._mediaPickerCallback = null;
+            window._mediaPickerSelectedUrl = null;
+        };
+
+        function loadMediaPickerItems() {
+            var grid = document.getElementById('mediaPickerGrid');
+            if (!grid) return;
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#64748b;"><i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem; margin-bottom:8px;"></i><div>در حال بارگذاری...</div></div>';
+            
+            fetch("<?= url('admin/media?format=json') ?>")
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (res.success && res.media) {
+                        window._mediaPickerItems = res.media;
+                        renderMediaPickerGrid(res.media);
+                    } else {
+                        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#ef4444;">خطا در دریافت لیست تصاویر.</div>';
+                    }
+                })
+                .catch(function() {
+                    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#ef4444;">ارتباط با سرور برقرار نشد.</div>';
+                });
+        }
+
+        function renderMediaPickerGrid(items) {
+            var grid = document.getElementById('mediaPickerGrid');
+            if (!grid) return;
+            if (items.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#64748b;">هیچ فایلی یافت نشد. می‌توانید فایل جدید آپلود کنید.</div>';
+                return;
+            }
+
+            var html = '';
+            var baseUrl = "<?= url() ?>";
+            items.forEach(function(item) {
+                var fileUrl = baseUrl + item.file_path.replace(/^\//, '');
+                html += '<div class="media-pick-item" onclick="selectMediaPickerItem(\'' + fileUrl + '\', this)" style="border:2px solid #e2e8f0; border-radius:10px; overflow:hidden; cursor:pointer; background:#fff; text-align:center; transition:all 0.2s ease;">' +
+                    '<div style="height:100px; display:flex; align-items:center; justify-content:center; background:#f8fafc; overflow:hidden;">' +
+                        '<img src="' + fileUrl + '" alt="' + item.original_name + '" style="max-width:100%; max-height:100px; object-fit:contain;">' +
+                    '</div>' +
+                    '<div style="font-size:0.75rem; padding:6px 8px; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + item.original_name + '">' + item.original_name + '</div>' +
+                '</div>';
+            });
+            grid.innerHTML = html;
+        }
+
+        function selectMediaPickerItem(url, el) {
+            window._mediaPickerSelectedUrl = url;
+            var all = document.querySelectorAll('.media-pick-item');
+            all.forEach(function(item) {
+                item.style.borderColor = '#e2e8f0';
+                item.style.boxShadow = 'none';
+            });
+            el.style.borderColor = '#EF5C16';
+            el.style.boxShadow = '0 0 0 3px rgba(239,92,22,0.2)';
+            var confirmBtn = document.getElementById('mediaPickerConfirmBtn');
+            if (confirmBtn) confirmBtn.disabled = false;
+        }
+
+        function confirmMediaPickerSelection() {
+            if (window._mediaPickerCallback && window._mediaPickerSelectedUrl) {
+                window._mediaPickerCallback(window._mediaPickerSelectedUrl);
+            }
+            closeMediaPicker();
+        }
+
+        function filterMediaPickerItems(query) {
+            query = query.trim().toLowerCase();
+            if (!query) {
+                renderMediaPickerGrid(window._mediaPickerItems);
+                return;
+            }
+            var filtered = window._mediaPickerItems.filter(function(i) {
+                return (i.original_name && i.original_name.toLowerCase().indexOf(query) !== -1) ||
+                       (i.filename && i.filename.toLowerCase().indexOf(query) !== -1);
+            });
+            renderMediaPickerGrid(filtered);
+        }
+
+        function uploadFromMediaPicker(input) {
+            if (!input.files || !input.files[0]) return;
+            var file = input.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('ajax', '1');
+
+            var grid = document.getElementById('mediaPickerGrid');
+            if (grid) {
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#EF5C16;"><i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem; margin-bottom:8px;"></i><div>در حال آپلود فایل...</div></div>';
+            }
+
+            fetch("<?= url('admin/media/upload') ?>", {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    loadMediaPickerItems();
+                } else {
+                    alert(res.message || 'خطا در آپلود');
+                    loadMediaPickerItems();
+                }
+            })
+            .catch(function() {
+                alert('خطا در برقراری ارتباط جهت آپلود');
+                loadMediaPickerItems();
+            });
+        }
     </script>
     <script src="<?= asset('js/main.js') ?>"></script>
 </body>

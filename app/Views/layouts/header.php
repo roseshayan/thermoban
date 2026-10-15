@@ -1,4 +1,8 @@
-<?php defined('ROOT_PATH') or exit('No direct script access allowed'); ?>
+<?php 
+$shopEnabled = (\App\Models\Setting::get('module_shop', '0') === '1');
+$blogEnabled = (\App\Models\Setting::get('module_blog', '1') === '1');
+$cartItemsCount = count($_SESSION['cart'] ?? []);
+?>
 <header class="site-header">
     <div class="header-container">
         <!-- Logo -->
@@ -15,12 +19,16 @@
                 <li class="nav-item">
                     <a href="<?= url('services') ?>" class="nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>">خدمات ما</a>
                 </li>
+                <?php if ($shopEnabled): ?>
                 <li class="nav-item">
                     <a href="<?= url('shop') ?>" class="nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>">فروشگاه</a>
                 </li>
+                <?php endif; ?>
+                <?php if ($blogEnabled): ?>
                 <li class="nav-item">
                     <a href="<?= url('blog') ?>" class="nav-link <?= ($currentPage ?? '') === 'blog' ? 'active' : '' ?>">مقالات</a>
                 </li>
+                <?php endif; ?>
                 <li class="nav-item">
                     <a href="<?= url('about') ?>" class="nav-link <?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>">درباره ما</a>
                 </li>
@@ -32,10 +40,14 @@
 
         <!-- Header Actions: Cart, Profile & CTA -->
         <div class="header-action">
+            <?php if ($shopEnabled): ?>
             <a href="<?= url('cart') ?>" class="header-icon-btn header-cart-btn" title="سبد خرید" aria-label="سبد خرید">
                 <?= icon('cart', 'header-svg-icon', 22) ?>
-                <span class="cart-count-badge">۲</span>
+                <?php if ($cartItemsCount > 0): ?>
+                    <span class="cart-count-badge"><?= $cartItemsCount ?></span>
+                <?php endif; ?>
             </a>
+            <?php endif; ?>
 
             <?php if (\App\Core\Auth::isAdmin()): ?>
                 <a href="<?= url('admin') ?>" class="header-icon-btn header-admin-btn" title="پنل مدیریت CMS">
@@ -70,13 +82,19 @@
         <ul class="mobile-nav-list">
             <li><a href="<?= url() ?>" class="mobile-nav-link <?= ($currentPage ?? 'home') === 'home' ? 'active' : '' ?>"><?= icon('building', '', 18) ?> <span>صفحه اصلی</span></a></li>
             <li><a href="<?= url('services') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>"><?= icon('wrench', '', 18) ?> <span>خدمات ما</span></a></li>
+            <?php if ($shopEnabled): ?>
             <li><a href="<?= url('shop') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>"><?= icon('flame', '', 18) ?> <span>فروشگاه پکیج</span></a></li>
+            <?php endif; ?>
+            <?php if ($blogEnabled): ?>
             <li><a href="<?= url('blog') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'blog' ? 'active' : '' ?>"><?= icon('calendar', '', 18) ?> <span>مقالات آموزشی</span></a></li>
+            <?php endif; ?>
             <?php if (\App\Core\Auth::isAdmin()): ?>
                 <li><a href="<?= url('admin') ?>" class="mobile-nav-link" style="color: var(--color-primary); font-weight: 800;"><?= icon('gear', '', 18) ?> <span>پنل مدیریت CMS</span></a></li>
             <?php endif; ?>
             <li><a href="<?= \App\Core\Auth::check() ? url('profile') : url('login') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'profile' ? 'active' : '' ?>"><?= icon('user', '', 18) ?> <span><?= \App\Core\Auth::check() ? 'پروفایل کاربری' : 'ورود / عضویت' ?></span></a></li>
-            <li><a href="<?= url('cart') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'cart' ? 'active' : '' ?>"><?= icon('cart', '', 18) ?> <span>سبد خرید (۲ کالا)</span></a></li>
+            <?php if ($shopEnabled): ?>
+            <li><a href="<?= url('cart') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'cart' ? 'active' : '' ?>"><?= icon('cart', '', 18) ?> <span>سبد خرید (<?= $cartItemsCount ?> کالا)</span></a></li>
+            <?php endif; ?>
             <li><a href="<?= url('about') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>"><?= icon('shield', '', 18) ?> <span>درباره ما</span></a></li>
             <li><a href="<?= url('contact') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'contact' ? 'active' : '' ?>"><?= icon('phone', '', 18) ?> <span>تماس با ما</span></a></li>
         </ul>

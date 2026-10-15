@@ -49,6 +49,9 @@ class ShopController extends Controller {
         );
 
         foreach ($products as &$p) {
+            $p['brand'] = $p['brand_name'] ?? 'ایران رادیاتور';
+            $p['category'] = 'پکیج شوفاژ دیواری';
+            $p['brand_logo'] = !empty($p['brand_logo']) ? $p['brand_logo'] : 'logo-icon.png';
             $p['price_raw'] = (int) $p['price'];
             $p['price'] = number_format($p['price_raw']);
             $p['old_price'] = !empty($p['old_price']) ? number_format((int)$p['old_price']) : null;
@@ -254,7 +257,40 @@ class ShopController extends Controller {
         $rawCart = $_SESSION['cart'] ?? [];
         if (empty($rawCart)) {
             $this->redirect('shop');
+            return;
         }
+
+        $productIds = array_keys($rawCart);
+        $cartItems = [];
+        $subtotal = 0;
+        $totalDiscount = 0;
+
+        if (!empty($productIds)) {
+            $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+            $products = Database::fetchAll("SELECT * FROM `products` WHERE `id` IN ($placeholders)", $productIds);
+            foreach ($products as $p) {
+                $qty = $rawCart[$p['id']] ?? 1;
+                $priceRaw = (int) $p['price'];
+                $oldPriceRaw = !empty($p['old_price']) ? (int) $p['old_price'] : $priceRaw;
+                $rowTotal = $priceRaw * $qty;
+                $subtotal += $oldPriceRaw * $qty;
+                $totalDiscount += ($oldPriceRaw - $priceRaw) * $qty;
+
+                $cartItems[] = [
+                    'id'          => $p['id'],
+                    'title'       => $p['title'],
+                    'image'       => $p['image'],
+                    'warranty'    => $p['warranty'],
+                    'quantity'    => $qty,
+                    'price_raw'   => $priceRaw,
+                    'price'       => number_format($priceRaw),
+                    'total_price' => number_format($rowTotal)
+                ];
+            }
+        }
+
+        $totalPayable = max(0, $subtotal - $totalDiscount);
+        $itemsCount = array_sum($rawCart);
 
         $addresses = [];
         if (\App\Core\Auth::check()) {
@@ -265,19 +301,129 @@ class ShopController extends Controller {
         }
 
         $this->view('shop/checkout', [
-            'pageTitle'   => 'تسویه حساب و پرداخت نهایی | ترموبان',
-            'currentPage' => 'checkout',
-            'csrfToken'   => Security::generateCsrf(),
-            'addresses'   => $addresses
+            'pageTitle'    => 'تسویه حساب و پرداخت نهایی | ترموبان',
+            'currentPage'  => 'checkout',
+            'csrfToken'    => Security::generateCsrf(),
+            'addresses'    => $addresses,
+            'cartItems'    => $cartItems,
+            'itemsCount'   => $itemsCount,
+            'subtotal'     => number_format($subtotal),
+            'discount'     => number_format($totalDiscount),
+            'totalAmount'  => number_format($totalPayable)
         ]);
+    }
+
+    /**
+     * Process Order Placement (Checkout Submit)
+     */
+    public function processCheckout(): void {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!Security::verifyCsrf($token)) {
+            $this->redirect('checkout');
+            return;
+        }
+
+        $rawCart = $_SESSION['cart'] ?? [];
+        if (empty($rawCart)) {
+            $this->redirect('shop');
+            return;
+        }
+
+        // Calculate cart total
+        $productIds = array_keys($rawCart);
+        $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+        $products = Database::fetchAll("SELECT * FROM `products` WHERE `id` IN ($placeholders)", $productIds);
+
+        $totalPayable = 0;
+        $orderItemsData = [];
+        foreach ($products as $p) {
+            $qty = $rawCart[$p['id']] ?? 1;
+            $unitPrice = (int) $p['price'];
+            $lineTotal = $unitPrice * $qty;
+            $totalPayable += $lineTotal;
+
+            $orderItemsData[] = [
+                'product_id'  => $p['id'],
+                'quantity'    => $qty,
+                'unit_price'  => $unitPrice,
+                'total_price' => $lineTotal
+            ];
+        }
+
+        // Customer & Address
+        $userId = \App\Core\Auth::id();
+        $selectedAddressId = !empty($_POST['selected_address']) ? (int) $_POST['selected_address'] : null;
+        $deliverySlot = trim($_POST['delivery_slot'] ?? 'امروز عصر');
+        $paymentMethod = ($_POST['payment_method'] ?? 'cod') === 'online' ? 'online' : 'cod';
+        $notes = trim($_POST['notes'] ?? '');
+
+        // Generate official order number
+        $orderNumber = 'TB-' . date('Y') . '-' . rand(10000, 99999);
+
+        // Insert into orders
+        $orderId = Database::insert('orders', [
+            'order_number'    => $orderNumber,
+            'user_id'         => $userId ?: null,
+            'address_id'      => $selectedAddressId,
+            'total_amount'    => $totalPayable,
+            'payable_amount'  => $totalPayable,
+            'order_status'    => 'registered',
+            'payment_status'  => $paymentMethod === 'online' ? 'paid' : 'pending',
+            'payment_method'  => $paymentMethod,
+            'technician_name' => 'در حال تخصیص تکنسین مجاز'
+        ]);
+
+        // Insert order items
+        if ($orderId) {
+            foreach ($orderItemsData as $item) {
+                Database::insert('order_items', [
+                    'order_id'    => $orderId,
+                    'product_id'  => $item['product_id'],
+                    'quantity'    => $item['quantity'],
+                    'unit_price'  => $item['unit_price'],
+                    'total_price' => $item['total_price']
+                ]);
+            }
+        }
+
+        // Empty Cart
+        $_SESSION['cart'] = [];
+
+        // Send SMS notification if customer has phone
+        if ($userId) {
+            $user = Database::fetchOne("SELECT * FROM `users` WHERE `id` = :id", ['id' => $userId]);
+            if ($user && !empty($user['phone'])) {
+                \App\Services\Sms\MeliPayamakService::sendOrderSuccess($user['phone'], $orderNumber, number_format($totalPayable));
+            }
+        }
+
+        $refId = 'REF-' . rand(100000, 999999);
+        $this->redirect('payment/success?order=' . urlencode($orderNumber) . '&ref=' . urlencode($refId) . '&amount=' . urlencode(number_format($totalPayable)) . '&slot=' . urlencode($deliverySlot) . '&method=' . urlencode($paymentMethod));
     }
 
     public function paymentSuccess(): void {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $_SESSION['cart'] = []; // Clear cart on successful order
+
+        $orderId = trim($_GET['order'] ?? ('TB-' . date('Y') . '-' . rand(10000, 99999)));
+        $refId = trim($_GET['ref'] ?? ('REF-' . rand(100000, 999999)));
+        $amount = trim($_GET['amount'] ?? '۰');
+        $delivery_time = trim($_GET['slot'] ?? 'هماهنگی تلفنی');
+        $method = trim($_GET['method'] ?? 'cod');
+        $gateway = ($method === 'online') ? 'درگاه شاپرک (بانک سامان / ملت)' : 'پرداخت در محل (کارتخوان سیار)';
+        $date = date('Y/m/d H:i');
+
         $this->view('shop/payment-success', [
-            'pageTitle'   => 'پرداخت موفق و ثبت سفارش | ترموبان',
-            'currentPage' => 'payment-success'
+            'pageTitle'     => 'پرداخت موفق و ثبت سفارش | ترموبان',
+            'currentPage'   => 'payment-success',
+            'orderId'       => $orderId,
+            'refId'         => $refId,
+            'gateway'       => $gateway,
+            'date'          => $date,
+            'amount'        => $amount,
+            'delivery_time' => $delivery_time
         ]);
     }
 

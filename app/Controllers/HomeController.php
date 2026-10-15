@@ -6,6 +6,60 @@ use App\Core\Security;
 
 class HomeController extends Controller {
     public function index(): void {
+        $shopEnabled = (\App\Models\Setting::get('module_shop', '0') === '1');
+        $blogEnabled = (\App\Models\Setting::get('module_blog', '1') === '1');
+
+        // Dynamic Brands
+        $brandsList = [];
+        try {
+            $brandsList = \App\Models\Brand::getActive();
+        } catch (\Throwable $e) {}
+        if (empty($brandsList)) {
+            $brandsList = [
+                ['name' => 'ایران رادیاتور', 'logo' => 'brand-iranradiator-logo.png', 'badge' => 'کد مجاز نصب'],
+                ['name' => 'بوتان', 'logo' => 'brand-butane.png', 'badge' => null],
+                ['name' => 'لورچ', 'logo' => 'brand-lorch.png', 'badge' => null],
+                ['name' => 'ایساتیس', 'logo' => 'brand-isatis.png', 'badge' => null],
+                ['name' => 'بوش', 'logo' => 'brand-bosch.png', 'badge' => null],
+                ['name' => 'آریستون', 'logo' => 'brand-ariston.png', 'badge' => null],
+            ];
+        }
+
+        // Dynamic Products (If shop enabled)
+        $productsList = [];
+        if ($shopEnabled) {
+            try {
+                $rawProds = \App\Models\Product::where("status = 'active' OR status IS NULL", [], 'id DESC', 6);
+                foreach ($rawProds as $p) {
+                    $productsList[] = [
+                        'id' => $p['id'],
+                        'title' => $p['title'],
+                        'model' => $p['model'] ?? '',
+                        'price' => number_format((float)$p['price']),
+                        'image' => $p['image'] ?? 'package-bita-24.png'
+                    ];
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        // Dynamic Articles (If blog enabled)
+        $articlesList = [];
+        if ($blogEnabled) {
+            try {
+                $rawArts = \App\Models\Article::where("is_published = 1", [], 'id DESC', 3);
+                foreach ($rawArts as $a) {
+                    $articlesList[] = [
+                        'id' => $a['id'],
+                        'title' => $a['title'],
+                        'slug' => $a['slug'] ?? 'post-' . $a['id'],
+                        'excerpt' => $a['excerpt'] ?? '',
+                        'date' => !empty($a['created_at']) ? date('Y/m/d', strtotime($a['created_at'])) : '۱۴۰۵/۰۸/۰۶',
+                        'image' => $a['image'] ?? 'technician-thumb.jpg'
+                    ];
+                }
+            } catch (\Throwable $e) {}
+        }
+
         $data = [
             'pageTitle' => 'ترموبان | مرجع تخصصی نصب، تعمیر و فروش پکیج',
             'csrfToken' => Security::generateCsrf(),
@@ -69,89 +123,11 @@ class HomeController extends Controller {
                 ['value' => '۱,۰۰۰', 'label' => 'مشتری راضی'],
                 ['value' => '۱۰+', 'label' => 'سال تجربه']
             ],
-            'brands' => [
-                [
-                    'name' => 'ایران رادیاتور',
-                    'logo' => 'brand-iranradiator-logo.png',
-                    'badge' => 'کد مجاز نصب'
-                ],
-                [
-                    'name' => 'بوتان',
-                    'logo' => 'brand-butane.png',
-                    'badge' => null
-                ],
-                [
-                    'name' => 'لورچ',
-                    'logo' => 'brand-lorch.png',
-                    'badge' => null
-                ],
-                [
-                    'name' => 'ایساتیس',
-                    'logo' => 'brand-isatis.png',
-                    'badge' => null
-                ],
-                [
-                    'name' => 'بوش',
-                    'logo' => 'brand-bosch.png',
-                    'badge' => null
-                ],
-                [
-                    'name' => 'ال جی',
-                    'logo' => 'brand-lg.png',
-                    'badge' => null
-                ],
-                [
-                    'name' => 'آریستون',
-                    'logo' => 'brand-ariston.png',
-                    'badge' => null
-                ]
-            ],
-            'products' => [
-                [
-                    'id' => 1,
-                    'title' => 'پکیج شوفاژ دیواری بوتان',
-                    'model' => 'مدل Bita 24 sealed',
-                    'price' => '۷۰,۳۷۵,۰۰۰',
-                    'image' => 'package-bita-24.png'
-                ],
-                [
-                    'id' => 2,
-                    'title' => 'پکیج شوفاژ دیواری بوتان',
-                    'model' => 'مدل Bita 24 sealed',
-                    'price' => '۷۰,۳۷۵,۰۰۰',
-                    'image' => 'package-bita-24.png'
-                ],
-                [
-                    'id' => 3,
-                    'title' => 'پکیج شوفاژ دیواری بوتان',
-                    'model' => 'مدل Bita 24 sealed',
-                    'price' => '۷۰,۳۷۵,۰۰۰',
-                    'image' => 'package-bita-24.png'
-                ]
-            ],
-            'articles' => [
-                [
-                    'id' => 1,
-                    'title' => 'علت روشن نشدن پکیج چیست؟',
-                    'excerpt' => 'بررسی رایج ترین دلایل و راه حل های روشن نشدن پکیج',
-                    'date' => '۱۴۰۵/۰۸/۰۶',
-                    'image' => 'technician-thumb.jpg'
-                ],
-                [
-                    'id' => 2,
-                    'title' => 'زمان مناسب سرویس پکیج',
-                    'excerpt' => 'هر چند وقت یک بار باید پکیج را سرویس کنیم؟',
-                    'date' => '۱۴۰۵/۰۸/۰۶',
-                    'image' => 'technician-thumb.jpg'
-                ],
-                [
-                    'id' => 3,
-                    'title' => 'راهنمای تنظیم دمای پکیج',
-                    'excerpt' => 'دمای مناسب برای فصل های مختلف و صرفه جویی در مصرف گاز',
-                    'date' => '۱۴۰۵/۰۸/۰۶',
-                    'image' => 'technician-thumb.jpg'
-                ]
-            ]
+            'brands' => $brandsList,
+            'products' => $productsList,
+            'articles' => $articlesList,
+            'shopEnabled' => $shopEnabled,
+            'blogEnabled' => $blogEnabled,
         ];
 
         $this->view('home/index', $data);
