@@ -37,9 +37,16 @@
                 <span class="cart-count-badge">۲</span>
             </a>
 
-            <a href="<?= url('profile') ?>" class="header-icon-btn header-user-btn" title="حساب کاربری" aria-label="حساب کاربری">
-                <?= icon('user', 'header-svg-icon', 22) ?>
-                <span class="user-text-label">پروفایل من</span>
+            <?php if (\App\Core\Auth::isAdmin()): ?>
+                <a href="<?= url('admin') ?>" class="header-icon-btn header-admin-btn" title="پنل مدیریت CMS">
+                    <?= icon('gear', 'header-svg-icon', 20) ?>
+                    <span class="user-text-label" style="color: var(--color-primary); font-weight: 800;">پنل CMS</span>
+                </a>
+            <?php endif; ?>
+
+            <a href="<?= \App\Core\Auth::check() ? url('profile') : url('login') ?>" class="header-icon-btn header-user-btn" title="حساب کاربری" aria-label="حساب کاربری">
+                <?= icon('user', 'header-svg-icon', 20) ?>
+                <span class="user-text-label"><?= \App\Core\Auth::check() ? 'پروفایل من' : 'ورود / عضویت' ?></span>
             </a>
 
             <a href="<?= url('#quick-order') ?>" class="btn btn-primary btn-header">
@@ -65,7 +72,10 @@
             <li><a href="<?= url('services') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>"><?= icon('wrench', '', 18) ?> <span>خدمات ما</span></a></li>
             <li><a href="<?= url('shop') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>"><?= icon('flame', '', 18) ?> <span>فروشگاه پکیج</span></a></li>
             <li><a href="<?= url('blog') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'blog' ? 'active' : '' ?>"><?= icon('calendar', '', 18) ?> <span>مقالات آموزشی</span></a></li>
-            <li><a href="<?= url('profile') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'profile' ? 'active' : '' ?>"><?= icon('user', '', 18) ?> <span>پروفایل کاربری</span></a></li>
+            <?php if (\App\Core\Auth::isAdmin()): ?>
+                <li><a href="<?= url('admin') ?>" class="mobile-nav-link" style="color: var(--color-primary); font-weight: 800;"><?= icon('gear', '', 18) ?> <span>پنل مدیریت CMS</span></a></li>
+            <?php endif; ?>
+            <li><a href="<?= \App\Core\Auth::check() ? url('profile') : url('login') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'profile' ? 'active' : '' ?>"><?= icon('user', '', 18) ?> <span><?= \App\Core\Auth::check() ? 'پروفایل کاربری' : 'ورود / عضویت' ?></span></a></li>
             <li><a href="<?= url('cart') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'cart' ? 'active' : '' ?>"><?= icon('cart', '', 18) ?> <span>سبد خرید (۲ کالا)</span></a></li>
             <li><a href="<?= url('about') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>"><?= icon('shield', '', 18) ?> <span>درباره ما</span></a></li>
             <li><a href="<?= url('contact') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'contact' ? 'active' : '' ?>"><?= icon('phone', '', 18) ?> <span>تماس با ما</span></a></li>

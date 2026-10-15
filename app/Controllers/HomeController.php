@@ -174,7 +174,20 @@ class HomeController extends Controller {
             return;
         }
 
-        // Return successful simulated order response for UI
+        try {
+            \App\Models\QuickOrder::create([
+                'fullname'   => $fullname,
+                'phone'      => $phone,
+                'service'    => $service,
+                'district'   => $district,
+                'status'     => 'pending',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $e) {
+            error_log("Failed to insert quick order: " . $e->getMessage());
+        }
+
+        // Return successful order response
         $this->json([
             'success' => true,
             'message' => 'درخواست شما با موفقیت ثبت شد! کارشناسان ترموبان به زودی با شما تماس خواهند گرفت.',

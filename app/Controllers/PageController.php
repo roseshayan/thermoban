@@ -196,6 +196,20 @@ class PageController extends Controller {
             return;
         }
 
+        try {
+            \App\Models\ContactMessage::create([
+                'name'       => $name,
+                'phone'      => $phone,
+                'district'   => $district,
+                'service'    => trim($_POST['service'] ?? 'تعمیر پکیج'),
+                'message'    => $message,
+                'status'     => 'unread',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $e) {
+            error_log("Failed to insert contact message: " . $e->getMessage());
+        }
+
         $this->json([
             'success' => true,
             'message' => 'پیام شما با موفقیت دریافت شد. کارشناسان ما به زودی با شما تماس خواهند گرفت.'

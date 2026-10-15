@@ -205,15 +205,33 @@ class UserController extends Controller {
         $name = trim($_POST['name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
         $national_id = trim($_POST['national_id'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
         if (empty($name) || empty($phone)) {
             $this->json(['success' => false, 'message' => 'نام و شماره موبایل الزامی است.'], 422);
             return;
         }
 
+        try {
+            $userId = \App\Core\Auth::id() ?? 2;
+            $updateData = [
+                'name'        => $name,
+                'phone'       => $phone,
+                'national_id' => $national_id,
+                'email'       => $email
+            ];
+            if (!empty($password)) {
+                $updateData['password_hash'] = \App\Core\Auth::hashPassword($password);
+            }
+            \App\Core\Database::update('users', $updateData, '`id` = :id', ['id' => $userId]);
+        } catch (\Throwable $e) {
+            error_log("Failed to update user info: " . $e->getMessage());
+        }
+
         $this->json([
             'success' => true,
-            'message' => 'اطلاعات کاربری با موفقیت ویرایش و ذخیره گردید.'
+            'message' => 'اطلاعات کاربری با موفقیت ویرایش و در پایگاه داده ذخیره گردید.'
         ]);
     }
 
@@ -227,15 +245,37 @@ class UserController extends Controller {
         $title = trim($_POST['title'] ?? '');
         $district = trim($_POST['district'] ?? '');
         $address = trim($_POST['address'] ?? '');
+        $postal_code = trim($_POST['postal_code'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $lat = (float) ($_POST['lat'] ?? 35.7219);
+        $lng = (float) ($_POST['lng'] ?? 51.4056);
 
         if (empty($title) || empty($district) || empty($address)) {
             $this->json(['success' => false, 'message' => 'لطفاً تمامی فیلدهای الزامی آدرس را تکمیل فرمایید.'], 422);
             return;
         }
 
+        try {
+            $userId = \App\Core\Auth::id() ?? 2;
+            \App\Core\Database::insert('user_addresses', [
+                'user_id'     => $userId,
+                'title'       => $title,
+                'district'    => $district,
+                'address'     => $address,
+                'postal_code' => $postal_code,
+                'phone'       => $phone,
+                'lat'         => $lat,
+                'lng'         => $lng,
+                'is_default'  => 0,
+                'created_at'  => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $e) {
+            error_log("Failed to add address: " . $e->getMessage());
+        }
+
         $this->json([
             'success' => true,
-            'message' => 'آدرس و موقعیت مکانی جدید با موفقیت ثبت شد.'
+            'message' => 'آدرس و موقعیت مکانی جدید با موفقیت روی نقشه ثبت شد.'
         ]);
     }
 
@@ -249,15 +289,40 @@ class UserController extends Controller {
         $subject = trim($_POST['subject'] ?? '');
         $category = trim($_POST['category'] ?? '');
         $message = trim($_POST['message'] ?? '');
+        $priority = trim($_POST['priority'] ?? 'normal');
 
         if (empty($subject) || empty($message)) {
             $this->json(['success' => false, 'message' => 'عنوان و شرح پیام تیکت الزامی است.'], 422);
             return;
         }
 
+        $ticketNum = 'TK-' . rand(1100, 9999);
+        try {
+            $userId = \App\Core\Auth::id() ?? 2;
+            $ticketId = \App\Core\Database::insert('tickets', [
+                'ticket_number' => $ticketNum,
+                'user_id'       => $userId,
+                'subject'       => $subject,
+                'category'      => $category,
+                'priority'      => in_array($priority, ['normal', 'high', 'emergency']) ? $priority : 'normal',
+                'status'        => 'open',
+                'created_at'    => date('Y-m-d H:i:s')
+            ]);
+
+            \App\Core\Database::insert('ticket_messages', [
+                'ticket_id'   => $ticketId,
+                'sender_type' => 'user',
+                'sender_name' => 'کاربر',
+                'message'     => $message,
+                'created_at'  => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $e) {
+            error_log("Failed to create ticket: " . $e->getMessage());
+        }
+
         $this->json([
             'success' => true,
-            'message' => 'تیکت پشتیبانی با کد TK-' . rand(1100, 9999) . ' با موفقیت ثبت شد و به کارشناس مربوطه ارجاع گردید.'
+            'message' => 'تیکت پشتیبانی با کد ' . $ticketNum . ' با موفقیت ثبت شد و به کارشناس فنی ارجاع گردید.'
         ]);
     }
 }

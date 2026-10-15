@@ -6113,3 +6113,126 @@ input, button, select, textarea {
     }
 }
 
+/* ==========================================================================
+   Authentication Views (Login & Register)
+   ========================================================================== */
+.auth-page-section {
+    padding: 70px 0 100px;
+    background-color: #f8fafc;
+    min-height: calc(100vh - 350px);
+    display: flex;
+    align-items: center;
+}
+
+.auth-card-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 40px;
+    box-shadow: 0 15px 40px rgba(1, 28, 57, 0.08);
+}
+
+.auth-card-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.auth-logo-box {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-md);
+    background-color: rgba(239, 92, 22, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.auth-logo {
+    max-height: 40px;
+    object-fit: contain;
+}
+
+.auth-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-navy);
+    margin-bottom: 8px;
+}
+
+.auth-subtitle {
+    font-size: 0.88rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+}
+
+.label-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.forgot-link {
+    font-size: 0.8rem;
+    color: var(--color-primary);
+}
+
+.btn-auth-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    font-size: 1rem;
+    font-weight: 800;
+    margin-top: 10px;
+}
+
+.auth-demo-hint {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 0.8rem;
+    margin-top: 24px;
+    color: #475569;
+    line-height: 1.8;
+}
+
+.auth-demo-hint p {
+    font-size: 0.82rem;
+    color: var(--color-navy);
+    margin-bottom: 4px;
+}
+
+.auth-demo-hint code {
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--color-navy);
+    font-weight: 700;
+}
+
+.auth-card-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: #64748b;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.auth-terms-note {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-bottom: 18px;
+    line-height: 1.6;
+}
+
+

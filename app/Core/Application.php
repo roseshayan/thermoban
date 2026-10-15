@@ -64,5 +64,27 @@ class Application {
         $this->router->get('/contact', [\App\Controllers\PageController::class, 'contact']);
         $this->router->get('/services', [\App\Controllers\PageController::class, 'services']);
         $this->router->post('/api/contact', [\App\Controllers\PageController::class, 'submitContact']);
+
+        // Authentication
+        $this->router->get('/login', [\App\Controllers\AuthController::class, 'showLogin']);
+        $this->router->post('/login', [\App\Controllers\AuthController::class, 'processLogin']);
+        $this->router->get('/register', [\App\Controllers\AuthController::class, 'showRegister']);
+        $this->router->post('/register', [\App\Controllers\AuthController::class, 'processRegister']);
+        $this->router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
+
+        // Dedicated CMS Admin Panel
+        $this->router->get('/admin', [\App\Controllers\AdminController::class, 'dashboard']);
+        $this->router->get('/admin/products', [\App\Controllers\AdminController::class, 'products']);
+        $this->router->post('/admin/products', [\App\Controllers\AdminController::class, 'products']);
+        $this->router->get('/admin/orders', [\App\Controllers\AdminController::class, 'orders']);
+        $this->router->post('/admin/orders', [\App\Controllers\AdminController::class, 'orders']);
+        $this->router->get('/admin/tickets', [\App\Controllers\AdminController::class, 'tickets']);
+        $this->router->post('/admin/tickets', [\App\Controllers\AdminController::class, 'tickets']);
+        $this->router->get('/admin/leads', [\App\Controllers\AdminController::class, 'leads']);
+        $this->router->post('/admin/leads', [\App\Controllers\AdminController::class, 'leads']);
+        $this->router->get('/admin/articles', [\App\Controllers\AdminController::class, 'articles']);
+        $this->router->post('/admin/articles', [\App\Controllers\AdminController::class, 'articles']);
+        $this->router->get('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
+        $this->router->post('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
     }
 }
