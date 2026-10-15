@@ -36,7 +36,7 @@
         <h3 style="margin: 0; font-size: 1.05rem; color: #011C39; font-weight: 800;">
             فهرست کامل دیدگاه‌ها
         </h3>
-        <input type="text" placeholder="جستجو در نظرات..." class="form-control" style="max-width: 260px; font-size: 0.84rem; padding: 6px 12px;" onkeyup="filterAdminTable(this, 'commentsTable')">
+        <input type="text" id="commentsSearchInput" placeholder="جستجو در نظرات..." class="form-control" style="max-width: 260px; font-size: 0.84rem; padding: 6px 12px;">
     </div>
 
     <div class="table-responsive">
@@ -168,9 +168,22 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination Controls -->
+    <div id="commentsPagination" class="admin-table-pagination" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;"></div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.initAdminTablePro) {
+        window.initAdminTablePro('commentsTable', {
+            searchInputId: 'commentsSearchInput',
+            paginationContainerId: 'commentsPagination',
+            pageSize: 10
+        });
+    }
+});
+
 function openReplyModal(commentId, authorName, currentReply) {
     if (typeof Swal !== 'undefined') {
         Swal.fire({

@@ -35,6 +35,23 @@ class MeliPayamakService {
     }
 
     /**
+     * Send Ticket Created or Replied Notification to customer
+     */
+    public static function sendTicketNotification(string $phone, string $ticketNum, string $title, string $action = 'replied'): array {
+        $service = new self();
+        $bodyId = (int) Setting::get('sms_pattern_ticket', '0');
+
+        if ($bodyId > 0) {
+            return $service->sendPattern($phone, $bodyId, [$ticketNum, $title]);
+        }
+
+        $actionText = ($action === 'created') ? 'تیکت پشتیبانی جدیدی برای شما ثبت شد.' : 'پاسخ جدیدی برای تیکت پشتیبانی شما ثبت گردید.';
+        $msg = "ترموبان (کد ۷۲۷۳)\nمشتری گرامی، {$actionText}\nشناسه تیکت: {$ticketNum}\nجهت بررسی وارد پنل کاربری شوید.";
+        return self::sendDirect($phone, $msg);
+    }
+
+
+    /**
      * Send pattern SMS via MeliPayamak BaseServiceNumber API
      */
     public function sendPattern(string $to, int $bodyId, array $args = []): array {

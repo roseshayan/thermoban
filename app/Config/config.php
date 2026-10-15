@@ -154,3 +154,18 @@ function icon(string $name, string $class = '', int $size = 0): string {
 
     return '<i class="' . $faClass . $extraClass . '"' . $style . ' aria-hidden="true"></i>';
 }
+
+/**
+ * Return raw CSRF token string
+ */
+function csrf_token(): string {
+    return \App\Core\Security::generateCsrf();
+}
+
+/**
+ * Return hidden input for CSRF protection in HTML forms
+ */
+function csrf_field(): string {
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
+}
+

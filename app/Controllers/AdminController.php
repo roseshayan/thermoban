@@ -152,20 +152,59 @@ class AdminController extends Controller {
     }
 
     /**
-     * Manage Orders
+     * Manage Orders & Manual Order Creation
      */
     public function orders(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $orderId = (int) ($_POST['order_id'] ?? 0);
-            $orderStatus = $_POST['order_status'] ?? 'registered';
-            $technician = trim($_POST['technician_name'] ?? '');
+            $action = $_POST['action'] ?? 'update_status';
 
-            Database::update('orders', [
-                'order_status'    => $orderStatus,
-                'technician_name' => $technician
-            ], '`id` = :id', ['id' => $orderId]);
+            if ($action === 'create_order') {
+                $userId = (int) ($_POST['user_id'] ?? 0);
+                $productId = (int) ($_POST['product_id'] ?? 0);
+                $qty = max(1, (int) ($_POST['quantity'] ?? 1));
+                $product = Product::find($productId);
+                
+                $unitPrice = $product ? (int) $product['price'] : 0;
+                $totalPrice = $unitPrice * $qty;
+                $payable = !empty($_POST['payable_amount']) ? (int) str_replace(',', '', $_POST['payable_amount']) : $totalPrice;
+                $orderNum = 'TB-' . date('Y') . '-' . rand(1000, 9999);
 
-            $_SESSION['admin_success'] = 'وضعیت سفارش و تکنسین اعزامی بروزرسانی شد.';
+                $orderId = Database::insert('orders', [
+                    'order_number'    => $orderNum,
+                    'user_id'         => $userId ?: null,
+                    'address_id'      => null,
+                    'total_amount'    => $totalPrice,
+                    'payable_amount'  => $payable,
+                    'order_status'    => $_POST['order_status'] ?? 'registered',
+                    'payment_status'  => $_POST['payment_status'] ?? 'paid',
+                    'payment_method'  => $_POST['payment_method'] ?? 'cod',
+                    'technician_name' => trim($_POST['technician_name'] ?? '')
+                ]);
+
+                if ($orderId && $productId) {
+                    Database::insert('order_items', [
+                        'order_id'    => $orderId,
+                        'product_id'  => $productId,
+                        'quantity'    => $qty,
+                        'unit_price'  => $unitPrice,
+                        'total_price' => $totalPrice
+                    ]);
+                }
+
+                $_SESSION['admin_success'] = "سفارش جدید به شماره {$orderNum} با موفقیت ثبت گردید.";
+            } else {
+                $orderId = (int) ($_POST['order_id'] ?? 0);
+                $orderStatus = $_POST['order_status'] ?? 'registered';
+                $technician = trim($_POST['technician_name'] ?? '');
+
+                Database::update('orders', [
+                    'order_status'    => $orderStatus,
+                    'technician_name' => $technician
+                ], '`id` = :id', ['id' => $orderId]);
+
+                $_SESSION['admin_success'] = 'وضعیت سفارش و تکنسین اعزامی بروزرسانی شد.';
+            }
+
             $this->redirect('admin/orders');
         }
 
@@ -177,9 +216,14 @@ class AdminController extends Controller {
              ORDER BY o.id DESC"
         );
 
+        $users = User::all('name ASC');
+        $products = Product::where("is_active = 1", [], 'title ASC');
+
         $this->view('admin/orders', [
-            'pageTitle' => 'مدیریت سفارش‌ها و اعزام نصاب | CMS ترموبان',
+            'pageTitle' => 'مدیریت سفارش‌ها و ثبت سفارش دستی | CMS ترموبان',
             'orders'    => $orders,
+            'users'     => $users,
+            'products'  => $products,
             'activeNav' => 'orders',
             'success'   => $_SESSION['admin_success'] ?? null
         ], 'layouts/admin');
@@ -187,25 +231,80 @@ class AdminController extends Controller {
     }
 
     /**
-     * Manage Support Tickets
+     * Manage Support Tickets & Customer Ticket Creation with Notifications
      */
     public function tickets(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $ticketId = (int) ($_POST['ticket_id'] ?? 0);
-            $replyMessage = trim($_POST['reply_message'] ?? '');
-            $status = $_POST['status'] ?? 'answered';
+            $action = $_POST['action'] ?? 'reply';
 
-            if (!empty($replyMessage)) {
-                Ticket::addMessage($ticketId, 'admin', 'پشتیبانی فنی ترموبان', $replyMessage);
-                Database::update('tickets', ['status' => $status], '`id` = :id', ['id' => $ticketId]);
-                $_SESSION['admin_success'] = 'پاسخ تیکت با موفقیت ثبت و ارسال گردید.';
+            if ($action === 'create_ticket') {
+                $userId = (int) ($_POST['user_id'] ?? 0);
+                $user = User::find($userId);
+                $subject = trim($_POST['subject'] ?? 'درخواست خدمات پکیج');
+                $category = trim($_POST['category'] ?? 'سرویس و عیب‌یابی');
+                $message = trim($_POST['message'] ?? '');
+                $sendEmail = isset($_POST['send_email']) && $_POST['send_email'] === '1';
+                $sendSms = isset($_POST['send_sms']) && $_POST['send_sms'] === '1';
+                $ticketNum = 'TK-' . rand(10000, 99999);
+
+                $ticketId = Database::insert('tickets', [
+                    'ticket_number' => $ticketNum,
+                    'user_id'       => $userId ?: null,
+                    'subject'       => $subject,
+                    'category'      => $category,
+                    'status'        => 'open',
+                    'priority'      => $_POST['priority'] ?? 'normal'
+                ]);
+
+                if ($ticketId && !empty($message)) {
+                    Ticket::addMessage($ticketId, 'admin', 'پشتیبانی فنی ترموبان', $message);
+                }
+
+                // Send Email Notification if requested & available
+                if ($user && $sendEmail && !empty($user['email'])) {
+                    \App\Services\EmailNotificationService::sendTicketNotification($user['email'], $user['name'], $ticketNum, $subject, 'created');
+                }
+
+                // Send SMS Notification if requested & enabled
+                if ($user && $sendSms && !empty($user['phone'])) {
+                    \App\Services\Sms\MeliPayamakService::sendTicketNotification($user['phone'], $ticketNum, $subject, 'created');
+                }
+
+                $customerName = $user['name'] ?? 'مشتری';
+                $_SESSION['admin_success'] = "تیکت جدید با شماره {$ticketNum} برای {$customerName} با موفقیت ثبت شد.";
+            } else {
+                $ticketId = (int) ($_POST['ticket_id'] ?? 0);
+                $replyMessage = trim($_POST['reply_message'] ?? '');
+                $status = $_POST['status'] ?? 'answered';
+                $sendEmail = isset($_POST['send_email']) && $_POST['send_email'] === '1';
+                $sendSms = isset($_POST['send_sms']) && $_POST['send_sms'] === '1';
+
+                if (!empty($replyMessage)) {
+                    Ticket::addMessage($ticketId, 'admin', 'پشتیبانی فنی ترموبان', $replyMessage);
+                    Database::update('tickets', ['status' => $status], '`id` = :id', ['id' => $ticketId]);
+
+                    $ticket = Ticket::find($ticketId);
+                    $user = $ticket && !empty($ticket['user_id']) ? User::find($ticket['user_id']) : null;
+
+                    // Send Email Notification if requested & available
+                    if ($user && $sendEmail && !empty($user['email'])) {
+                        \App\Services\EmailNotificationService::sendTicketNotification($user['email'], $user['name'], $ticket['ticket_number'] ?? (string)$ticketId, $ticket['subject'] ?? '', 'replied');
+                    }
+
+                    // Send SMS Notification if requested & enabled
+                    if ($user && $sendSms && !empty($user['phone'])) {
+                        \App\Services\Sms\MeliPayamakService::sendTicketNotification($user['phone'], $ticket['ticket_number'] ?? (string)$ticketId, $ticket['subject'] ?? '', 'replied');
+                    }
+
+                    $_SESSION['admin_success'] = 'پاسخ تیکت با موفقیت ثبت و اعلانات مربوطه ارسال گردید.';
+                }
             }
 
             $this->redirect('admin/tickets');
         }
 
         $tickets = Database::fetchAll(
-            "SELECT t.*, u.name as user_name, u.phone as user_phone 
+            "SELECT t.*, u.name as user_name, u.phone as user_phone, u.email as user_email 
              FROM `tickets` t 
              LEFT JOIN `users` u ON t.user_id = u.id 
              ORDER BY t.id DESC"
@@ -218,9 +317,12 @@ class AdminController extends Controller {
             );
         }
 
+        $users = User::all('name ASC');
+
         $this->view('admin/tickets', [
-            'pageTitle' => 'تیکت‌های پشتیبانی و رزرو | CMS ترموبان',
+            'pageTitle' => 'تیکت‌های پشتیبانی و ثبت تیکت جدید | CMS ترموبان',
             'tickets'   => $tickets,
+            'users'     => $users,
             'activeNav' => 'tickets',
             'success'   => $_SESSION['admin_success'] ?? null
         ], 'layouts/admin');
@@ -505,6 +607,7 @@ class AdminController extends Controller {
             if ($action === 'create') {
                 $name = trim($_POST['name'] ?? '');
                 $phone = trim($_POST['phone'] ?? '');
+                $nationalId = trim($_POST['national_id'] ?? '');
                 $email = trim($_POST['email'] ?? '');
                 $password = $_POST['password'] ?? '123456';
                 $role = $_POST['role'] ?? 'user';
@@ -517,6 +620,7 @@ class AdminController extends Controller {
                         User::create([
                             'name'          => $name,
                             'phone'         => $phone,
+                            'national_id'   => $nationalId ?: null,
                             'email'         => $email ?: null,
                             'password_hash' => Auth::hashPassword($password),
                             'role'          => $role,

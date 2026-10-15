@@ -1101,16 +1101,285 @@ window.confirmSwalDelete = function(e, form, itemName) {
     return false;
 };
 
-window.filterAdminTable = function(input, tableId) {
-    const query = input.value.trim().toLowerCase();
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
-    });
-};
+/**
+ * AdminTablePro - Universal Client & AJAX Table Search, Filter & Pagination Engine
+ */
+(function() {
+    window.adminTables = window.adminTables || {};
+
+    function toPersianDigits(n) {
+        if (n === null || n === undefined) return '';
+        const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        return n.toString().replace(/\d/g, x => farsiDigits[x]);
+    }
+
+    class AdminTablePro {
+        constructor(tableId, options = {}) {
+            this.table = typeof tableId === 'string' ? document.getElementById(tableId) : tableId;
+            if (!this.table) return;
+
+            this.tableId = typeof tableId === 'string' ? tableId : (this.table.id || 'table_' + Math.random().toString(36).substr(2, 9));
+            this.options = Object.assign({
+                pageSize: 10,
+                pageSizeOptions: [10, 25, 50, 100],
+                searchInputId: null,
+                paginationContainerId: null,
+                debounceTime: 200,
+                showPageSizeChanger: true
+            }, options);
+
+            this.tbody = this.table.querySelector('tbody');
+            if (!this.tbody) return;
+
+            this.originalRows = Array.from(this.tbody.querySelectorAll('tr')).filter(tr => !tr.classList.contains('no-records-row'));
+            this.filteredRows = [...this.originalRows];
+            this.currentPage = 1;
+            this.pageSize = this.options.pageSize;
+            this.searchQuery = '';
+            this.columnFilters = {}; // { colIndex: filterValue }
+
+            this.initSearch();
+            this.initPaginationContainer();
+            this.render();
+
+            window.adminTables[this.tableId] = this;
+        }
+
+        initSearch() {
+            if (this.options.searchInputId) {
+                const input = document.getElementById(this.options.searchInputId);
+                if (input) {
+                    let debounceTimer = null;
+                    input.addEventListener('input', (e) => {
+                        clearTimeout(debounceTimer);
+                        debounceTimer = setTimeout(() => {
+                            this.search(e.target.value);
+                        }, this.options.debounceTime);
+                    });
+                }
+            }
+        }
+
+        initPaginationContainer() {
+            if (this.options.paginationContainerId) {
+                this.paginationContainer = document.getElementById(this.options.paginationContainerId);
+            }
+        }
+
+        search(query) {
+            this.searchQuery = (query || '').trim().toLowerCase();
+            this.applyFilters();
+        }
+
+        filterColumn(colIndex, value) {
+            const val = (value || '').trim().toLowerCase();
+            if (!val) {
+                delete this.columnFilters[colIndex];
+            } else {
+                this.columnFilters[colIndex] = val;
+            }
+            this.applyFilters();
+        }
+
+        applyFilters() {
+            this.filteredRows = this.originalRows.filter(row => {
+                // Global text search across all cells
+                if (this.searchQuery) {
+                    const rowText = row.textContent.toLowerCase();
+                    if (!rowText.includes(this.searchQuery)) {
+                        return false;
+                    }
+                }
+
+                // Column specific filters
+                for (const [colIdx, filterVal] of Object.entries(this.columnFilters)) {
+                    const cell = row.children[parseInt(colIdx, 10)];
+                    if (!cell) return false;
+                    const cellText = cell.textContent.trim().toLowerCase();
+                    if (!cellText.includes(filterVal)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            this.currentPage = 1;
+            this.render();
+        }
+
+        goToPage(page) {
+            const totalPages = Math.ceil(this.filteredRows.length / this.pageSize) || 1;
+            this.currentPage = Math.max(1, Math.min(page, totalPages));
+            this.render();
+        }
+
+        setPageSize(newSize) {
+            this.pageSize = parseInt(newSize, 10) || 10;
+            this.currentPage = 1;
+            this.render();
+        }
+
+        render() {
+            const totalItems = this.filteredRows.length;
+            const totalPages = Math.ceil(totalItems / this.pageSize) || 1;
+            if (this.currentPage > totalPages) this.currentPage = totalPages;
+
+            const startIndex = (this.currentPage - 1) * this.pageSize;
+            const endIndex = startIndex + this.pageSize;
+            const visibleSet = new Set(this.filteredRows.slice(startIndex, endIndex));
+
+            // Show or hide rows
+            this.originalRows.forEach(row => {
+                row.style.display = visibleSet.has(row) ? '' : 'none';
+            });
+
+            // Empty state notice
+            let emptyNotice = this.tbody.querySelector('.admin-table-empty-notice');
+            if (totalItems === 0) {
+                if (!emptyNotice) {
+                    emptyNotice = document.createElement('tr');
+                    emptyNotice.className = 'admin-table-empty-notice';
+                    emptyNotice.innerHTML = `
+                        <td colspan="100%" style="text-align: center; padding: 35px 20px; color: #94a3b8;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
+                            موردی مطابق با جستجوی شما یافت نشد.
+                        </td>
+                    `;
+                    this.tbody.appendChild(emptyNotice);
+                }
+                emptyNotice.style.display = '';
+            } else if (emptyNotice) {
+                emptyNotice.style.display = 'none';
+            }
+
+            // Render Pagination
+            if (this.paginationContainer) {
+                if (totalItems === 0) {
+                    this.paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                const startItem = totalItems > 0 ? startIndex + 1 : 0;
+                const endItem = Math.min(endIndex, totalItems);
+
+                let pagesHtml = '';
+                // Previous button
+                pagesHtml += `
+                    <button type="button" class="admin-page-btn" ${this.currentPage <= 1 ? 'disabled' : ''} onclick="window.adminTables['${this.tableId}'].goToPage(${this.currentPage - 1})" title="صفحه قبل">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                `;
+
+                // Smart page buttons with ellipsis
+                const maxButtons = 5;
+                let startPage = Math.max(1, this.currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                if (endPage - startPage < maxButtons - 1) {
+                    startPage = Math.max(1, endPage - maxButtons + 1);
+                }
+
+                if (startPage > 1) {
+                    pagesHtml += `<button type="button" class="admin-page-btn" onclick="window.adminTables['${this.tableId}'].goToPage(1)">${toPersianDigits(1)}</button>`;
+                    if (startPage > 2) pagesHtml += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    pagesHtml += `
+                        <button type="button" class="admin-page-btn ${i === this.currentPage ? 'active' : ''}" onclick="window.adminTables['${this.tableId}'].goToPage(${i})">
+                            ${toPersianDigits(i)}
+                        </button>
+                    `;
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) pagesHtml += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
+                    pagesHtml += `<button type="button" class="admin-page-btn" onclick="window.adminTables['${this.tableId}'].goToPage(${totalPages})">${toPersianDigits(totalPages)}</button>`;
+                }
+
+                // Next button
+                pagesHtml += `
+                    <button type="button" class="admin-page-btn" ${this.currentPage >= totalPages ? 'disabled' : ''} onclick="window.adminTables['${this.tableId}'].goToPage(${this.currentPage + 1})" title="صفحه بعد">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                `;
+
+                // Page size changer
+                let sizeChangerHtml = '';
+                if (this.options.showPageSizeChanger) {
+                    const optionsHtml = this.options.pageSizeOptions.map(sz => 
+                        `<option value="${sz}" ${sz === this.pageSize ? 'selected' : ''}>${toPersianDigits(sz)} ردیف</option>`
+                    ).join('');
+                    sizeChangerHtml = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.82rem; color: #64748b;">تعداد در صفحه:</span>
+                            <select class="admin-page-size-select" onchange="window.adminTables['${this.tableId}'].setPageSize(this.value)">
+                                ${optionsHtml}
+                            </select>
+                        </div>
+                    `;
+                }
+
+                this.paginationContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <span style="color: #64748b; font-size: 0.84rem;">
+                            نمایش <strong>${toPersianDigits(startItem)}</strong> تا <strong>${toPersianDigits(endItem)}</strong> از <strong>${toPersianDigits(totalItems)}</strong> مورد
+                        </span>
+                        ${sizeChangerHtml}
+                    </div>
+                    <div class="admin-pagination-pages">
+                        ${pagesHtml}
+                    </div>
+                `;
+            }
+        }
+
+        // AJAX live reload helper
+        reloadAjax(url) {
+            if (!url) return;
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTbody = doc.querySelector('#' + this.tableId + ' tbody');
+                if (newTbody) {
+                    this.tbody.innerHTML = newTbody.innerHTML;
+                    this.originalRows = Array.from(this.tbody.querySelectorAll('tr')).filter(tr => !tr.classList.contains('no-records-row'));
+                    this.applyFilters();
+                }
+            })
+            .catch(err => console.error('Error reloading table via AJAX:', err));
+        }
+    }
+
+    window.initAdminTablePro = function(tableId, options) {
+        return new AdminTablePro(tableId, options);
+    };
+
+    window.filterTableByColumn = function(tableId, colIndex, value) {
+        if (window.adminTables[tableId]) {
+            window.adminTables[tableId].filterColumn(colIndex, value);
+        }
+    };
+
+    window.filterAdminTable = function(input, tableId) {
+        if (window.adminTables[tableId]) {
+            window.adminTables[tableId].search(input.value);
+            return;
+        }
+        const query = input.value.trim().toLowerCase();
+        const table = document.getElementById(tableId);
+        if (!table) return;
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+    };
+})();
 
 window.searchAdminTickets = function(input) {
     const query = input.value.trim().toLowerCase();

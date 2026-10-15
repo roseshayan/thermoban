@@ -91,21 +91,28 @@
             فهرست فایل‌های پشتیبان ذخیره‌شده (SQL Dump)
         </h3>
         
-        <!-- Schedule Form -->
-        <form action="<?= url('admin/backups') ?>" method="POST" style="margin: 0; display: flex; align-items: center; gap: 10px;">
-            <?= csrf_field() ?>
-            <input type="hidden" name="action" value="save_schedule">
-            <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">زمان‌بندی خودکار:</span>
-            <select name="backup_schedule" class="form-control" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px;" onchange="this.form.submit()">
-                <option value="daily" <?= ($schedule === 'daily') ? 'selected' : '' ?>>روزانه (Daily)</option>
-                <option value="weekly" <?= ($schedule === 'weekly') ? 'selected' : '' ?>>هفتگی (Weekly)</option>
-                <option value="monthly" <?= ($schedule === 'monthly') ? 'selected' : '' ?>>ماهانه (Monthly)</option>
-            </select>
-        </form>
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div style="position: relative; width: 220px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem;"></i>
+                <input type="text" id="backupsSearchInput" class="form-control" style="padding-right: 34px; border-radius: 6px; font-size: 0.82rem; height: 34px;" placeholder="جستجو در نام فایل...">
+            </div>
+
+            <!-- Schedule Form -->
+            <form action="<?= url('admin/backups') ?>" method="POST" style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="save_schedule">
+                <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">زمان‌بندی خودکار:</span>
+                <select name="backup_schedule" class="form-control" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px;" onchange="this.form.submit()">
+                    <option value="daily" <?= ($schedule === 'daily') ? 'selected' : '' ?>>روزانه (Daily)</option>
+                    <option value="weekly" <?= ($schedule === 'weekly') ? 'selected' : '' ?>>هفتگی (Weekly)</option>
+                    <option value="monthly" <?= ($schedule === 'monthly') ? 'selected' : '' ?>>ماهانه (Monthly)</option>
+                </select>
+            </form>
+        </div>
     </div>
 
     <div class="table-responsive">
-        <table class="profile-table" style="width: 100%; border-collapse: collapse;">
+        <table class="profile-table" id="backupsTable" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: right;">
                     <th style="padding: 14px 24px; font-size: 0.85rem; color: #475569;">نام فایل بک‌آپ</th>
@@ -184,9 +191,22 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination Controls -->
+    <div id="backupsPagination" class="admin-table-pagination" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;"></div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.initAdminTablePro) {
+        window.initAdminTablePro('backupsTable', {
+            searchInputId: 'backupsSearchInput',
+            paginationContainerId: 'backupsPagination',
+            pageSize: 10
+        });
+    }
+});
+
 function confirmRestore(e, form, filename) {
     e.preventDefault();
     if (typeof Swal !== 'undefined') {

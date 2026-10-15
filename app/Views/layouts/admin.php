@@ -87,6 +87,8 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            width: calc(100% - var(--admin-sidebar-w));
+            transition: all 0.3s ease;
         }
         .admin-topbar {
             background-color: #FFFFFF;
@@ -100,15 +102,66 @@
             top: 0;
             z-index: 90;
         }
-        .admin-topbar-title {
+        .admin-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .admin-hamburger-btn {
+            display: none;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            width: 42px;
+            height: 42px;
+            align-items: center;
+            justify-content: center;
             font-size: 1.25rem;
+            color: #011C39;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .admin-hamburger-btn:hover {
+            background: #e2e8f0;
+            color: #EF5C16;
+        }
+        .admin-sidebar-close {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #ffffff;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-right: auto;
+            align-items: center;
+            justify-content: center;
+        }
+        .admin-sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(1, 28, 57, 0.65);
+            backdrop-filter: blur(2px);
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .admin-sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        .admin-topbar-title {
+            font-size: 1.2rem;
             font-weight: 800;
             color: #011C39;
         }
         .admin-user-nav {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
         }
         .admin-user-pill {
             display: flex;
@@ -123,13 +176,14 @@
             height: 38px;
             border-radius: 50%;
             border: 2px solid #EF5C16;
+            object-fit: cover;
         }
         .admin-content-area {
-            padding: 35px;
+            padding: 30px;
             flex-grow: 1;
         }
         .admin-footer-bar {
-            padding: 18px 35px;
+            padding: 18px 30px;
             background-color: #FFFFFF;
             border-top: 1px solid #e2e8f0;
             display: flex;
@@ -144,38 +198,150 @@
             border-radius: 6px;
             font-size: 0.84rem;
             font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .btn-live-site:hover {
             background-color: #011C39;
             color: #FFFFFF;
         }
-        @media (max-width: 900px) {
-            .admin-sidebar {
-                width: 70px;
+
+        /* 100% Mobile & Tablet Responsive Engine */
+        @media (max-width: 992px) {
+            .admin-hamburger-btn {
+                display: flex;
             }
-            .admin-brand-text, .admin-nav-item span {
-                display: none;
+            .admin-sidebar-close {
+                display: flex;
+            }
+            .admin-sidebar {
+                width: 280px;
+                right: -290px;
+                z-index: 9999;
+                transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: -4px 0 25px rgba(0,0,0,0.3);
+            }
+            .admin-sidebar.active {
+                right: 0;
             }
             .admin-main-wrap {
-                margin-right: 70px;
+                margin-right: 0 !important;
+                width: 100% !important;
             }
-            .admin-nav-item {
-                justify-content: center;
-                padding: 16px;
+            .admin-topbar {
+                padding: 0 16px;
+                height: 64px;
             }
+            .admin-topbar-title {
+                font-size: 0.98rem;
+                max-width: 240px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .admin-content-area {
+                padding: 16px 12px;
+            }
+            .admin-footer-bar {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+                padding: 14px;
+            }
+            .btn-live-site span {
+                display: none;
+            }
+            .admin-user-pill span {
+                display: none;
+            }
+        }
+        @media (max-width: 576px) {
+            .admin-topbar-title {
+                display: none;
+            }
+            .admin-user-nav {
+                gap: 8px;
+            }
+            .admin-card {
+                padding: 16px 12px !important;
+                border-radius: 10px !important;
+        }
+
+        /* Admin Table Pagination & Filtering Styles */
+        .admin-table-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.86rem;
+            color: #64748b;
+        }
+        .admin-pagination-pages {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .admin-page-btn {
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .admin-page-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+            color: #EF5C16;
+            border-color: #cbd5e1;
+        }
+        .admin-page-btn.active {
+            background: #EF5C16;
+            color: #ffffff;
+            border-color: #EF5C16;
+        }
+        .admin-page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .admin-page-size-select {
+            padding: 5px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            color: #334155;
+            background: #ffffff;
+            outline: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body class="admin-body">
 
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>
+
     <!-- Admin Sidebar -->
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-brand">
             <img src="<?= asset('images/logo-icon.png') ?>" alt="ترموبان">
             <div class="admin-brand-text">
                 <h2>پنل مدیریت ترموبان</h2>
                 <span>نمایندگی کد ۷۲۷۳</span>
             </div>
+            <button type="button" class="admin-sidebar-close" id="adminSidebarClose" aria-label="بستن منو">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
         <nav class="admin-menu">
@@ -249,8 +415,13 @@
         
         <!-- Top Navbar -->
         <header class="admin-topbar">
-            <div class="admin-topbar-title">
-                <?= e($pageTitle ?? 'سیستم مدیریت محتوای اختصاصی ترموبان') ?>
+            <div class="admin-topbar-right">
+                <button type="button" class="admin-hamburger-btn" id="adminSidebarToggle" aria-label="منوی ناوبری">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="admin-topbar-title">
+                    <?= e($pageTitle ?? 'سیستم مدیریت محتوای اختصاصی ترموبان') ?>
+                </div>
             </div>
             <div class="admin-user-nav">
                 <a href="<?= url() ?>" target="_blank" class="btn-live-site">
@@ -290,6 +461,47 @@
             baseUrl: "<?= url() ?>",
             csrfToken: "<?= e($csrfToken ?? '') ?>"
         };
+
+        // Mobile Off-canvas Drawer Navigation
+        (function() {
+            var toggleBtn = document.getElementById('adminSidebarToggle');
+            var closeBtn = document.getElementById('adminSidebarClose');
+            var sidebar = document.getElementById('adminSidebar');
+            var overlay = document.getElementById('adminSidebarOverlay');
+
+            function openSidebar() {
+                if (sidebar) sidebar.classList.add('active');
+                if (overlay) overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
+                    closeSidebar();
+                }
+            });
+
+            // Close on nav link click on mobile
+            if (sidebar) {
+                sidebar.querySelectorAll('.admin-nav-item').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 992) {
+                            closeSidebar();
+                        }
+                    });
+                });
+            }
+        })();
     </script>
     <script src="<?= asset('js/main.js') ?>"></script>
 </body>

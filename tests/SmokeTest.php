@@ -64,6 +64,9 @@ class SmokeTestRunner {
         $this->testDatabaseBackupAndRetention();
         $this->testWebInstallerAssets();
         $this->testZeroCdnCompliance();
+        $this->testCsrfProtection();
+        $this->testEmailAndSmsTicketNotifications();
+        $this->testAdminPanelEndpointsNo500();
         $this->testErrorTemplates();
 
         echo "\n-------------------------------------------------------\n";
@@ -251,6 +254,48 @@ class SmokeTestRunner {
         }
 
         $this->assert("Zero CDN Policy (All Assets 100% Local)", !$hasCdn, $violatingFile);
+    }
+
+    private function testCsrfProtection(): void {
+        $token = csrf_token();
+        $field = csrf_field();
+        $this->assert("CSRF Token Generated", !empty($token) && strlen($token) >= 32);
+        $this->assert("CSRF Field HTML Rendered", str_contains($field, 'name="csrf_token"') && str_contains($field, $token));
+    }
+
+    private function testEmailAndSmsTicketNotifications(): void {
+        $emailRes = \App\Services\EmailNotificationService::sendTicketNotification('test@example.com', 'شایان نماینده', 'TK-99999', 'تست پشتیبانی پکیج', 'created');
+        $this->assert("Email Notification Service Dispatches Successfully", $emailRes === true);
+
+        $smsRes = \App\Services\Sms\MeliPayamakService::sendTicketNotification('09121111111', 'TK-99999', 'تست پشتیبانی پکیج', 'created');
+        $this->assert("MeliPayamak Ticket Notification SMS Dispatches", is_array($smsRes) && isset($smsRes['status']));
+    }
+
+    private function testAdminPanelEndpointsNo500(): void {
+        $_SESSION['user_id'] = 1;
+        $_SESSION['user_role'] = 'super_admin';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        $admin = new \App\Controllers\AdminController();
+        $actions = [
+            'dashboard', 'orders', 'products', 'tickets', 'leads', 
+            'articles', 'comments', 'analytics', 'backups', 'users', 
+            'seo', 'gateways', 'sms', 'modules', 'settings'
+        ];
+
+        $failedActions = [];
+        foreach ($actions as $action) {
+            ob_start();
+            try {
+                $admin->$action();
+                ob_end_clean();
+            } catch (\Throwable $e) {
+                ob_end_clean();
+                $failedActions[] = "{$action} ({$e->getMessage()})";
+            }
+        }
+
+        $this->assert("All 15 Admin Pages Return HTTP 200 (No 500 Errors)", empty($failedActions), implode(', ', $failedActions));
     }
 
     private function testErrorTemplates(): void {
