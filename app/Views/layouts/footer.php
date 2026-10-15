@@ -84,11 +84,11 @@
             <div class="footer-col footer-col-links">
                 <h4 class="footer-col-title">لینک های مفید</h4>
                 <ul class="footer-nav-list">
-                    <li><a href="#shop">فروشگاه</a></li>
-                    <li><a href="#guarantee">گارانتی و ضمانت</a></li>
-                    <li><a href="#blog">مقالات</a></li>
-                    <li><a href="#contact">تماس با ما</a></li>
-                    <li><a href="#about">درباره ما</a></li>
+                    <li><a href="<?= url('shop') ?>">فروشگاه</a></li>
+                    <li><a href="<?= url('services') ?>">گارانتی و خدمات</a></li>
+                    <li><a href="<?= url('blog') ?>">مقالات آموزشی</a></li>
+                    <li><a href="<?= url('contact') ?>">تماس با ما</a></li>
+                    <li><a href="<?= url('about') ?>">درباره ما</a></li>
                 </ul>
             </div>
 
@@ -96,11 +96,11 @@
             <div class="footer-col footer-col-services">
                 <h4 class="footer-col-title">خدمات</h4>
                 <ul class="footer-nav-list">
-                    <li><a href="#services">نصب پکیج</a></li>
-                    <li><a href="#services">تعمیر پکیج</a></li>
-                    <li><a href="#services">سرویس پکیج</a></li>
-                    <li><a href="#services">نصب آب گرم کن</a></li>
-                    <li><a href="#services">تعمیر آب گرم کن</a></li>
+                    <li><a href="<?= url('services#install') ?>">نصب پکیج</a></li>
+                    <li><a href="<?= url('services#repair') ?>">تعمیر پکیج</a></li>
+                    <li><a href="<?= url('services#maintenance') ?>">سرویس پکیج</a></li>
+                    <li><a href="<?= url('services#setup') ?>">راه‌اندازی فصلی</a></li>
+                    <li><a href="<?= url('services#sale') ?>">فروش پکیج</a></li>
                 </ul>
             </div>
 
@@ -129,6 +129,13 @@
 
         <div class="footer-bottom-line">
             <p class="copyright-text">تمامی حقوق مادی و معنوی این وبسایت متعلق به ترموبان است.</p>
+            <div class="developer-credit">
+                طراحی و برنامه‌نویسی: <a href="https://devshayan.ir" target="_blank" rel="noopener"><strong>شایان نماینده</strong></a>
+                <span class="sep">•</span>
+                ایمیل: <a href="mailto:namayandeshayan@gmail.com">namayandeshayan@gmail.com</a>
+                <span class="sep">•</span>
+                وب‌سایت: <a href="https://devshayan.ir" target="_blank" rel="noopener">devshayan.ir</a>
+            </div>
         </div>
     </div>
 </footer>

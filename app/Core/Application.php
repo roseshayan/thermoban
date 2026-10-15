@@ -35,15 +35,23 @@ class Application {
     protected function registerRoutes(): void {
         // Home
         $this->router->get('/', [\App\Controllers\HomeController::class, 'index']);
-        
-        // Quick Order API / Form submission
         $this->router->post('/api/quick-order', [\App\Controllers\HomeController::class, 'submitQuickOrder']);
         
-        // Additional UI pages if visited directly
-        $this->router->get('/services', [\App\Controllers\HomeController::class, 'index']);
-        $this->router->get('/shop', [\App\Controllers\HomeController::class, 'index']);
-        $this->router->get('/blog', [\App\Controllers\HomeController::class, 'index']);
-        $this->router->get('/contact', [\App\Controllers\HomeController::class, 'index']);
-        $this->router->get('/about', [\App\Controllers\HomeController::class, 'index']);
+        // Blog / Articles
+        $this->router->get('/blog', [\App\Controllers\BlogController::class, 'index']);
+        $this->router->get('/articles', [\App\Controllers\BlogController::class, 'index']);
+        $this->router->get('/blog/{slug}', [\App\Controllers\BlogController::class, 'detail']);
+        
+        // Shop / Products
+        $this->router->get('/shop', [\App\Controllers\ShopController::class, 'index']);
+        $this->router->get('/products', [\App\Controllers\ShopController::class, 'index']);
+        $this->router->get('/product/{id}', [\App\Controllers\ShopController::class, 'detail']);
+        $this->router->get('/shop/{id}', [\App\Controllers\ShopController::class, 'detail']);
+        
+        // Pages & Services
+        $this->router->get('/about', [\App\Controllers\PageController::class, 'about']);
+        $this->router->get('/contact', [\App\Controllers\PageController::class, 'contact']);
+        $this->router->get('/services', [\App\Controllers\PageController::class, 'services']);
+        $this->router->post('/api/contact', [\App\Controllers\PageController::class, 'submitContact']);
     }
 }

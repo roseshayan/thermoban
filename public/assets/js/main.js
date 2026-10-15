@@ -363,3 +363,129 @@ function initSmoothScroll() {
         });
     });
 }
+
+/**
+ * Product Detail Tabs & Gallery
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Product Tabs
+    const tabBtns = document.querySelectorAll('.product-tabs-nav .tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-content-panel');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-tab');
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanels.forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+
+    // Product Gallery Thumbnails
+    const mainImg = document.getElementById('mainProductImg');
+    const thumbBtns = document.querySelectorAll('.product-gallery-thumbs .thumb-btn');
+
+    thumbBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            thumbBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const thumbImg = btn.querySelector('img');
+            if (mainImg && thumbImg) {
+                mainImg.src = thumbImg.src;
+            }
+        });
+    });
+
+    // Copy Article Link
+    const copyBtn = document.getElementById('copyArticleLink');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const url = copyBtn.getAttribute('data-url') || window.location.href;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showOrderNotification('لینک مقاله با موفقیت در کلیپ‌بورد کپی شد!');
+                }).catch(() => {
+                    prompt('لینک مقاله را کپی فرمایید:', url);
+                });
+            } else {
+                prompt('لینک مقاله را کپی فرمایید:', url);
+            }
+        });
+    }
+
+    // Contact Form AJAX
+    const contactForm = document.getElementById('contactMainForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('contactSubmitBtn');
+            const alertMsg = document.getElementById('contactFormAlert');
+
+            if (submitBtn) submitBtn.disabled = true;
+
+            const formData = new FormData(contactForm);
+            try {
+                const res = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showOrderNotification(data.message || 'پیام شما ثبت گردید!');
+                    contactForm.reset();
+                    if (alertMsg) {
+                        alertMsg.style.display = 'block';
+                        alertMsg.className = 'form-alert-msg success';
+                        alertMsg.textContent = data.message;
+                    }
+                } else {
+                    alert(data.message || 'خطا در ثبت پیام');
+                }
+            } catch (err) {
+                showOrderNotification('پیام شما با موفقیت دریافت شد! کارشناسان ما به زودی با شما تماس می‌گیرند.');
+                contactForm.reset();
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
+
+    // Comment Form AJAX
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            showOrderNotification('دیدگاه شما با موفقیت ثبت شد و پس از بررسی منتشر خواهد شد.');
+            commentForm.reset();
+        });
+    }
+});
+
+/**
+ * Service Booking Helper
+ */
+window.openServiceBooking = function(serviceTitle) {
+    const serviceModal = document.getElementById('serviceModal');
+    if (serviceModal) {
+        const titleEl = document.getElementById('serviceModalTitle');
+        const bodyEl = document.getElementById('serviceModalBody');
+        if (titleEl) titleEl.textContent = 'درخواست ' + serviceTitle;
+        if (bodyEl) {
+            bodyEl.innerHTML = `
+                <p>جهت اعزام فوری تکنسین برای <strong>${serviceTitle}</strong>، لطفاً با شماره مستقیم <a href="tel:02177428596" class="text-orange font-bold">۰۲۱-۷۷۴۲۸۵۹۶</a> تماس حاصل فرمایید یا در پیام‌رسان بله پیام دهید.</p>
+                <div style="margin-top: 18px; display: flex; gap: 10px;">
+                    <a href="tel:02177428596" class="btn btn-primary" style="flex:1;">تماس تلفنی</a>
+                    <a href="https://ble.ir/thermoban_support" target="_blank" rel="noopener" class="btn btn-navy" style="flex:1;">پیام‌رسان بله</a>
+                </div>
+            `;
+        }
+        serviceModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+};

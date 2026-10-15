@@ -234,9 +234,9 @@
                                     <span class="product-price"><?= e($prod['price']) ?></span>
                                     <span class="price-currency">تومان</span>
                                 </div>
-                                <button type="button" class="btn btn-primary btn-buy" onclick="openOrderModal('<?= e($prod['title']) ?>')">
+                                <a href="<?= url('product/' . $prod['id']) ?>" class="btn btn-primary btn-buy">
                                     مشاهده و خرید
-                                </button>
+                                </a>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -245,7 +245,7 @@
                 </div>
 
                 <div class="column-footer-action">
-                    <a href="#shop" class="btn btn-outline btn-pill">مشاهده همه محصولات</a>
+                    <a href="<?= url('shop') ?>" class="btn btn-outline btn-pill">مشاهده همه محصولات</a>
                 </div>
             </div>
 
@@ -261,7 +261,7 @@
                         <article class="article-card">
                             <div class="article-text-side">
                                 <h3 class="article-title">
-                                    <a href="#quick-order"><?= e($art['title']) ?></a>
+                                    <a href="<?= url('blog/' . ($art['slug'] ?? 'error-e81-iran-radiator-fix')) ?>"><?= e($art['title']) ?></a>
                                 </h3>
                                 <p class="article-excerpt"><?= e($art['excerpt']) ?></p>
                                 <div class="article-meta">
@@ -276,7 +276,7 @@
                 </div>
 
                 <div class="column-footer-action">
-                    <a href="#blog" class="btn btn-outline btn-pill">مشاهده همه مقالات</a>
+                    <a href="<?= url('blog') ?>" class="btn btn-outline btn-pill">مشاهده همه مقالات</a>
                 </div>
             </div>
 

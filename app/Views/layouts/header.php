@@ -10,29 +10,29 @@
         <nav class="main-nav" aria-label="منوی اصلی">
             <ul class="nav-list">
                 <li class="nav-item">
-                    <a href="<?= url() ?>" class="nav-link active">صفحه اصلی</a>
+                    <a href="<?= url() ?>" class="nav-link <?= ($currentPage ?? 'home') === 'home' ? 'active' : '' ?>">صفحه اصلی</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#services" class="nav-link">خدمات ما</a>
+                    <a href="<?= url('services') ?>" class="nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>">خدمات ما</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#shop" class="nav-link">فروشگاه</a>
+                    <a href="<?= url('shop') ?>" class="nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>">فروشگاه</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#blog" class="nav-link">مقالات</a>
+                    <a href="<?= url('blog') ?>" class="nav-link <?= ($currentPage ?? '') === 'blog' ? 'active' : '' ?>">مقالات</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#contact" class="nav-link">تماس با ما</a>
+                    <a href="<?= url('about') ?>" class="nav-link <?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>">درباره ما</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#about" class="nav-link">درباره ما</a>
+                    <a href="<?= url('contact') ?>" class="nav-link <?= ($currentPage ?? '') === 'contact' ? 'active' : '' ?>">تماس با ما</a>
                 </li>
             </ul>
         </nav>
 
         <!-- CTA Action Button -->
         <div class="header-action">
-            <a href="#quick-order" class="btn btn-primary btn-header">
+            <a href="<?= url('#quick-order') ?>" class="btn btn-primary btn-header">
                 ثبت سفارش سریع
             </a>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="منوی موبایل">
@@ -50,15 +50,15 @@
             <button class="mobile-drawer-close" id="mobileDrawerClose" aria-label="بستن منو">&times;</button>
         </div>
         <ul class="mobile-nav-list">
-            <li><a href="<?= url() ?>" class="mobile-nav-link active">صفحه اصلی</a></li>
-            <li><a href="#services" class="mobile-nav-link">خدمات ما</a></li>
-            <li><a href="#shop" class="mobile-nav-link">فروشگاه</a></li>
-            <li><a href="#blog" class="mobile-nav-link">مقالات</a></li>
-            <li><a href="#contact" class="mobile-nav-link">تماس با ما</a></li>
-            <li><a href="#about" class="mobile-nav-link">درباره ما</a></li>
+            <li><a href="<?= url() ?>" class="mobile-nav-link <?= ($currentPage ?? 'home') === 'home' ? 'active' : '' ?>">صفحه اصلی</a></li>
+            <li><a href="<?= url('services') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>">خدمات ما</a></li>
+            <li><a href="<?= url('shop') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>">فروشگاه</a></li>
+            <li><a href="<?= url('blog') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'blog' ? 'active' : '' ?>">مقالات</a></li>
+            <li><a href="<?= url('about') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>">درباره ما</a></li>
+            <li><a href="<?= url('contact') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'contact' ? 'active' : '' ?>">تماس با ما</a></li>
         </ul>
         <div class="mobile-drawer-footer">
-            <a href="#quick-order" class="btn btn-primary w-100">ثبت سفارش سریع</a>
+            <a href="<?= url('#quick-order') ?>" class="btn btn-primary w-100">ثبت سفارش سریع</a>
             <a href="tel:<?= str_replace('-', '', SITE_PHONE_2) ?>" class="mobile-phone-btn">
                 <span>تماس فوری: <?= SITE_PHONE_2 ?></span>
             </a>
