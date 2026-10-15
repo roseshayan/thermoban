@@ -137,14 +137,21 @@
                         <td><?= number_format($p['capacity']) ?></td>
                         <td><strong><?= number_format($p['price']) ?></strong></td>
                         <td>
-                            <form action="<?= url('admin/products') ?>" method="POST" style="display:inline;" onsubmit="return confirmSwalDelete(event, this, '<?= e($p['title']) ?>');">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="id" value="<?= $p['id'] ?>">
-                                <button type="submit" class="btn-table-action" style="color: #ef4444; border: 1px solid #fecaca; background: #fff;">
-                                    <?= icon('trash', '', 14) ?>
-                                    <span>حذف</span>
-                                </button>
-                            </form>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="<?= url('admin/products/edit/' . $p['id']) ?>" class="btn-table-action" style="color: #0284c7; border: 1px solid #bae6fd; background: #fff; text-decoration: none; padding: 4px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>ویرایش</span>
+                                </a>
+                                <form action="<?= url('admin/products') ?>" method="POST" style="display:inline;" onsubmit="return confirmSwalDelete(event, this, '<?= e($p['title']) ?>');">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?= $p['id'] ?>">
+                                    <button type="submit" class="btn-table-action" style="color: #ef4444; border: 1px solid #fecaca; background: #fff; padding: 4px 10px; border-radius: 4px;">
+                                        <?= icon('trash', '', 14) ?>
+                                        <span>حذف</span>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>

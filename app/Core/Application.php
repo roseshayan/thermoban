@@ -65,17 +65,23 @@ class Application {
         $this->router->get('/services', [\App\Controllers\PageController::class, 'services']);
         $this->router->post('/api/contact', [\App\Controllers\PageController::class, 'submitContact']);
 
-        // Authentication
+        // Authentication & Password Recovery
         $this->router->get('/login', [\App\Controllers\AuthController::class, 'showLogin']);
         $this->router->post('/login', [\App\Controllers\AuthController::class, 'processLogin']);
         $this->router->get('/register', [\App\Controllers\AuthController::class, 'showRegister']);
         $this->router->post('/register', [\App\Controllers\AuthController::class, 'processRegister']);
+        $this->router->get('/forgot-password', [\App\Controllers\AuthController::class, 'showForgotPassword']);
+        $this->router->post('/forgot-password', [\App\Controllers\AuthController::class, 'submitForgotPassword']);
+        $this->router->get('/reset-password', [\App\Controllers\AuthController::class, 'showResetPassword']);
+        $this->router->post('/reset-password', [\App\Controllers\AuthController::class, 'submitResetPassword']);
         $this->router->get('/logout', [\App\Controllers\AuthController::class, 'logout']);
 
         // Dedicated CMS Admin Panel
         $this->router->get('/admin', [\App\Controllers\AdminController::class, 'dashboard']);
         $this->router->get('/admin/products', [\App\Controllers\AdminController::class, 'products']);
         $this->router->post('/admin/products', [\App\Controllers\AdminController::class, 'products']);
+        $this->router->get('/admin/products/edit/{id}', [\App\Controllers\AdminController::class, 'editProduct']);
+        $this->router->post('/admin/products/edit/{id}', [\App\Controllers\AdminController::class, 'editProduct']);
         $this->router->get('/admin/orders', [\App\Controllers\AdminController::class, 'orders']);
         $this->router->post('/admin/orders', [\App\Controllers\AdminController::class, 'orders']);
         $this->router->get('/admin/tickets', [\App\Controllers\AdminController::class, 'tickets']);
@@ -84,6 +90,18 @@ class Application {
         $this->router->post('/admin/leads', [\App\Controllers\AdminController::class, 'leads']);
         $this->router->get('/admin/articles', [\App\Controllers\AdminController::class, 'articles']);
         $this->router->post('/admin/articles', [\App\Controllers\AdminController::class, 'articles']);
+        $this->router->get('/admin/articles/edit/{id}', [\App\Controllers\AdminController::class, 'editArticle']);
+        $this->router->post('/admin/articles/edit/{id}', [\App\Controllers\AdminController::class, 'editArticle']);
+        $this->router->get('/admin/users', [\App\Controllers\AdminController::class, 'users']);
+        $this->router->post('/admin/users', [\App\Controllers\AdminController::class, 'users']);
+        $this->router->get('/admin/seo', [\App\Controllers\AdminController::class, 'seo']);
+        $this->router->post('/admin/seo', [\App\Controllers\AdminController::class, 'seo']);
+        $this->router->get('/admin/gateways', [\App\Controllers\AdminController::class, 'gateways']);
+        $this->router->post('/admin/gateways', [\App\Controllers\AdminController::class, 'gateways']);
+        $this->router->get('/admin/sms', [\App\Controllers\AdminController::class, 'sms']);
+        $this->router->post('/admin/sms', [\App\Controllers\AdminController::class, 'sms']);
+        $this->router->get('/admin/modules', [\App\Controllers\AdminController::class, 'modules']);
+        $this->router->post('/admin/modules', [\App\Controllers\AdminController::class, 'modules']);
         $this->router->get('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
         $this->router->post('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
     }

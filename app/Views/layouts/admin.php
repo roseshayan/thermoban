@@ -180,31 +180,53 @@
 
         <nav class="admin-menu">
             <a href="<?= url('admin') ?>" class="admin-nav-item <?= ($activeNav === 'dashboard') ? 'active' : '' ?>">
-                <?= icon('building', '', 18) ?>
+                <i class="fa-solid fa-chart-pie" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>داشبورد آماری</span>
             </a>
             <a href="<?= url('admin/orders') ?>" class="admin-nav-item <?= ($activeNav === 'orders') ? 'active' : '' ?>">
-                <?= icon('invoice', '', 18) ?>
+                <i class="fa-solid fa-file-invoice-dollar" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>مدیریت سفارش‌ها</span>
             </a>
             <a href="<?= url('admin/products') ?>" class="admin-nav-item <?= ($activeNav === 'products') ? 'active' : '' ?>">
-                <?= icon('cart', '', 18) ?>
+                <i class="fa-solid fa-boxes-stacked" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>محصولات پکیج</span>
             </a>
             <a href="<?= url('admin/tickets') ?>" class="admin-nav-item <?= ($activeNav === 'tickets') ? 'active' : '' ?>">
-                <?= icon('ticket', '', 18) ?>
+                <i class="fa-solid fa-headset" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>تیکت‌های پشتیبانی</span>
             </a>
             <a href="<?= url('admin/leads') ?>" class="admin-nav-item <?= ($activeNav === 'leads') ? 'active' : '' ?>">
-                <?= icon('phone', '', 18) ?>
+                <i class="fa-solid fa-phone-volume" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>سفارشات سریع و تماس‌ها</span>
             </a>
             <a href="<?= url('admin/articles') ?>" class="admin-nav-item <?= ($activeNav === 'articles') ? 'active' : '' ?>">
-                <?= icon('edit', '', 18) ?>
+                <i class="fa-solid fa-newspaper" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>مقالات آموزشی</span>
             </a>
+            <a href="<?= url('admin/users') ?>" class="admin-nav-item <?= ($activeNav === 'users') ? 'active' : '' ?>">
+                <i class="fa-solid fa-users" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>مدیریت کاربران</span>
+            </a>
+            <a href="<?= url('admin/seo') ?>" class="admin-nav-item <?= ($activeNav === 'seo') ? 'active' : '' ?>">
+                <i class="fa-solid fa-chart-line" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>سئو (Rank Math Pro)</span>
+            </a>
+            <a href="<?= url('admin/gateways') ?>" class="admin-nav-item <?= ($activeNav === 'gateways') ? 'active' : '' ?>">
+                <i class="fa-solid fa-credit-card" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>درگاه‌های پرداخت</span>
+            </a>
+            <a href="<?= url('admin/sms') ?>" class="admin-nav-item <?= ($activeNav === 'sms') ? 'active' : '' ?>">
+                <i class="fa-solid fa-comment-sms" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>پنل پیامک (ملی‌پیامک)</span>
+            </a>
+            <?php if (\App\Core\Auth::isSuperAdmin()): ?>
+                <a href="<?= url('admin/modules') ?>" class="admin-nav-item <?= ($activeNav === 'modules') ? 'active' : '' ?>" style="border-right-color: #f59e0b; color: #fbbf24;">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>ماژول‌ها و پلن‌ها</span>
+                </a>
+            <?php endif; ?>
             <a href="<?= url('admin/settings') ?>" class="admin-nav-item <?= ($activeNav === 'settings') ? 'active' : '' ?>">
-                <?= icon('gear', '', 18) ?>
+                <i class="fa-solid fa-gears" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>تنظیمات نمایندگی</span>
             </a>
         </nav>

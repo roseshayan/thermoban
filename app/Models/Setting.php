@@ -20,4 +20,13 @@ class Setting extends Model {
             Database::insert('settings', ['setting_key' => $key, 'setting_value' => $value]);
         }
     }
+
+    public static function allKeyVal(): array {
+        $rows = Database::fetchAll("SELECT * FROM `settings`");
+        $map = [];
+        foreach ($rows as $r) {
+            $map[$r['setting_key']] = $r['setting_value'];
+        }
+        return $map;
+    }
 }

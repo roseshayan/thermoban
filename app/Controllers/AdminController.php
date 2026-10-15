@@ -12,6 +12,9 @@ use App\Models\Article;
 use App\Models\QuickOrder;
 use App\Models\ContactMessage;
 use App\Models\Setting;
+use App\Models\User;
+use App\Services\Payment\PaymentManager;
+use App\Services\Sms\MeliPayamakService;
 
 class AdminController extends Controller {
     public function __construct() {
@@ -31,7 +34,8 @@ class AdminController extends Controller {
             'orders_count'      => Order::count(),
             'open_tickets'      => Ticket::count("`status` != 'closed'"),
             'pending_leads'     => QuickOrder::count("`status` = 'pending'"),
-            'total_revenue'     => Database::fetchOne("SELECT SUM(payable_amount) as total FROM `orders` WHERE `payment_status` = 'paid'")['total'] ?? 0
+            'total_revenue'     => Database::fetchOne("SELECT SUM(payable_amount) as total FROM `orders` WHERE `payment_status` = 'paid'")['total'] ?? 0,
+            'users_count'       => User::count()
         ];
 
         $recentOrders = Database::fetchAll(
@@ -53,7 +57,7 @@ class AdminController extends Controller {
     }
 
     /**
-     * Manage Products
+     * Manage Products (List, Create, Delete)
      */
     public function products(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -102,6 +106,49 @@ class AdminController extends Controller {
             'success'   => $_SESSION['admin_success'] ?? null
         ], 'layouts/admin');
         unset($_SESSION['admin_success']);
+    }
+
+    /**
+     * Edit Single Product
+     */
+    public function editProduct(int|string $id): void {
+        $product = Product::find($id);
+        if (!$product) {
+            $_SESSION['admin_error'] = 'محصول یافت نشد.';
+            $this->redirect('admin/products');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            Product::update($id, [
+                'brand_id'       => (int) ($_POST['brand_id'] ?? 1),
+                'title'          => trim($_POST['title']),
+                'model'          => trim($_POST['model']),
+                'capacity'       => (int) $_POST['capacity'],
+                'area'           => trim($_POST['area']),
+                'heat_exchanger' => trim($_POST['heat_exchanger']),
+                'flue_type'      => trim($_POST['flue_type']),
+                'price'          => (int) str_replace(',', '', $_POST['price']),
+                'old_price'      => !empty($_POST['old_price']) ? (int) str_replace(',', '', $_POST['old_price']) : null,
+                'warranty'       => trim($_POST['warranty']),
+                'image'          => trim($_POST['image'] ?: 'package-thumb.png'),
+                'description'    => trim($_POST['description']),
+                'features'       => json_encode(array_filter(array_map('trim', explode("\n", $_POST['features'] ?? ''))), JSON_UNESCAPED_UNICODE),
+                'stock'          => (int) ($_POST['stock'] ?? 10),
+                'is_active'      => isset($_POST['is_active']) ? 1 : 0
+            ]);
+
+            $_SESSION['admin_success'] = 'مشخصات و قیمت محصول بروزرسانی شد.';
+            $this->redirect('admin/products');
+        }
+
+        $brands = Database::fetchAll("SELECT * FROM `brands`");
+
+        $this->view('admin/product-edit', [
+            'pageTitle' => 'ویرایش محصول: ' . $product['title'],
+            'product'   => $product,
+            'brands'    => $brands,
+            'activeNav' => 'products'
+        ], 'layouts/admin');
     }
 
     /**
@@ -207,7 +254,7 @@ class AdminController extends Controller {
     }
 
     /**
-     * Manage Articles
+     * Manage Articles (List, Create, Delete)
      */
     public function articles(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -243,6 +290,297 @@ class AdminController extends Controller {
             'success'   => $_SESSION['admin_success'] ?? null
         ], 'layouts/admin');
         unset($_SESSION['admin_success']);
+    }
+
+    /**
+     * Edit Single Article
+     */
+    public function editArticle(int|string $id): void {
+        $article = Article::find($id);
+        if (!$article) {
+            $_SESSION['admin_error'] = 'مقاله یافت نشد.';
+            $this->redirect('admin/articles');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            Article::update($id, [
+                'title'        => trim($_POST['title']),
+                'slug'         => trim($_POST['slug']),
+                'excerpt'      => trim($_POST['excerpt']),
+                'content'      => trim($_POST['content']),
+                'image'        => trim($_POST['image'] ?: 'hero-technician.jpg'),
+                'reading_time' => trim($_POST['reading_time'] ?: '۵ دقیقه'),
+                'is_published' => isset($_POST['is_published']) ? 1 : 0
+            ]);
+
+            $_SESSION['admin_success'] = 'محتوای مقاله آموزشی با موفقیت بروزرسانی شد.';
+            $this->redirect('admin/articles');
+        }
+
+        $this->view('admin/article-edit', [
+            'pageTitle' => 'ویرایش مقاله: ' . $article['title'],
+            'article'   => $article,
+            'activeNav' => 'articles'
+        ], 'layouts/admin');
+    }
+
+    /**
+     * Super Admin Feature Flags & Monetization Control
+     */
+    public function modules(): void {
+        if (!Auth::isSuperAdmin()) {
+            $_SESSION['admin_error'] = 'این بخش فقط مخصوص برنامه‌نویس و سوپر ادمین (شایان نماینده) است.';
+            $this->redirect('admin');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $modules = [
+                'module_shop'         => isset($_POST['module_shop']) ? '1' : '0',
+                'module_blog'         => isset($_POST['module_blog']) ? '1' : '0',
+                'module_tickets'      => isset($_POST['module_tickets']) ? '1' : '0',
+                'module_gateways'     => isset($_POST['module_gateways']) ? '1' : '0',
+                'module_sms'          => isset($_POST['module_sms']) ? '1' : '0',
+                'module_registration' => isset($_POST['module_registration']) ? '1' : '0',
+                'maintenance_mode'    => isset($_POST['maintenance_mode']) ? '1' : '0',
+                'maintenance_title'   => trim($_POST['maintenance_title'] ?? ''),
+                'maintenance_message' => trim($_POST['maintenance_message'] ?? ''),
+                'maintenance_phone'   => trim($_POST['maintenance_phone'] ?? '۰۲۱-۷۷۴۲۸۵۹۶')
+            ];
+
+            foreach ($modules as $k => $v) {
+                Setting::set($k, $v);
+            }
+
+            $_SESSION['admin_success'] = 'وضعیت ماژول‌های سامانه و پلن‌های تجاری ذخیره گردید.';
+            $this->redirect('admin/modules');
+        }
+
+        $settings = Setting::allKeyVal();
+
+        $this->view('admin/modules', [
+            'pageTitle' => 'مدیریت ماژول‌ها و پلن‌های تجاری (سوپر ادمین)',
+            'settings'  => $settings,
+            'activeNav' => 'modules',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Rank Math Pro Style SEO Manager
+     */
+    public function seo(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $seoKeys = [
+                'seo_meta_title_template',
+                'seo_meta_description',
+                'seo_meta_keywords',
+                'seo_canonical_url',
+                'seo_og_image',
+                'seo_robots_txt',
+                'seo_google_analytics',
+                'seo_search_console',
+                'seo_schema_type'
+            ];
+
+            foreach ($seoKeys as $key) {
+                if (isset($_POST[$key])) {
+                    Setting::set($key, trim($_POST[$key]));
+                }
+            }
+
+            $_SESSION['admin_success'] = 'تنظیمات حرفه‌ای سئو (Rank Math Pro) ذخیره گردید.';
+            $this->redirect('admin/seo');
+        }
+
+        $settings = Setting::allKeyVal();
+
+        $this->view('admin/seo', [
+            'pageTitle' => 'مدیریت جامع سئو و بهینه‌سازی موتورهای جستجو (Rank Math)',
+            'settings'  => $settings,
+            'activeNav' => 'seo',
+            'success'   => $_SESSION['admin_success'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success']);
+    }
+
+    /**
+     * Payment Gateways Configuration
+     */
+    public function gateways(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $keys = [
+                'gateway_default'           => trim($_POST['gateway_default'] ?? 'zarinpal'),
+                'gateway_zarinpal_merchant' => trim($_POST['gateway_zarinpal_merchant'] ?? ''),
+                'gateway_zarinpal_sandbox'  => isset($_POST['gateway_zarinpal_sandbox']) ? '1' : '0',
+                'gateway_zibal_merchant'    => trim($_POST['gateway_zibal_merchant'] ?? ''),
+                'gateway_zibal_sandbox'     => isset($_POST['gateway_zibal_sandbox']) ? '1' : '0',
+                'gateway_cod_enabled'       => isset($_POST['gateway_cod_enabled']) ? '1' : '0'
+            ];
+
+            foreach ($keys as $k => $v) {
+                Setting::set($k, $v);
+            }
+
+            $_SESSION['admin_success'] = 'تنظیمات درگاه‌های پرداخت با موفقیت بروزرسانی شد.';
+            $this->redirect('admin/gateways');
+        }
+
+        $settings = Setting::allKeyVal();
+
+        $this->view('admin/gateways', [
+            'pageTitle' => 'پیکربندی درگاه‌های پرداخت آنلاین (زرین‌پال و زیبال)',
+            'settings'  => $settings,
+            'activeNav' => 'gateways',
+            'success'   => $_SESSION['admin_success'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success']);
+    }
+
+    /**
+     * SMS Panel Configuration & Testing
+     */
+    public function sms(): void {
+        $testResult = null;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? 'save_settings';
+
+            if ($action === 'save_settings') {
+                $keys = [
+                    'sms_enabled'       => isset($_POST['sms_enabled']) ? '1' : '0',
+                    'sms_username'      => trim($_POST['sms_username'] ?? ''),
+                    'sms_password'      => trim($_POST['sms_password'] ?? ''),
+                    'sms_from_number'   => trim($_POST['sms_from_number'] ?? ''),
+                    'sms_pattern_otp'   => trim($_POST['sms_pattern_otp'] ?? ''),
+                    'sms_pattern_order' => trim($_POST['sms_pattern_order'] ?? ''),
+                    'sms_pattern_ticket'=> trim($_POST['sms_pattern_ticket'] ?? '')
+                ];
+
+                foreach ($keys as $k => $v) {
+                    Setting::set($k, $v);
+                }
+
+                $_SESSION['admin_success'] = 'تنظیمات وب‌سرویس ملی‌پیامک ذخیره گردید.';
+                $this->redirect('admin/sms');
+            } elseif ($action === 'test_sms') {
+                $testPhone = trim($_POST['test_phone'] ?? '');
+                $testMsg = trim($_POST['test_message'] ?? 'تست ارتباط با پنل پیامکی ترموبان');
+
+                if (!empty($testPhone)) {
+                    $res = MeliPayamakService::sendDirect($testPhone, $testMsg);
+                    if ($res['success']) {
+                        $_SESSION['admin_success'] = 'پیامک آزمایشی با موفقیت به شماره ' . $testPhone . ' ارسال گردید. (پاسخ ملی‌پیامک: ' . ($res['response']['Value'] ?? 'OK') . ')';
+                    } else {
+                        $_SESSION['admin_error'] = 'خطا در ارسال پیامک: ' . ($res['error'] ?? 'خطای ناشناخته');
+                    }
+                }
+                $this->redirect('admin/sms');
+            }
+        }
+
+        $settings = Setting::allKeyVal();
+
+        $this->view('admin/sms', [
+            'pageTitle' => 'تنظیمات پنل پیامک (ملی‌پیامک REST)',
+            'settings'  => $settings,
+            'activeNav' => 'sms',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Manage Users (CRUD, Roles, Block/Active)
+     */
+    public function users(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+
+            if ($action === 'create') {
+                $name = trim($_POST['name'] ?? '');
+                $phone = trim($_POST['phone'] ?? '');
+                $email = trim($_POST['email'] ?? '');
+                $password = $_POST['password'] ?? '123456';
+                $role = $_POST['role'] ?? 'user';
+                $status = $_POST['status'] ?? 'active';
+
+                if (!empty($name) && !empty($phone)) {
+                    if (User::findByPhone($phone)) {
+                        $_SESSION['admin_error'] = 'کاربری با این شماره همراه قبلاً ثبت شده است.';
+                    } else {
+                        User::create([
+                            'name'          => $name,
+                            'phone'         => $phone,
+                            'email'         => $email ?: null,
+                            'password_hash' => Auth::hashPassword($password),
+                            'role'          => $role,
+                            'status'        => $status
+                        ]);
+                        $_SESSION['admin_success'] = "کاربر {$name} با موفقیت افزوده شد.";
+                    }
+                }
+            } elseif ($action === 'update_role') {
+                $userId = (int) $_POST['user_id'];
+                $role = $_POST['role'] ?? 'user';
+                $status = $_POST['status'] ?? 'active';
+
+                // Prevent changing super_admin role if not super_admin
+                $target = User::find($userId);
+                if ($target && $target['role'] === 'super_admin' && !Auth::isSuperAdmin()) {
+                    $_SESSION['admin_error'] = 'شما دسترسی لازم برای تغییر نقش سوپر ادمین را ندارید.';
+                } else {
+                    User::update($userId, [
+                        'role'   => $role,
+                        'status' => $status
+                    ]);
+                    $_SESSION['admin_success'] = 'نقش و وضعیت کاربر بروزرسانی شد.';
+                }
+            } elseif ($action === 'reset_password') {
+                $userId = (int) $_POST['user_id'];
+                $newPassword = $_POST['new_password'] ?? '';
+                if (!empty($newPassword) && strlen($newPassword) >= 6) {
+                    User::update($userId, [
+                        'password_hash' => Auth::hashPassword($newPassword)
+                    ]);
+                    $_SESSION['admin_success'] = 'کلمه عبور کاربر با موفقیت تغییر یافت.';
+                } else {
+                    $_SESSION['admin_error'] = 'کلمه عبور باید حداقل ۶ رقم باشد.';
+                }
+            } elseif ($action === 'delete') {
+                $userId = (int) $_POST['user_id'];
+                if ($userId === Auth::id()) {
+                    $_SESSION['admin_error'] = 'امکان حذف حساب کاربری جاری خودتان وجود ندارد.';
+                } else {
+                    User::delete($userId);
+                    $_SESSION['admin_success'] = 'کاربر با موفقیت حذف گردید.';
+                }
+            }
+
+            $this->redirect('admin/users');
+        }
+
+        $search = trim($_GET['q'] ?? '');
+        if (!empty($search)) {
+            $users = Database::fetchAll(
+                "SELECT * FROM `users` WHERE `name` LIKE :q OR `phone` LIKE :q OR `email` LIKE :q ORDER BY `id` DESC",
+                ['q' => "%{$search}%"]
+            );
+        } else {
+            $users = User::all('id DESC');
+        }
+
+        $this->view('admin/users', [
+            'pageTitle' => 'مدیریت جامع کاربران و سطوح دسترسی | CMS ترموبان',
+            'users'     => $users,
+            'search'    => $search,
+            'activeNav' => 'users',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
     }
 
     /**

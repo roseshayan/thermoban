@@ -37,10 +37,12 @@
                 <div class="form-group">
                     <div class="label-flex">
                         <label for="password">کلمه عبور <span class="required">*</span></label>
-                        <a href="https://ble.ir/thermoban_support" target="_blank" rel="noopener" class="forgot-link">فراموشی رمز عبور؟</a>
+                        <a href="<?= url('forgot-password') ?>" class="forgot-link">فراموشی رمز عبور؟</a>
                     </div>
                     <input type="password" id="password" name="password" class="form-control" placeholder="کلمه عبور خود را وارد کنید..." required data-msg="کلمه عبور الزامی است">
                 </div>
+
+                <?= \App\Services\CaptchaService::renderHtml() ?>
 
                 <button type="submit" class="btn btn-primary btn-auth-submit w-100">
                     <span>ورود به سامانه</span>

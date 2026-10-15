@@ -19,6 +19,11 @@ class Auth {
             return false;
         }
 
+        // Check if user is blocked
+        if (($user['status'] ?? 'active') === 'blocked') {
+            return false;
+        }
+
         if (password_verify($password, $user['password_hash'])) {
             self::login($user);
             return true;
@@ -53,13 +58,24 @@ class Auth {
     }
 
     /**
-     * Check if logged in user is admin
+     * Check if logged in user is admin or super admin
      */
     public static function isAdmin(): bool {
         if (!self::check()) {
             return false;
         }
-        return ($_SESSION['user_role'] ?? 'user') === 'admin';
+        $role = $_SESSION['user_role'] ?? 'user';
+        return in_array($role, ['admin', 'super_admin'], true);
+    }
+
+    /**
+     * Check if logged in user is developer / super admin
+     */
+    public static function isSuperAdmin(): bool {
+        if (!self::check()) {
+            return false;
+        }
+        return ($_SESSION['user_role'] ?? 'user') === 'super_admin';
     }
 
     /**

@@ -41,6 +41,8 @@
                     با کلیک بر روی ثبت‌نام، کلیه قوانین و شرایط خدمات نمایندگی مجاز ترموبان را می‌پذیرید.
                 </div>
 
+                <?= \App\Services\CaptchaService::renderHtml() ?>
+
                 <button type="submit" class="btn btn-primary btn-auth-submit w-100">
                     <span>ایجاد حساب و ورود</span>
                     <?= icon('check', '', 18) ?>

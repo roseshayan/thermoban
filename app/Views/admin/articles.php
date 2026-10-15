@@ -92,14 +92,21 @@
                         <td><?= number_format($art['views_count']) ?></td>
                         <td><?= e($art['created_at']) ?></td>
                         <td>
-                            <form action="<?= url('admin/articles') ?>" method="POST" style="display:inline;" onsubmit="return confirm('آیا از حذف این مقاله اطمینان دارید؟');">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="id" value="<?= $art['id'] ?>">
-                                <button type="submit" class="btn-table-action" style="color: #ef4444; border: 1px solid #fecaca; background: #fff;">
-                                    <?= icon('trash', '', 14) ?>
-                                    <span>حذف</span>
-                                </button>
-                            </form>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="<?= url('admin/articles/edit/' . $art['id']) ?>" class="btn-table-action" style="color: #0284c7; border: 1px solid #bae6fd; background: #fff; text-decoration: none; padding: 4px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>ویرایش</span>
+                                </a>
+                                <form action="<?= url('admin/articles') ?>" method="POST" style="display:inline;" onsubmit="return confirm('آیا از حذف این مقاله اطمینان دارید؟');">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?= $art['id'] ?>">
+                                    <button type="submit" class="btn-table-action" style="color: #ef4444; border: 1px solid #fecaca; background: #fff; padding: 4px 10px; border-radius: 4px;">
+                                        <i class="fa-solid fa-trash"></i>
+                                        <span>حذف</span>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
