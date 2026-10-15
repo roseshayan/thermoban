@@ -7,6 +7,8 @@
     <title><?= e($pageTitle ?? 'پنل مدیریت اختصاصی ترموبان') ?></title>
     <link rel="icon" type="image/png" href="<?= asset('images/logo-icon.png') ?>">
     <link rel="stylesheet" href="<?= asset('css/fonts.css') ?>">
+    <link rel="stylesheet" href="<?= asset('vendor/fontawesome/css/all.min.css') ?>">
+    <link rel="stylesheet" href="<?= asset('vendor/sweetalert2/sweetalert2.min.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
     <style>
         :root {
@@ -246,6 +248,15 @@
 
     </div>
 
+    <!-- Vendor JS (Zero CDN) -->
+    <script src="<?= asset('vendor/chartjs/chart.umd.min.js') ?>"></script>
+    <script src="<?= asset('vendor/sweetalert2/sweetalert2.all.min.js') ?>"></script>
+    <script>
+        window.THERMOBAN_CONFIG = {
+            baseUrl: "<?= url() ?>",
+            csrfToken: "<?= e($csrfToken ?? '') ?>"
+        };
+    </script>
     <script src="<?= asset('js/main.js') ?>"></script>
 </body>
 </html>

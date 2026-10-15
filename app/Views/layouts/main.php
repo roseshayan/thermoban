@@ -13,6 +13,11 @@
     
     <!-- Local Fonts (Installed via npm, 100% Offline / No CDN) -->
     <link rel="stylesheet" href="<?= asset('css/fonts.css') ?>">
+
+    <!-- Local Vendor Assets (FontAwesome 6, Leaflet Map, SweetAlert2 - Zero CDN) -->
+    <link rel="stylesheet" href="<?= asset('vendor/fontawesome/css/all.min.css') ?>">
+    <link rel="stylesheet" href="<?= asset('vendor/leaflet/leaflet.css') ?>">
+    <link rel="stylesheet" href="<?= asset('vendor/sweetalert2/sweetalert2.min.css') ?>">
     
     <!-- Main Style CSS -->
     <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
@@ -39,7 +44,9 @@
         </div>
     </a>
 
-    <!-- Interactive Scripts -->
+    <!-- Interactive Scripts & Local Vendor JS -->
+    <script src="<?= asset('vendor/leaflet/leaflet.js') ?>"></script>
+    <script src="<?= asset('vendor/sweetalert2/sweetalert2.all.min.js') ?>"></script>
     <script>
         window.THERMOBAN_CONFIG = {
             baseUrl: "<?= url() ?>",

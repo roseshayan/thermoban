@@ -308,44 +308,47 @@
                         <?php endforeach; ?>
                     </div>
 
-                    <!-- Interactive Map Picker Section -->
+                    <!-- Real Interactive Map Picker Section (Leaflet & OpenStreetMap) -->
                     <div class="map-picker-container" id="addressMapSection">
                         <div class="map-picker-header">
-                            <h3 class="map-picker-title">انتخاب لوکیشن و موقعیت روی نقشه تهران</h3>
-                            <p class="map-picker-desc">نشانگر را روی نقشه جابجا کنید تا تکنسین نزدیک‌ترین مسیر را برای حضور در محل شما انتخاب کند.</p>
+                            <div>
+                                <h3 class="map-picker-title">انتخاب موقعیت دقیق روی نقشه تعاملی ایران و تهران</h3>
+                                <p class="map-picker-desc">با کلیک روی نقشه یا جابجایی پین نشانگر، آدرس دقیق خود را برای حضور تکنسین مشخص کنید.</p>
+                            </div>
+                            <div class="map-city-quicklinks">
+                                <span class="quicklink-label">انتخاب سریع:</span>
+                                <button type="button" class="btn-city-pill active" onclick="jumpMapTo(35.6892, 51.3890, 12, 'تهران')">تهران</button>
+                                <button type="button" class="btn-city-pill" onclick="jumpMapTo(35.8400, 50.9391, 12, 'کرج')">کرج</button>
+                                <button type="button" class="btn-city-pill" onclick="jumpMapTo(32.6546, 51.6680, 12, 'اصفهان')">اصفهان</button>
+                                <button type="button" class="btn-city-pill" onclick="jumpMapTo(36.2972, 59.6067, 12, 'مشهد')">مشهد</button>
+                                <button type="button" class="btn-city-pill" onclick="jumpMapTo(29.5918, 52.5837, 12, 'شیراز')">شیراز</button>
+                                <button type="button" class="btn-city-pill" onclick="jumpMapTo(38.0800, 46.2919, 12, 'تبریز')">تبریز</button>
+                                <button type="button" class="btn-city-pill" onclick="jumpMapTo(32.4279, 53.6880, 5, 'کل ایران')">نمای کل ایران</button>
+                            </div>
                         </div>
 
-                        <!-- Simulated Interactive Map with Pointer & Coordinates -->
-                        <div class="interactive-map-box" id="interactiveMap">
-                            <div class="map-overlay-grid"></div>
+                        <!-- Real Leaflet Map Container -->
+                        <div class="real-map-wrapper">
+                            <div id="realIranMap" class="real-iran-map" style="height: 400px; width: 100%; border-radius: 14px; position: relative; z-index: 1;"></div>
                             
-                            <!-- Map Pin Marker -->
-                            <div class="map-marker-pin" id="mapMarkerPin" style="top: 48%; left: 52%;">
-                                <div class="marker-pulse"></div>
-                                <div class="marker-icon">
-                                    <?= icon('map-pin', 'marker-svg', 28) ?>
+                            <div class="map-bottom-controls">
+                                <div class="map-coords-badge">
+                                    <?= icon('map-pin', '', 16) ?>
+                                    <span>موقعیت جغرافیایی: </span>
+                                    <strong id="coordsDisplay">۳۵.۶۸۹۲° شمالی، ۵۱.۳۸۹۰° شرقی</strong>
                                 </div>
-                                <div class="marker-tooltip">لوکیشن انتخابی شما (کلیک برای جابجایی)</div>
-                            </div>
-
-                            <!-- Map Controls -->
-                            <div class="map-controls">
-                                <button type="button" class="map-btn" id="mapZoomIn" title="بزرگنمایی">+</button>
-                                <button type="button" class="map-btn" id="mapZoomOut" title="کوچکنمایی">−</button>
-                                <button type="button" class="map-btn map-reset-btn" id="mapReset" title="مرکز تهران">تهران</button>
-                            </div>
-
-                            <div class="map-coords-bar">
-                                <span>طول و عرض جغرافیایی: </span>
-                                <strong id="coordsDisplay">۳۵.۷۲۱۹° شمالی، ۵۱.۴۰۵۶° شرقی</strong>
+                                <button type="button" class="btn-locate-me" id="btnLocateMe" onclick="getUserCurrentLocation()">
+                                    <?= icon('location-arrow', '', 14) ?>
+                                    <span>یافتن لوکیشن من</span>
+                                </button>
                             </div>
                         </div>
 
                         <!-- New Address Form Attached to Map -->
                         <form action="<?= url('api/user/add-address') ?>" method="POST" class="map-address-form js-validate-form" id="newAddressForm">
                             <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
-                            <input type="hidden" name="lat" id="inputLat" value="35.7219">
-                            <input type="hidden" name="lng" id="inputLng" value="51.4056">
+                            <input type="hidden" name="lat" id="inputLat" value="35.6892">
+                            <input type="hidden" name="lng" id="inputLng" value="51.3890">
 
                             <div class="form-row-2">
                                 <div class="form-group">
@@ -481,94 +484,195 @@
                     </div>
                 </div>
 
-                <!-- 6. SUPPORT TICKETS TAB -->
+                <!-- 6. SUPPORT TICKETS TAB (Professional Ticketing System) -->
                 <div class="profile-tab-panel <?= ($activeTab === 'tickets') ? 'active' : '' ?>" id="tab-tickets">
                     <div class="panel-header-flex">
                         <div>
-                            <h2 class="panel-main-title">تیکت‌های پشتیبانی، رزرو و گارانتی</h2>
-                            <p class="panel-subtitle">پرسش‌های فنی، درخواست رزرو سرویسکار و پیگیری گارانتی‌های ثبت شده</p>
+                            <h2 class="panel-main-title">سامانه جامع پشتیبانی، رزرو تکنسین و گارانتی</h2>
+                            <p class="panel-subtitle">ارتباط مستقیم با کارشناسان فنی نمایندگی کد ۷۲۷۳ ایران رادیاتور و بوتان</p>
                         </div>
-                        <button type="button" class="btn btn-primary" id="btnOpenNewTicket">
-                            <?= icon('ticket', '', 18) ?>
+                        <button type="button" class="btn btn-primary btn-new-ticket-glow" id="btnOpenNewTicket">
+                            <?= icon('plus', '', 16) ?>
                             <span>ثبت تیکت جدید</span>
                         </button>
                     </div>
 
-                    <!-- New Ticket Form (Collapsible) -->
-                    <div class="new-ticket-box" id="newTicketBox" style="display: none;">
-                        <h3 class="new-ticket-title">ثبت تیکت پشتیبانی یا درخواست رزرو تکنسین</h3>
+                    <!-- New Ticket Form (Collapsible Modern Card) -->
+                    <div class="new-ticket-box-pro" id="newTicketBox" style="display: none;">
+                        <div class="box-header-ribbon">
+                            <div class="ribbon-title">
+                                <?= icon('ticket', '', 18) ?>
+                                <span>فرم ثبت تیکت پشتیبانی و درخواست اعزام کارشناس</span>
+                            </div>
+                            <span class="ribbon-badge">پاسخگویی سریع زیر ۳۰ دقیقه</span>
+                        </div>
                         <form action="<?= url('api/user/create-ticket') ?>" method="POST" class="ticket-form js-validate-form" id="createTicketForm">
                             <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
 
                             <div class="form-row-2">
                                 <div class="form-group">
-                                    <label for="tk_subject">موضوع تیکت <span class="required">*</span></label>
-                                    <input type="text" id="tk_subject" name="subject" class="form-control" placeholder="مثال: درخواست اعزام تکنسین جهت سرویس..." required data-msg="موضوع تیکت الزامی است">
+                                    <label for="tk_subject">موضوع درخواست <span class="required">*</span></label>
+                                    <input type="text" id="tk_subject" name="subject" class="form-control" placeholder="مثال: درخواست اعزام تکنسین جهت سرویس پکیج L24FF..." required data-msg="موضوع تیکت الزامی است">
                                 </div>
                                 <div class="form-group">
-                                    <label for="tk_category">دسته‌بندی درخواست <span class="required">*</span></label>
+                                    <label for="tk_category">دپارتمان / نوع خدمت <span class="required">*</span></label>
                                     <select id="tk_category" name="category" class="form-control" required data-msg="انتخاب دسته‌بندی الزامی است">
-                                        <option value="">انتخاب دسته‌بندی...</option>
-                                        <option value="رزرو و اعزام تکنسین">رزرو و اعزام تکنسین در تهران</option>
-                                        <option value="پشتیبانی فنی و ارور">پشتیبانی فنی و راهنمای کدهای خطا</option>
-                                        <option value="گارانتی و خدمات شرکتی">گارانتی طلایی و مهر دفترچه ۲۴ ماهه</option>
-                                        <option value="پیگیری سفارش کالا">پیگیری سفارش و زمان تحویل</option>
+                                        <option value="">انتخاب دپارتمان...</option>
+                                        <option value="اعزام تکنسین فوری">اعزام تکنسین فوری در محل (تهران)</option>
+                                        <option value="عیب‌یابی و رفع ارور">عیب‌یابی، رفع کد ارور و نشت آب</option>
+                                        <option value="گارانتی و سرویس سالیانه">گارانتی طلایی و سرویس دوره‌ای ۲۴ ماهه</option>
+                                        <option value="پیگیری سفارش خرید">پیگیری فاکتور خرید و زمان ارسال</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="tk_message">شرح کامل پیام یا درخواست <span class="required">*</span></label>
-                                <textarea id="tk_message" name="message" rows="4" class="form-control" placeholder="شرح مشکل پکیج، مدل دستگاه یا زمان مورد نظر برای اعزام را بنویسید..." required data-msg="شرح پیام الزامی است"></textarea>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="tk_priority">سطح اولویت <span class="required">*</span></label>
+                                    <select id="tk_priority" name="priority" class="form-control">
+                                        <option value="عادی">عادی (پاسخگویی حداکثر ۲ ساعته)</option>
+                                        <option value="مهم">مهم (بررسی در اولویت نخست)</option>
+                                        <option value="اورژانسی">اورژانسی (بدون آب گرم / افت فشار شدید)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="tk_brand">برند و مدل دستگاه پکیج</label>
+                                    <input type="text" id="tk_brand" name="device_model" class="form-control" placeholder="مثال: ایران رادیاتور M24FF یا بوتان Perla Pro">
+                                </div>
                             </div>
 
-                            <div class="form-actions">
+                            <div class="form-group">
+                                <label for="tk_message">شرح کامل مشکل یا درخواست <span class="required">*</span></label>
+                                <textarea id="tk_message" name="message" rows="4" class="form-control" placeholder="شرح مشکل دستگاه، کد ارور چشمک‌زن روی نمایشگر یا زمان پیشنهادی برای حضور سرویسکار را وارد کنید..." required data-msg="شرح پیام الزامی است"></textarea>
+                            </div>
+
+                            <div class="form-actions-flex">
                                 <button type="submit" class="btn btn-primary">
-                                    <?= icon('check', '', 18) ?>
-                                    <span>ارسال تیکت</span>
+                                    <?= icon('paper-plane', '', 16) ?>
+                                    <span>ثبت و ارسال رسمی تیکت</span>
                                 </button>
-                                <button type="button" class="btn btn-outline" onclick="document.getElementById('newTicketBox').style.display='none';">انصراف</button>
+                                <button type="button" class="btn btn-outline" onclick="document.getElementById('newTicketBox').style.display='none';">
+                                    انصراف
+                                </button>
                             </div>
                         </form>
                     </div>
 
+                    <!-- Tickets Control Bar (Filter tabs & Search) -->
+                    <div class="tickets-control-bar">
+                        <div class="ticket-filter-pills">
+                            <button type="button" class="btn-ticket-filter active" onclick="filterTicketsByStatus('all', this)">
+                                <span>همه گفتگوها</span>
+                                <span class="badge"><?= count($tickets) ?></span>
+                            </button>
+                            <button type="button" class="btn-ticket-filter" onclick="filterTicketsByStatus('پاسخ داده شده', this)">
+                                <span>پاسخ داده شده</span>
+                            </button>
+                            <button type="button" class="btn-ticket-filter" onclick="filterTicketsByStatus('در حال بررسی', this)">
+                                <span>در حال بررسی</span>
+                            </button>
+                            <button type="button" class="btn-ticket-filter" onclick="filterTicketsByStatus('بسته', this)">
+                                <span>بسته شده</span>
+                            </button>
+                        </div>
+                        <div class="ticket-search-box">
+                            <?= icon('search', 'search-icon', 16) ?>
+                            <input type="text" placeholder="جستجو در موضوع یا شناسه تیکت..." onkeyup="searchTicketsList(this)">
+                        </div>
+                    </div>
+
                     <!-- Tickets List -->
                     <div class="tickets-full-list">
-                        <?php foreach ($tickets as $ticket): ?>
-                            <div class="ticket-card-thread">
-                                <div class="ticket-card-head">
-                                    <div class="ticket-meta-info">
-                                        <span class="ticket-code"><?= e($ticket['id']) ?></span>
-                                        <span class="ticket-cat-badge"><?= e($ticket['category']) ?></span>
-                                        <span class="ticket-date">📅 <?= e($ticket['date']) ?></span>
-                                    </div>
-                                    <span class="status-badge <?= $ticket['status_class'] ?>"><?= e($ticket['status']) ?></span>
-                                </div>
-
-                                <h3 class="ticket-subject"><?= e($ticket['subject']) ?></h3>
-
-                                <!-- Messages Thread -->
-                                <div class="ticket-messages-thread">
-                                    <?php foreach ($ticket['messages'] as $msg): ?>
-                                        <div class="thread-message <?= ($msg['sender'] === 'user') ? 'msg-user' : 'msg-support' ?>">
-                                            <div class="msg-header">
-                                                <strong><?= e($msg['sender_name']) ?></strong>
-                                                <span class="msg-time"><?= e($msg['time']) ?></span>
-                                            </div>
-                                            <p class="msg-body"><?= e($msg['text']) ?></p>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-
-                                <!-- Quick Reply Box -->
-                                <div class="ticket-quick-reply">
-                                    <input type="text" class="form-control" placeholder="پاسخ به این تیکت...">
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="alert('پاسخ شما ارسال شد و به تیکت اضافه گردید.');">
-                                        ارسال پاسخ
-                                    </button>
-                                </div>
+                        <?php if (empty($tickets)): ?>
+                            <div class="empty-state-box">
+                                <?= icon('ticket', 'empty-icon', 48) ?>
+                                <h3>هنوز هیچ تیکتی ثبت نکرده‌اید</h3>
+                                <p>هرگونه پرسش فنی در خصوص پکیج، نیاز به اعزام کارشناس یا گارانتی دارید از دکمه ثبت تیکت استفاده نمایید.</p>
                             </div>
-                        <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php foreach ($tickets as $ticket): ?>
+                                <div class="ticket-card-thread-pro" data-status="<?= e($ticket['status']) ?>">
+                                    
+                                    <!-- Ticket Header Bar -->
+                                    <div class="ticket-pro-header">
+                                        <div class="ticket-pro-left">
+                                            <span class="ticket-code-pill">
+                                                <?= icon('ticket', '', 14) ?>
+                                                <span><?= e($ticket['id']) ?></span>
+                                            </span>
+                                            <span class="ticket-dept-pill"><?= e($ticket['category']) ?></span>
+                                            <span class="ticket-date-pill">
+                                                <?= icon('clock', '', 13) ?>
+                                                <span><?= e($ticket['date']) ?></span>
+                                            </span>
+                                        </div>
+                                        <div class="ticket-pro-right">
+                                            <span class="ticket-status-pill <?= $ticket['status_class'] ?>">
+                                                <span class="status-pulse-dot"></span>
+                                                <span><?= e($ticket['status']) ?></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <h3 class="ticket-pro-subject"><?= e($ticket['subject']) ?></h3>
+
+                                    <!-- Messages Thread Stream -->
+                                    <div class="ticket-messages-stream">
+                                        <?php foreach ($ticket['messages'] as $msg): ?>
+                                            <?php $isSupport = ($msg['sender'] !== 'user'); ?>
+                                            <div class="stream-bubble <?= $isSupport ? 'bubble-support' : 'bubble-user' ?>">
+                                                <div class="bubble-avatar">
+                                                    <?php if ($isSupport): ?>
+                                                        <div class="avatar-support">
+                                                            <?= icon('headset', '', 18) ?>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <div class="avatar-user">
+                                                            <?= icon('user', '', 18) ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="bubble-content-wrap">
+                                                    <div class="bubble-meta">
+                                                        <span class="bubble-author">
+                                                            <?= e($msg['sender_name']) ?>
+                                                            <?php if ($isSupport): ?>
+                                                                <span class="verified-agent-tag" title="پاسخ رسمی نمایندگی ۷۲۷۳">
+                                                                    <?= icon('circle-check', '', 14) ?>
+                                                                    <span>کارشناس مجاز</span>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                        <span class="bubble-time"><?= e($msg['time']) ?></span>
+                                                    </div>
+                                                    <div class="bubble-text">
+                                                        <?= nl2br(e($msg['text'])) ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <!-- Quick Reply Interactive Composer -->
+                                    <div class="ticket-reply-composer">
+                                        <div class="composer-chips">
+                                            <span class="chip-label">پاسخ‌های پیشنهادی:</span>
+                                            <button type="button" class="reply-chip" onclick="this.closest('.ticket-reply-composer').querySelector('textarea').value = 'سلام، لطفاً هرچه سریع‌تر تکنسین را اعزام نمایید.'">اعزام سریع تکنسین</button>
+                                            <button type="button" class="reply-chip" onclick="this.closest('.ticket-reply-composer').querySelector('textarea').value = 'عکس ارور دستگاه را در محل بررسی فرمایید.'">بررسی ارور در محل</button>
+                                            <button type="button" class="reply-chip" onclick="this.closest('.ticket-reply-composer').querySelector('textarea').value = 'مشکل با راهنمایی شما حل شد، با تشکر.'">مشکل برطرف شد</button>
+                                        </div>
+                                        <div class="composer-input-row">
+                                            <textarea rows="2" class="form-control composer-textarea" placeholder="پاسخ خود را در مورد این گفتگو بنویسید..."></textarea>
+                                            <button type="button" class="btn btn-primary btn-send-reply" onclick="submitTicketQuickReply(this, '<?= e($ticket['id']) ?>')">
+                                                <?= icon('paper-plane', '', 16) ?>
+                                                <span>ارسال پاسخ</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
 
                 </div>

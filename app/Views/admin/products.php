@@ -102,8 +102,16 @@
 
 <!-- Products Table -->
 <div class="dashboard-block" style="background: #fff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+        <h3 class="block-title" style="margin: 0;">لیست پکیج‌های ثبت شده در انبار (<?= count($products) ?> محصول)</h3>
+        <div style="position: relative; width: 320px;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+            <input type="text" class="form-control" style="padding-right: 38px; border-radius: 20px; font-size: 0.85rem;" placeholder="جستجوی سریع در نام، مدل یا برند..." onkeyup="filterAdminTable(this, 'productsTable')">
+        </div>
+    </div>
+
     <div class="orders-table-wrapper">
-        <table class="profile-table">
+        <table class="profile-table" id="productsTable">
             <thead>
                 <tr>
                     <th>تصویر</th>
@@ -129,7 +137,7 @@
                         <td><?= number_format($p['capacity']) ?></td>
                         <td><strong><?= number_format($p['price']) ?></strong></td>
                         <td>
-                            <form action="<?= url('admin/products') ?>" method="POST" style="display:inline;" onsubmit="return confirm('آیا از حذف این محصول اطمینان دارید؟');">
+                            <form action="<?= url('admin/products') ?>" method="POST" style="display:inline;" onsubmit="return confirmSwalDelete(event, this, '<?= e($p['title']) ?>');">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="id" value="<?= $p['id'] ?>">
                                 <button type="submit" class="btn-table-action" style="color: #ef4444; border: 1px solid #fecaca; background: #fff;">

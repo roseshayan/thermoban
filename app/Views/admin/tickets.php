@@ -12,6 +12,10 @@
         <h2 class="panel-main-title">تیکت‌های پشتیبانی، رزرو و گارانتی</h2>
         <p class="panel-subtitle">پاسخگویی به استعلامات فنی کاربران، هماهنگی رزرو سرویسکار و پاسخ به سوالات گارانتی</p>
     </div>
+    <div style="position: relative; width: 320px;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+        <input type="text" class="form-control" style="padding-right: 38px; border-radius: 20px; font-size: 0.85rem;" placeholder="جستجو در تیکت‌ها و نام مشتری..." onkeyup="searchAdminTickets(this)">
+    </div>
 </div>
 
 <div class="tickets-cards-list">

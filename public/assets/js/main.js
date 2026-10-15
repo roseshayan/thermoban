@@ -612,6 +612,13 @@ window.switchProfileTab = function(targetTabId) {
         }
     });
 
+    // Invalidate Leaflet map size when switching to address tab
+    if (targetTabId === 'tab-addresses' && window.iranLeafletMap) {
+        setTimeout(() => {
+            window.iranLeafletMap.invalidateSize();
+        }, 200);
+    }
+
     // Update URL hash/query without page reload
     const cleanTab = targetTabId.replace('tab-', '');
     const newUrl = window.location.pathname + '?tab=' + cleanTab;
@@ -635,7 +642,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenTicket.addEventListener('click', () => {
             const isHidden = newTicketBox.style.display === 'none' || !newTicketBox.style.display;
             newTicketBox.style.display = isHidden ? 'block' : 'none';
-            btnOpenTicket.textContent = isHidden ? 'بستن فرم تیکت' : 'ثبت تیکت جدید';
+            btnOpenTicket.innerHTML = isHidden 
+                ? '<i class="fa-solid fa-xmark"></i> <span>بستن فرم تیکت</span>' 
+                : '<i class="fa-solid fa-plus"></i> <span>ثبت تیکت جدید</span>';
             if (isHidden) newTicketBox.scrollIntoView({ behavior: 'smooth' });
         });
     }
@@ -646,87 +655,189 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnOpenAddr && addrSection) {
         btnOpenAddr.addEventListener('click', () => {
             addrSection.scrollIntoView({ behavior: 'smooth' });
+            if (window.iranLeafletMap) window.iranLeafletMap.invalidateSize();
             const titleInput = document.getElementById('addr_title');
             if (titleInput) titleInput.focus();
         });
     }
 
-    // Initialize Interactive Map Location Picker
+    // Initialize Interactive Map Location Picker (Leaflet)
     initInteractiveMap();
 });
 
 /**
- * Interactive Map Location Picker for Tehran
+ * Interactive Real Map Location Picker for Iran & Tehran (Leaflet + OpenStreetMap)
  */
 function initInteractiveMap() {
-    const mapBox = document.getElementById('interactiveMap');
-    const pin = document.getElementById('mapMarkerPin');
+    const mapContainer = document.getElementById('realIranMap');
+    if (!mapContainer || typeof L === 'undefined') return;
+
+    const defaultLat = 35.6892;
+    const defaultLng = 51.3890;
     const coordsDisplay = document.getElementById('coordsDisplay');
     const inputLat = document.getElementById('inputLat');
     const inputLng = document.getElementById('inputLng');
-    const zoomInBtn = document.getElementById('mapZoomIn');
-    const zoomOutBtn = document.getElementById('mapZoomOut');
-    const resetBtn = document.getElementById('mapReset');
 
-    if (!mapBox || !pin) return;
-
-    let zoomLevel = 1;
-
-    mapBox.addEventListener('click', (e) => {
-        // Prevent click if clicking zoom buttons
-        if (e.target.closest('.map-controls')) return;
-
-        const rect = mapBox.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-
-        const percentX = Math.max(5, Math.min(95, (clickX / rect.width) * 100));
-        const percentY = Math.max(10, Math.min(90, (clickY / rect.height) * 100));
-
-        pin.style.left = percentX + '%';
-        pin.style.top = percentY + '%';
-
-        // Calculate realistic Tehran Coordinates
-        // Tehran Bounding Box: Lat 35.60 to 35.80, Lng 51.20 to 51.55
-        const lat = (35.80 - (percentY / 100) * 0.20).toFixed(4);
-        const lng = (51.20 + (percentX / 100) * 0.35).toFixed(4);
-
-        if (coordsDisplay) {
-            coordsDisplay.textContent = `${lat}° شمالی، ${lng}° شرقی`;
-        }
-        if (inputLat) inputLat.value = lat;
-        if (inputLng) inputLng.value = lng;
+    window.iranLeafletMap = L.map('realIranMap', {
+        center: [defaultLat, defaultLng],
+        zoom: 12,
+        scrollWheelZoom: true
     });
 
-    if (zoomInBtn) {
-        zoomInBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (zoomLevel < 1.6) zoomLevel += 0.2;
-            mapBox.style.backgroundSize = `${100 * zoomLevel}%`;
-        });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: 'نقشه آزاد ایران &copy; OpenStreetMap'
+    }).addTo(window.iranLeafletMap);
+
+    const marker = L.marker([defaultLat, defaultLng], {
+        draggable: true,
+        title: 'موقعیت انتخابی شما'
+    }).addTo(window.iranLeafletMap);
+
+    marker.bindPopup('<b>موقعیت انتخابی شما</b><br>برای تغییر پین را بکشید یا روی نقشه کلیک کنید.').openPopup();
+
+    function updateCoords(lat, lng) {
+        const fixedLat = Number(lat).toFixed(4);
+        const fixedLng = Number(lng).toFixed(4);
+        if (coordsDisplay) coordsDisplay.textContent = `${fixedLat}° شمالی، ${fixedLng}° شرقی`;
+        if (inputLat) inputLat.value = fixedLat;
+        if (inputLng) inputLng.value = fixedLng;
     }
 
-    if (zoomOutBtn) {
-        zoomOutBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (zoomLevel > 0.8) zoomLevel -= 0.2;
-            mapBox.style.backgroundSize = `${100 * zoomLevel}%`;
-        });
-    }
+    marker.on('dragend', function() {
+        const pos = marker.getLatLng();
+        updateCoords(pos.lat, pos.lng);
+    });
 
-    if (resetBtn) {
-        resetBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            zoomLevel = 1;
-            mapBox.style.backgroundSize = 'cover';
-            pin.style.left = '50%';
-            pin.style.top = '50%';
-            if (coordsDisplay) coordsDisplay.textContent = '۳۵.۷۲۱۹° شمالی، ۵۱.۴۰۵۶° شرقی';
-            if (inputLat) inputLat.value = '35.7219';
-            if (inputLng) inputLng.value = '51.4056';
-        });
-    }
+    window.iranLeafletMap.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        updateCoords(e.latlng.lat, e.latlng.lng);
+        marker.openPopup();
+    });
+
+    window.jumpMapTo = function(lat, lng, zoom, name) {
+        if (!window.iranLeafletMap) return;
+        window.iranLeafletMap.flyTo([lat, lng], zoom, { duration: 1.2 });
+        marker.setLatLng([lat, lng]);
+        updateCoords(lat, lng);
+        marker.setPopupContent(`<b>موقعیت انتخابی: ${name}</b>`).openPopup();
+
+        document.querySelectorAll('.btn-city-pill').forEach(btn => btn.classList.remove('active'));
+        if (window.event && window.event.target) {
+            window.event.target.classList.add('active');
+        }
+    };
+
+    window.getUserCurrentLocation = function() {
+        if (!navigator.geolocation) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'عدم پشتیبانی مرورگر',
+                    text: 'مرورگر شما از قابلیت موقعیت‌یابی خودکار پشتیبانی نمی‌کند.'
+                });
+            } else {
+                alert('مرورگر شما از مکان‌یابی پشتیبانی نمی‌کند.');
+            }
+            return;
+        }
+
+        const btn = document.getElementById('btnLocateMe');
+        const origHTML = btn ? btn.innerHTML : '';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>در حال دریافت...</span>';
+
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                window.iranLeafletMap.flyTo([lat, lng], 15, { duration: 1.5 });
+                marker.setLatLng([lat, lng]);
+                updateCoords(lat, lng);
+                marker.setPopupContent('<b>موقعیت دقیق شما</b>').openPopup();
+                if (btn) btn.innerHTML = origHTML;
+
+                if (typeof Swal !== 'undefined') {
+                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                    Toast.fire({ icon: 'success', title: 'موقعیت شما روی نقشه تنظیم شد' });
+                }
+            },
+            function(err) {
+                if (btn) btn.innerHTML = origHTML;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'موقعیت‌یاب',
+                        text: 'امکان دریافت موقعیت خودکار فراهم نشد. لطفاً نشانگر را روی نقشه جابجا فرمایید.'
+                    });
+                }
+            },
+            { timeout: 8000, enableHighAccuracy: true }
+        );
+    };
 }
+
+/**
+ * Ticketing Live Filtering & Reply Handlers
+ */
+window.filterTicketsByStatus = function(status, btn) {
+    document.querySelectorAll('.btn-ticket-filter').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.ticket-card-thread-pro');
+    cards.forEach(card => {
+        const cardStatus = card.getAttribute('data-status') || '';
+        if (status === 'all' || cardStatus.includes(status)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+};
+
+window.searchTicketsList = function(input) {
+    const query = input.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.ticket-card-thread-pro');
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(query)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+};
+
+window.submitTicketQuickReply = function(btn, ticketId) {
+    const row = btn.closest('.composer-input-row');
+    const textarea = row ? row.querySelector('textarea') : null;
+    const text = textarea ? textarea.value.trim() : '';
+
+    if (!text) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'متن پاسخ خالی است',
+                text: 'لطفاً متن پاسخ یا توضیح خود را وارد کنید.'
+            });
+        } else {
+            alert('لطفاً متن پاسخ را وارد نمایید.');
+        }
+        return;
+    }
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'success',
+            title: 'پاسخ شما با موفقیت ثبت شد',
+            text: 'پاسخ شما به تیکت ' + ticketId + ' اضافه شد و کارشناس پشتیبانی نمایندگی ۷۲۷۳ در اسرع وقت پاسخ خواهد داد.',
+            confirmButtonText: 'متشکرم'
+        });
+    } else {
+        alert('پاسخ شما با موفقیت ثبت شد.');
+    }
+
+    if (textarea) textarea.value = '';
+};
 
 /* ==========================================================================
    Shopping Cart & Checkout Calculations
@@ -750,14 +861,33 @@ window.removeCartItemRow = function(btn) {
     const row = btn.closest('.cart-item-row');
     if (!row) return;
 
-    if (confirm('آیا از حذف این کالا از سبد خرید اطمینان دارید؟')) {
-        row.style.opacity = '0';
-        row.style.transform = 'translateX(20px)';
-        setTimeout(() => {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'حذف از سبد خرید؟',
+            text: 'آیا از حذف این کالا از سبد خرید اطمینان دارید؟',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'بله، حذف کن',
+            cancelButtonText: 'انصراف'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    row.remove();
+                    recalculateCartTotals();
+                    checkCartEmptyState();
+                }, 300);
+            }
+        });
+    } else {
+        if (confirm('آیا از حذف این کالا از سبد خرید اطمینان دارید؟')) {
             row.remove();
             recalculateCartTotals();
             checkCartEmptyState();
-        }, 300);
+        }
     }
 };
 
@@ -789,10 +919,12 @@ function checkCartEmptyState() {
         if (container) {
             container.innerHTML = `
                 <div class="no-results-box" style="padding: 60px 20px; text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 16px; color: #94a3b8;">🛒</div>
+                    <div style="font-size: 3.5rem; margin-bottom: 16px; color: #94a3b8;">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
                     <h3 style="font-size: 1.4rem; color: #011C39; margin-bottom: 10px;">سبد خرید شما در حال حاضر خالی است</h3>
                     <p style="color: #64748b; margin-bottom: 24px;">می‌توانید مدل‌های متنوع پکیج دیواری را در فروشگاه مشاهده کرده و به سبد خرید اضافه نمایید.</p>
-                    <a href="/thermoban/shop" class="btn btn-primary">مشاهده محصولات فروشگاه</a>
+                    <a href="${window.THERMOBAN_CONFIG ? window.THERMOBAN_CONFIG.baseUrl + 'shop' : '/shop'}" class="btn btn-primary">مشاهده محصولات فروشگاه</a>
                 </div>
             `;
         }
@@ -806,17 +938,146 @@ window.applyPromoCode = function(e) {
 
     const code = input.value.trim().toUpperCase();
     if (!code) {
-        alert('لطفاً کد تخفیف را وارد کنید.');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'warning', title: 'کد تخفیف خالی است', text: 'لطفاً کد تخفیف را وارد کنید.' });
+        } else {
+            alert('لطفاً کد تخفیف را وارد کنید.');
+        }
         return;
     }
 
     if (code === 'THERMO5' || code === 'NOROOZ' || code === 'SHAYAN') {
-        alert('کد تخفیف معتبر است! مبلغ ۵۰۰,۰۰۰ تومان از فاکتور شما کسر شد.');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: 'کد تخفیف با موفقیت اعمال شد!',
+                text: 'مبلغ ۵۰۰,۰۰۰ تومان از مبلغ کل سفارش شما کسر گردید.',
+                timer: 2500,
+                showConfirmButton: false
+            });
+        } else {
+            alert('کد تخفیف معتبر است! مبلغ ۵۰۰,۰۰۰ تومان کسر شد.');
+        }
         const discountEl = document.getElementById('summaryDiscount');
         if (discountEl) discountEl.textContent = '۱,۳۵۰,۰۰۰ تومان';
         recalculateCartTotals();
     } else {
-        alert('کد تخفیف وارد شده معتبر نمی‌باشد یا مهلت استفاده از آن به پایان رسیده است.');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'کد تخفیف نامعتبر است',
+                text: 'کد تخفیف وارد شده وجود ندارد یا تاریخ انقضای آن سپری شده است.'
+            });
+        } else {
+            alert('کد تخفیف نامعتبر است.');
+        }
     }
+};
+
+/* ==========================================================================
+   Admin CMS JavaScript Enhancements (SweetAlert2 & Filtering)
+   ========================================================================== */
+window.confirmSwalDelete = function(e, form, itemName) {
+    e.preventDefault();
+    if (typeof Swal === 'undefined') {
+        if (confirm('آیا از حذف مطمئن هستید؟')) form.submit();
+        return false;
+    }
+    Swal.fire({
+        title: 'آیا از حذف اطمینان دارید؟',
+        text: itemName ? `آیتم "${itemName}" به صورت کامل حذف خواهد شد.` : 'این عملیات غیرقابل بازگشت است.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'بله، حذف کن',
+        cancelButtonText: 'انصراف'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+    return false;
+};
+
+window.filterAdminTable = function(input, tableId) {
+    const query = input.value.trim().toLowerCase();
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+};
+
+window.searchAdminTickets = function(input) {
+    const query = input.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.ticket-full-card');
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(query) ? 'block' : 'none';
+    });
+};
+
+window.openOrderEditModal = function(orderId, orderNum, currentStatus, currentTech) {
+    if (typeof Swal === 'undefined') {
+        const newStatus = prompt('وضعیت سفارش جدید:', currentStatus);
+        return;
+    }
+
+    Swal.fire({
+        title: 'مدیریت سفارش ' + orderNum,
+        html: `
+            <div style="text-align: right; font-family: Vazirmatn, sans-serif; font-size: 0.9rem;">
+                <label style="display:block; margin-bottom: 6px; font-weight: 700;">وضعیت سفارش:</label>
+                <select id="swalOrderStatus" class="form-control" style="margin-bottom: 16px; width: 100%;">
+                    <option value="pending" ${currentStatus === 'pending' ? 'selected' : ''}>در انتظار بررسی</option>
+                    <option value="processing" ${currentStatus === 'processing' ? 'selected' : ''}>در حال آماده‌سازی و ارسال</option>
+                    <option value="completed" ${currentStatus === 'completed' ? 'selected' : ''}>نصب و تکمیل شده</option>
+                    <option value="canceled" ${currentStatus === 'canceled' ? 'selected' : ''}>لغو شده</option>
+                </select>
+                <label style="display:block; margin-bottom: 6px; font-weight: 700;">نام تکنسین مجاز اعزامی:</label>
+                <input type="text" id="swalTechName" class="form-control" value="${currentTech || ''}" placeholder="مثال: مهندس کاظمی - کد ۹۸۲">
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'ذخیره تغییرات',
+        cancelButtonText: 'انصراف',
+        confirmButtonColor: '#011C39',
+        preConfirm: () => {
+            const status = document.getElementById('swalOrderStatus').value;
+            const tech = document.getElementById('swalTechName').value;
+            return { status, tech };
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            // Create and submit hidden form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = window.THERMOBAN_CONFIG ? window.THERMOBAN_CONFIG.baseUrl + 'admin/orders' : '/admin/orders';
+
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'order_id';
+            idInput.value = orderId;
+            form.appendChild(idInput);
+
+            const statusInput = document.createElement('input');
+            statusInput.type = 'hidden';
+            statusInput.name = 'order_status';
+            statusInput.value = result.value.status;
+            form.appendChild(statusInput);
+
+            const techInput = document.createElement('input');
+            techInput.type = 'hidden';
+            techInput.name = 'technician_name';
+            techInput.value = result.value.tech;
+            form.appendChild(techInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
 };
 

@@ -49,7 +49,7 @@ class BlogController extends Controller {
                 </ol>
 
                 <div class="article-callout alert-info">
-                    <div class="callout-icon">💡</div>
+                    <div class="callout-icon"><i class="fa-solid fa-lightbulb"></i></div>
                     <div class="callout-body">
                         <h4>آیا نیاز به حضور تکنسین دارید؟</h4>
                         <p>اگر با یک‌بار ریست دستگاه خطا برطرف نشد یا بلافاصله پس از روشن شدن شعله مجدداً ارور E81 ظاهر گردید، قطعا پمپ یا مبدل دچار مشکل شده است و نیاز به باز شدن و اسیدشویی تخصصی با پمپ رسوب‌زدا دارد. برای اعزام سریع تکنسین مجاز با شماره <a href="tel:02177428596" class="text-orange font-bold">۰۲۱-۷۷۴۲۸۵۹۶</a> تماس حاصل فرمایید.</p>

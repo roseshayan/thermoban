@@ -50,8 +50,8 @@
 
             <div class="auth-demo-hint">
                 <p><strong>حساب‌های آزمایشی فعال جهت بررسی:</strong></p>
-                <div>👨‍💼 مدیر کل: <code dir="ltr">09121111111</code> | رمز: <code dir="ltr">admin123</code></div>
-                <div>👤 مشتری ویژه: <code dir="ltr">09123456789</code> | رمز: <code dir="ltr">123456</code></div>
+                <div><?= icon('user-gear', '', 14) ?> مدیر کل: <code dir="ltr">09121111111</code> | رمز: <code dir="ltr">admin123</code></div>
+                <div><?= icon('user', '', 14) ?> مشتری ویژه: <code dir="ltr">09123456789</code> | رمز: <code dir="ltr">123456</code></div>
             </div>
 
             <div class="auth-card-footer">

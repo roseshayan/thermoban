@@ -15,8 +15,15 @@
 </div>
 
 <div class="dashboard-block" style="background: #fff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+        <h3 class="block-title" style="margin: 0;">لیست سفارشات خرید و درخواست‌های نصب (<?= count($orders) ?> سفارش)</h3>
+        <div style="position: relative; width: 320px;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+            <input type="text" class="form-control" style="padding-right: 38px; border-radius: 20px; font-size: 0.85rem;" placeholder="جستجو در کد سفارش، نام یا تلفن مشتری..." onkeyup="filterAdminTable(this, 'ordersTable')">
+        </div>
+    </div>
     <div class="orders-table-wrapper">
-        <table class="profile-table">
+        <table class="profile-table" id="ordersTable">
             <thead>
                 <tr>
                     <th>کد سفارش</th>

@@ -199,7 +199,7 @@
                         <td><?= $i++ ?></td>
                         <td class="text-right">
                             <strong><?= e($item['title']) ?></strong>
-                            <div style="font-size: 0.78rem; color: #059669;">🛡️ <?= e($order['guarantee']) ?></div>
+                            <div style="font-size: 0.78rem; color: #059669;"><?= icon('shield', '', 13) ?> <?= e($order['guarantee']) ?></div>
                         </td>
                         <td><?= $item['quantity'] ?></td>
                         <td>دستگاه</td>
@@ -254,10 +254,10 @@
     <!-- Actions Bar -->
     <div class="invoice-actions">
         <a href="<?= url('profile') ?>" class="btn btn-outline">
-            ← بازگشت به حساب کاربری
+            <?= icon('arrow-right', '', 14) ?> <span>بازگشت به حساب کاربری</span>
         </a>
         <button type="button" class="btn btn-primary" onclick="window.print();">
-            🖨️ چاپ فاکتور رسمی
+            <?= icon('print', '', 16) ?> <span>چاپ فاکتور رسمی</span>
         </button>
     </div>
 
