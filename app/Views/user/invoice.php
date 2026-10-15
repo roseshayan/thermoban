@@ -14,6 +14,23 @@
             padding: 40px 20px;
             font-family: var(--font-family);
         }
+        @media print {
+            body {
+                background: #FFFFFF !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .invoice-actions, .site-header, .site-footer, .floating-bale-btn, header, footer, nav {
+                display: none !important;
+            }
+            .invoice-paper {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+        }
         .invoice-paper {
             max-width: 900px;
             margin: 0 auto;

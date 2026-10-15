@@ -36,3 +36,9 @@ tmp/
 temp/
 *.tmp
 *.bak
+
+# Storage & Backups
+storage/installed.lock
+storage/backups/*.sql
+storage/logs/*.log
+*.zip

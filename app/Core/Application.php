@@ -48,6 +48,9 @@ class Application {
         $this->router->get('/product/{id}', [\App\Controllers\ShopController::class, 'detail']);
         $this->router->get('/shop/{id}', [\App\Controllers\ShopController::class, 'detail']);
         $this->router->get('/cart', [\App\Controllers\ShopController::class, 'cart']);
+        $this->router->post('/api/cart/add', [\App\Controllers\ShopController::class, 'addToCart']);
+        $this->router->post('/api/cart/remove', [\App\Controllers\ShopController::class, 'removeFromCart']);
+        $this->router->post('/api/cart/clear', [\App\Controllers\ShopController::class, 'clearCart']);
         $this->router->get('/checkout', [\App\Controllers\ShopController::class, 'checkout']);
         $this->router->get('/payment/success', [\App\Controllers\ShopController::class, 'paymentSuccess']);
         $this->router->get('/payment/failed', [\App\Controllers\ShopController::class, 'paymentFailed']);
@@ -58,6 +61,11 @@ class Application {
         $this->router->post('/api/user/update-info', [\App\Controllers\UserController::class, 'updateInfo']);
         $this->router->post('/api/user/add-address', [\App\Controllers\UserController::class, 'addAddress']);
         $this->router->post('/api/user/create-ticket', [\App\Controllers\UserController::class, 'createTicket']);
+
+        // Web Installer for cPanel & Shared Hosting
+        $this->router->get('/install', [\App\Controllers\InstallController::class, 'index']);
+        $this->router->post('/install/test-db', [\App\Controllers\InstallController::class, 'testConnection']);
+        $this->router->post('/install/execute', [\App\Controllers\InstallController::class, 'execute']);
         
         // Pages & Services
         $this->router->get('/about', [\App\Controllers\PageController::class, 'about']);
@@ -104,5 +112,13 @@ class Application {
         $this->router->post('/admin/modules', [\App\Controllers\AdminController::class, 'modules']);
         $this->router->get('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
         $this->router->post('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
+        
+        // Admin Backups, Analytics & Comments
+        $this->router->get('/admin/backups', [\App\Controllers\AdminController::class, 'backups']);
+        $this->router->post('/admin/backups', [\App\Controllers\AdminController::class, 'backups']);
+        $this->router->get('/admin/backups/download/{file}', [\App\Controllers\AdminController::class, 'downloadBackup']);
+        $this->router->get('/admin/analytics', [\App\Controllers\AdminController::class, 'analytics']);
+        $this->router->get('/admin/comments', [\App\Controllers\AdminController::class, 'comments']);
+        $this->router->post('/admin/comments', [\App\Controllers\AdminController::class, 'comments']);
     }
 }

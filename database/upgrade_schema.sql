@@ -1,5 +1,4 @@
 -- Upgrade schema for Super Admin, Modules, SEO, Gateways, SMS, Password Resets
-USE thermoban_db;
 
 -- 1. Modify users role and status
 ALTER TABLE users 

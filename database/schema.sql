@@ -3,9 +3,6 @@
 -- Character Set: utf8mb4 / Collation: utf8mb4_unicode_ci
 -- =========================================================================
 
-CREATE DATABASE IF NOT EXISTS `thermoban_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `thermoban_db`;
-
 -- 1. Users Table
 CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,

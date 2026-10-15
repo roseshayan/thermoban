@@ -3,347 +3,288 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Security;
+use App\Core\Database;
+use App\Models\Product;
 
 class ShopController extends Controller {
-    protected array $products = [
-        [
-            'id' => 1,
-            'slug' => 'butane-bita-24-sealed',
-            'title' => 'پکیج شوفاژ دیواری بوتان ۲۴۰۰۰',
-            'model' => 'مدل Bita 24 Sealed فن دار',
-            'brand' => 'بوتان',
-            'brand_slug' => 'butane',
-            'brand_logo' => 'brand-butane.png',
-            'category' => 'پکیج دیواری',
-            'price_raw' => 28500000,
-            'price' => '۲۸,۵۰۰,۰۰۰',
-            'old_price' => '۳۱,۲۰۰,۰۰۰',
-            'discount' => '۹٪',
-            'image' => 'package-bita-24.png',
-            'capacity' => 24000,
-            'area' => 'تا ۱۴۰ متر مربع',
-            'heat_exchanger' => 'دو مبدل حرارتی',
-            'flue_type' => 'فن‌دار (محفظه احتراق بسته)',
-            'efficiency' => '۹۰٪ راندمان واقعی',
-            'warranty' => '۲۴ ماه گارانتی طلایی شرکت بوتان + نصب رایگان',
-            'in_stock' => true,
-            'rating' => 4.8,
-            'reviews_count' => 38,
-            'description' => 'پکیج دیواری بوتان مدل Bita 24 Sealed یکی از پرفروش‌ترین و اقتصادی‌ترین پکیج‌های بازار ایران است. این پکیج با دارا بودن محفظه احتراق بسته و فن قدرتمند دودکش، قابلیت نصب ایمن در تراس یا فضای داخلی آشپزخانه را داراست. با راندمان بالا و قطعات استاندارد، آب گرم بهداشتی فوری و مداوم و گرمایش مطبوع شوفاژ را تضمین می‌کند.',
-            'specs' => [
-                'ظرفیت حرارتی خروجی' => '۲۴ کیلووات (۲۴,۰۰۰ کیلوکالری)',
-                'نوع مبدل حرارتی' => 'دو مبدل مجزا (مبدل اصلی مسی + مبدل ثانویه صفحه‌ای استیل)',
-                'نوع محفظه احتراق' => 'بسته (فن دار)',
-                'حداکثر متراژ تحت پوشش' => '۱۴۰ متر مربع در شرایط آب و هوایی تهران',
-                'دبی آب گرم مصرفی' => '۱۰.۸ لیتر در دقیقه (با اختلاف دمای ۳۰ درجه)',
-                'حداکثر دمای مدار گرمایش' => '۸۵ درجه سانتی‌گراد',
-                'حداکثر دمای مدار آب گرم مصرفی' => '۶۰ درجه سانتی‌گراد',
-                'فشار کاری مجاز' => '۰.۳ الی ۳ بار',
-                'قطر لوله دودکش' => '۶ سانتی‌متر لوله تخلیه دود / ۱۰ سانتی‌متر مکش هوا',
-                'ابعاد (ارتفاع × عرض × عمق)' => '۷۴۰ × ۴۰۰ × ۳۳۰ میلی‌متر',
-                'وزن خالص' => '۲۹.۵ کیلوگرم',
-                'کشور سازنده' => 'ایران (شرکت صنعتی بوتان)'
-            ],
-            'features' => [
-                'مجهز به سیستم ضد یخ‌زدگی (Anti-Freeze)',
-                'سیستم ضد گریپاژ پمپ و شیر سه طرفه',
-                'سیستم کنترل هوشمند میکروپروسسوری',
-                'قابلیت اتصال به ترموستات اتاقی و حسگر دمای محیط بیرونی',
-                'نمایشگر عیب‌یاب دیجیتال با کدهای خطای دقیق'
-            ]
-        ],
-        [
-            'id' => 2,
-            'slug' => 'iran-radiator-l24ff',
-            'title' => 'پکیج شوفاژ دیواری ایران رادیاتور ۲۴۰۰۰',
-            'model' => 'مدل L24FF دو مبدل دیجیتال فن دار',
-            'brand' => 'ایران رادیاتور',
-            'brand_slug' => 'iran-radiator',
-            'brand_logo' => 'brand-iranradiator-logo.png',
-            'category' => 'پکیج دیواری',
-            'price_raw' => 32400000,
-            'price' => '۳۲,۴۰۰,۰۰۰',
-            'old_price' => '۳۴,۵۰۰,۰۰۰',
-            'discount' => '۶٪',
-            'image' => 'package-thumb.png',
-            'capacity' => 24000,
-            'area' => 'تا ۱۴۰ متر مربع',
-            'heat_exchanger' => 'دو مبدل حرارتی منوژنیک',
-            'flue_type' => 'فن‌دار (FF)',
-            'efficiency' => '۹۳٪ راندمان حرارتی',
-            'warranty' => '۲۴ ماه گارانتی رسمی شرکت ایران رادیاتور (کد مجاز ۷۲۷۳) + نصب رایگان',
-            'in_stock' => true,
-            'rating' => 4.9,
-            'reviews_count' => 64,
-            'description' => 'پکیج شوفاژ دیواری ایران رادیاتور سری L مدل L24FF برترین پرچمدار دیجیتال ایران رادیاتور است. این مدل با صفحه نمایشگر بزرگ دیجیتال، منبع انبساط بزرگتر، هیدرولیک برنجی مقاوم و کم‌صداترین پمپ ویلو، انتخابی بی‌نظیر برای سال‌ها آرامش و آسایش گرمایشی خانه شماست.',
-            'specs' => [
-                'ظرفیت حرارتی خروجی' => '۲۴ کیلووات (۲۴,۰۰۰ کیلوکالری)',
-                'نوع مبدل حرارتی' => 'دو مبدل مجزا با آلیاژ ضد رسوب',
-                'نوع محفظه احتراق' => 'بسته مجهز به فن دودکش FF',
-                'صفحه نمایشگر' => 'LCD دیجیتال با قابلیت نمایش دقیق دما و عیب‌یابی هوشمند',
-                'حداکثر متراژ تحت پوشش' => '۱۴۰ متر مربع',
-                'دبی آب گرم مصرفی' => '۱۱.۴ لیتر بر دقیقه',
-                'پمپ سیرکولاتور' => 'سه سرعته پرقدرت Wilo آلمان',
-                'ابعاد (ارتفاع × عرض × عمق)' => '۷۶۳ × ۴۵۰ × ۳۵۰ میلی‌متر',
-                'وزن خالص' => '۳۷ کیلوگرم',
-                'گارانتی و خدمات' => '۲۴ ماه گارانتی تعویض قطعات شرکتی ایران رادیاتور'
-            ],
-            'features' => [
-                'هیدرولیک تمام برنجی با طول عمر فوق‌العاده بالا',
-                'صفحه نمایشگر دیجیتال با وضوح بالا',
-                'سیستم هواگیری خودکار پمپ ایرونت (Air Vent)',
-                'سیستم ایمنی تخلیه گازهای احتراق و پرشر سوییچ دود',
-                'گارانتی رسمی با نصب رایگان توسط نصاب مجاز کد ۷۲۷۳'
-            ]
-        ],
-        [
-            'id' => 3,
-            'slug' => 'iran-radiator-l28ff',
-            'title' => 'پکیج دیواری ایران رادیاتور ۲۸۰۰۰ دیجیتال',
-            'model' => 'مدل L28FF دو مبدل فن دار',
-            'brand' => 'ایران رادیاتور',
-            'brand_slug' => 'iran-radiator',
-            'brand_logo' => 'brand-iranradiator-logo.png',
-            'category' => 'پکیج دیواری',
-            'price_raw' => 38900000,
-            'price' => '۳۸,۹۰۰,۰۰۰',
-            'old_price' => '۴۱,۰۰۰,۰۰۰',
-            'discount' => '۵٪',
-            'image' => 'package-thumb.png',
-            'capacity' => 28000,
-            'area' => 'تا ۲۱۰ متر مربع',
-            'heat_exchanger' => 'دو مبدل حرارتی',
-            'flue_type' => 'فن‌دار (FF)',
-            'efficiency' => '۹۳٪ راندمان حرارتی',
-            'warranty' => '۲۴ ماه گارانتی طلایی ایران رادیاتور + نصب رایگان',
-            'in_stock' => true,
-            'rating' => 4.9,
-            'reviews_count' => 42,
-            'description' => 'پکیج ۲۸۰۰۰ ایران رادیاتور مدل L28FF برای واحدهای مسکونی تا متراژ ۲۱۰ متر مربع و همچنین واحدهایی که دارای دو حمام هستند ایده‌آل است. ظرفیت آب گرم دهی عالی و توان حرارتی بالا پاسخگوی سخت‌ترین سرمای زمستان است.',
-            'specs' => [
-                'ظرفیت حرارتی' => '۲۸,۰۰۰ کیلوکالری',
-                'نوع مبدل' => 'دو مبدل حرارتی',
-                'نوع احتراق' => 'فن دار',
-                'متراژ مناسب' => '۱۴۰ الی ۲۱۰ متر مربع',
-                'ابعاد' => '۷۶۳ × ۴۵۰ × ۳۵۰ میلی‌متر',
-                'وزن' => '۳۸.۵ کیلوگرم'
-            ],
-            'features' => [
-                'مناسب برای منازل دارای ۲ سرویس بهداشتی و حمام',
-                'نمایشگر هوشمند دیجیتال',
-                'حداکثر راندمان با کمترین میزان مصرف گاز'
-            ]
-        ],
-        [
-            'id' => 4,
-            'slug' => 'lorch-hero-24',
-            'title' => 'پکیج شوفاژ دیواری لورچ ۲۴۰۰۰',
-            'model' => 'مدل هیرو (Hero 24) فن دار',
-            'brand' => 'لورچ',
-            'brand_slug' => 'lorch',
-            'brand_logo' => 'brand-lorch.png',
-            'category' => 'پکیج دیواری',
-            'price_raw' => 29800000,
-            'price' => '۲۹,۸۰۰,۰۰۰',
-            'old_price' => '۳۲,۰۰۰,۰۰۰',
-            'discount' => '۷٪',
-            'image' => 'package-bita-24.png',
-            'capacity' => 24000,
-            'area' => 'تا ۱۴۰ متر مربع',
-            'heat_exchanger' => 'دو مبدل حرارتی صفحه‌ای',
-            'flue_type' => 'فن‌دار',
-            'efficiency' => '۹۳.۵٪ راندمان',
-            'warranty' => '۲۴ ماه ضمانت لورچ + نصب رایگان',
-            'in_stock' => true,
-            'rating' => 4.7,
-            'reviews_count' => 29,
-            'description' => 'پکیج دیواری لورچ ۲۴۰۰۰ مدل هیرو با قطعات باکیفیت اروپایی، سیستم مدولاسیون خطی مشعل و سنسور دمای پیشرفته، آب گرم مطلوب و بدون نوسان دما را برای خانه شما فراهم می‌کند.',
-            'specs' => [
-                'ظرفیت حرارتی' => '۲۴ کیلووات',
-                'نوع مبدل' => 'دو مبدل مونوترمیک',
-                'پمپ' => 'گراندفوس دانمارک ۳ سرعته',
-                'راندمان' => '۹۳.۵ درصد'
-            ],
-            'features' => [
-                'بدون کوچک‌ترین نوسان دمای آب گرم',
-                'عایق صوتی پیشرفته و کارکرد کاملاً بی‌صدا'
-            ]
-        ]
-    ];
 
+    /**
+     * Products List / Shop Archive
+     */
     public function index(): void {
-        $brand = $_GET['brand'] ?? '';
-        $capacity = (int)($_GET['capacity'] ?? 0);
+        $brandSlug = trim($_GET['brand'] ?? '');
+        $capacity = (int) ($_GET['capacity'] ?? 0);
         $sort = $_GET['sort'] ?? 'newest';
 
-        $filtered = $this->products;
+        $where = ["`is_active` = 1"];
+        $params = [];
 
-        if (!empty($brand)) {
-            $filtered = array_filter($filtered, function($item) use ($brand) {
-                return $item['brand_slug'] === $brand;
-            });
-        }
-
-        if ($capacity > 0) {
-            $filtered = array_filter($filtered, function($item) use ($capacity) {
-                return $item['capacity'] === $capacity;
-            });
-        }
-
-        // Sort
-        if ($sort === 'cheap') {
-            usort($filtered, fn($a, $b) => $a['price_raw'] <=> $b['price_raw']);
-        } elseif ($sort === 'expensive') {
-            usort($filtered, fn($a, $b) => $b['price_raw'] <=> $a['price_raw']);
-        }
-
-        $brands = [
-            ['slug' => '', 'name' => 'همه برندها', 'count' => count($this->products)],
-            ['slug' => 'iran-radiator', 'name' => 'ایران رادیاتور (کد مجاز)', 'count' => 2],
-            ['slug' => 'butane', 'name' => 'بوتان', 'count' => 1],
-            ['slug' => 'lorch', 'name' => 'لورچ', 'count' => 1],
-        ];
-
-        $data = [
-            'pageTitle' => 'فروشگاه پکیج و رادیاتور | نمایندگی رسمی با نصب رایگان | ترموبان',
-            'currentPage' => 'shop',
-            'csrfToken' => Security::generateCsrf(),
-            'products' => array_values($filtered),
-            'brands' => $brands,
-            'selectedBrand' => $brand,
-            'selectedCapacity' => $capacity,
-            'selectedSort' => $sort,
-            'totalCount' => count($filtered)
-        ];
-
-        $this->view('shop/index', $data);
-    }
-
-    public function detail(string $id = ''): void {
-        $product = null;
-        foreach ($this->products as $item) {
-            if ((string)$item['id'] === $id || $item['slug'] === $id) {
-                $product = $item;
-                break;
+        if (!empty($brandSlug)) {
+            $brand = Database::fetchOne("SELECT id FROM `brands` WHERE `slug` = :b", ['b' => $brandSlug]);
+            if ($brand) {
+                $where[] = "`brand_id` = :bid";
+                $params['bid'] = $brand['id'];
             }
         }
 
-        if (!$product) {
-            $product = $this->products[0];
+        if ($capacity > 0) {
+            $where[] = "`capacity` = :cap";
+            $params['cap'] = $capacity;
         }
 
-        $related = array_filter($this->products, fn($p) => $p['id'] !== $product['id']);
+        $orderBy = match ($sort) {
+            'price_asc'  => '`price` ASC',
+            'price_desc' => '`price` DESC',
+            default      => '`id` DESC'
+        };
 
-        $data = [
-            'pageTitle' => $product['title'] . ' ' . $product['model'] . ' | ترموبان',
-            'currentPage' => 'shop',
-            'csrfToken' => Security::generateCsrf(),
-            'product' => $product,
-            'relatedProducts' => array_slice($related, 0, 3)
+        $whereSql = implode(' AND ', $where);
+        $products = Database::fetchAll(
+            "SELECT p.*, b.name as brand_name, b.slug as brand_slug, b.logo as brand_logo 
+             FROM `products` p 
+             LEFT JOIN `brands` b ON p.brand_id = b.id 
+             WHERE {$whereSql} 
+             ORDER BY {$orderBy}",
+            $params
+        );
+
+        foreach ($products as &$p) {
+            $p['price_raw'] = (int) $p['price'];
+            $p['price'] = number_format($p['price_raw']);
+            $p['old_price'] = !empty($p['old_price']) ? number_format((int)$p['old_price']) : null;
+            $p['in_stock'] = ($p['stock'] ?? 0) > 0;
+            $p['rating'] = 4.8;
+            $p['reviews_count'] = 24;
+        }
+
+        $brands = Database::fetchAll("SELECT * FROM `brands`");
+        $brandList = [
+            ['slug' => '', 'name' => 'همه برندها', 'count' => Product::count("`is_active` = 1")]
         ];
+        foreach ($brands as $b) {
+            $cnt = Product::count("`is_active` = 1 AND `brand_id` = " . (int)$b['id']);
+            $brandList[] = [
+                'slug'  => $b['slug'],
+                'name'  => $b['name'],
+                'count' => $cnt
+            ];
+        }
 
-        $this->view('shop/detail', $data);
+        $this->view('shop/index', [
+            'pageTitle'        => 'فروشگاه پکیج شوفاژ دیواری | نمایندگی کد ۷۲۷۳ | ترموبان',
+            'currentPage'      => 'shop',
+            'csrfToken'        => Security::generateCsrf(),
+            'products'         => $products,
+            'brands'           => $brandList,
+            'selectedBrand'    => $brandSlug,
+            'selectedCapacity' => $capacity,
+            'selectedSort'     => $sort,
+            'totalCount'       => count($products)
+        ]);
     }
 
-    public function cart(): void {
-        $cartItems = [
-            [
-                'id' => 1,
-                'title' => 'پکیج شوفاژ دیواری بوتان ۲۴۰۰۰ مدل Bita 24 Sealed فن دار',
-                'price_raw' => 28500000,
-                'price' => '۲۸,۵۰۰,۰۰۰',
-                'old_price' => '۳۱,۲۰۰,۰۰۰',
-                'quantity' => 1,
-                'image' => 'package-bita-24.png',
-                'warranty' => '۲۴ ماه ضمانت طلایی بوتان + نصب رایگان'
-            ],
-            [
-                'id' => 2,
-                'title' => 'فیلتر مغناطیسی مدار گرمایش و رسوب‌گیر پکیج Mag-Filter',
-                'price_raw' => 650000,
-                'price' => '۶۵۰,۰۰۰',
-                'old_price' => '۷۸۰,۰۰۰',
-                'quantity' => 1,
-                'image' => 'badge-shield.png',
-                'warranty' => 'ضمانت تعویض ۱۲ ماهه شرکتی'
-            ]
-        ];
+    /**
+     * Single Product Detail
+     */
+    public function detail(string $id = ''): void {
+        $product = Database::fetchOne(
+            "SELECT p.*, b.name as brand_name, b.slug as brand_slug, b.logo as brand_logo 
+             FROM `products` p 
+             LEFT JOIN `brands` b ON p.brand_id = b.id 
+             WHERE (p.`id` = :id1 OR p.`slug` = :id2) AND p.`is_active` = 1 LIMIT 1",
+            ['id1' => $id, 'id2' => $id]
+        );
 
-        $subtotal = 28500000 + 650000;
-        $discount = 2700000 + 130000;
-        $shipping = 0; // Free in Tehran
+        if (!$product) {
+            $product = Database::fetchOne("SELECT p.*, b.name as brand_name, b.slug as brand_slug, b.logo as brand_logo FROM `products` p LEFT JOIN `brands` b ON p.brand_id = b.id LIMIT 1");
+        }
+
+        if ($product) {
+            $product['price_raw'] = (int) $product['price'];
+            $product['price'] = number_format($product['price_raw']);
+            $product['old_price'] = !empty($product['old_price']) ? number_format((int)$product['old_price']) : null;
+            $product['in_stock'] = ($product['stock'] ?? 0) > 0;
+            $product['specs'] = json_decode($product['specs'] ?? '[]', true) ?: [];
+            $product['features'] = json_decode($product['features'] ?? '[]', true) ?: [];
+            $product['rating'] = 4.9;
+            $product['reviews_count'] = 32;
+        }
+
+        $related = Database::fetchAll(
+            "SELECT p.*, b.name as brand_name FROM `products` p LEFT JOIN `brands` b ON p.brand_id = b.id WHERE p.`id` != :pid LIMIT 3",
+            ['pid' => $product['id'] ?? 0]
+        );
+
+        foreach ($related as &$rel) {
+            $rel['price_raw'] = (int) $rel['price'];
+            $rel['price'] = number_format($rel['price_raw']);
+            $rel['in_stock'] = ($rel['stock'] ?? 0) > 0;
+        }
+
+        $this->view('shop/detail', [
+            'pageTitle'       => ($product['title'] ?? 'پکیج') . ' | نمایندگی رسمی ترموبان',
+            'currentPage'     => 'shop',
+            'csrfToken'       => Security::generateCsrf(),
+            'product'         => $product,
+            'relatedProducts' => $related
+        ]);
+    }
+
+    /**
+     * Shopping Cart View (100% Dynamic Session Cart)
+     */
+    public function cart(): void {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $rawCart = $_SESSION['cart'] ?? [];
+        $cartItems = [];
+        $subtotal = 0;
+
+        if (!empty($rawCart)) {
+            $ids = array_keys($rawCart);
+            $inClause = implode(',', array_map('intval', $ids));
+            $products = Database::fetchAll("SELECT * FROM `products` WHERE `id` IN ({$inClause})");
+
+            foreach ($products as $p) {
+                $qty = (int) ($rawCart[$p['id']] ?? 1);
+                $pPrice = (int) $p['price'];
+                $itemTotal = $pPrice * $qty;
+                $subtotal += $itemTotal;
+
+                $cartItems[] = [
+                    'id'        => $p['id'],
+                    'title'     => $p['title'],
+                    'price_raw' => $pPrice,
+                    'price'     => number_format($pPrice),
+                    'old_price' => !empty($p['old_price']) ? number_format((int)$p['old_price']) : null,
+                    'quantity'  => $qty,
+                    'image'     => $p['image'] ?: 'package-thumb.png',
+                    'warranty'  => $p['warranty'] ?: '۲۴ ماه ضمانت طلایی شرکتی + نصب رایگان'
+                ];
+            }
+        }
+
         $total = $subtotal;
 
-        $data = [
-            'pageTitle' => 'سبد خرید | ترموبان',
+        $this->view('shop/cart', [
+            'pageTitle'   => 'سبد خرید | ترموبان',
             'currentPage' => 'cart',
-            'csrfToken' => Security::generateCsrf(),
-            'cartItems' => $cartItems,
-            'subtotal' => number_format($subtotal),
-            'discount' => number_format($discount),
-            'shipping' => 'رایگان',
-            'install' => 'رایگان (کد ۷۲۷۳)',
-            'total' => number_format($total)
-        ];
-
-        $this->view('shop/cart', $data);
+            'csrfToken'   => Security::generateCsrf(),
+            'cartItems'   => $cartItems,
+            'subtotal'    => number_format($subtotal),
+            'discount'    => '۰',
+            'shipping'    => 'رایگان',
+            'install'     => 'رایگان (کد ۷۲۷۳)',
+            'total'       => number_format($total)
+        ]);
     }
 
+    /**
+     * AJAX: Add Item to Cart
+     */
+    public function addToCart(): void {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        $productId = (int) ($_POST['product_id'] ?? 0);
+        $qty = max(1, (int) ($_POST['quantity'] ?? 1));
+
+        if ($productId <= 0) {
+            $this->json(['success' => false, 'message' => 'شناسه محصول نامعتبر است.'], 400);
+            return;
+        }
+
+        if (!isset($_SESSION['cart'])) {
+            $_SESSION['cart'] = [];
+        }
+
+        if (isset($_SESSION['cart'][$productId])) {
+            $_SESSION['cart'][$productId] += $qty;
+        } else {
+            $_SESSION['cart'][$productId] = $qty;
+        }
+
+        $this->json([
+            'success'    => true,
+            'message'    => 'محصول انتخابی با موفقیت به سبد خرید شما افزوده شد.',
+            'cart_count' => array_sum($_SESSION['cart'])
+        ]);
+    }
+
+    /**
+     * AJAX: Remove Item from Cart
+     */
+    public function removeFromCart(): void {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        $productId = (int) ($_POST['product_id'] ?? 0);
+        if (isset($_SESSION['cart'][$productId])) {
+            unset($_SESSION['cart'][$productId]);
+        }
+
+        $this->json([
+            'success'    => true,
+            'message'    => 'کالای مورد نظر از سبد خرید حذف گردید.',
+            'cart_count' => isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0
+        ]);
+    }
+
+    /**
+     * AJAX: Clear / Empty Cart
+     */
+    public function clearCart(): void {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        $_SESSION['cart'] = [];
+
+        $this->json([
+            'success'    => true,
+            'message'    => 'سبد خرید شما کاملاً خالی شد.',
+            'cart_count' => 0
+        ]);
+    }
+
+    /**
+     * Checkout View
+     */
     public function checkout(): void {
-        $addresses = [
-            [
-                'id' => 1,
-                'title' => 'منزل (سعادت‌آباد)',
-                'address' => 'تهران، سعادت‌آباد، میدان کاج، خیابان سرو غربی، کوچه مروارید، پلاک ۱۸، واحد ۴',
-                'phone' => '۰۹۱۲۲۸۴۵۸۳۲',
-                'district' => 'منطقه ۲'
-            ],
-            [
-                'id' => 2,
-                'title' => 'محل کار (میرداماد)',
-                'address' => 'تهران، بلوار میرداماد، جنب مترو، ساختمان اداری نگین، طبقه ۳، واحد ۹',
-                'phone' => '۰۲۱-۲۲۱۴۵۶۷۸',
-                'district' => 'منطقه ۳'
-            ]
-        ];
+        if (session_status() === PHP_SESSION_NONE) session_start();
 
-        $data = [
-            'pageTitle' => 'تسویه حساب و نهایی‌سازی سفارش | ترموبان',
+        $rawCart = $_SESSION['cart'] ?? [];
+        if (empty($rawCart)) {
+            $this->redirect('shop');
+        }
+
+        $addresses = [];
+        if (\App\Core\Auth::check()) {
+            $addresses = Database::fetchAll(
+                "SELECT * FROM `user_addresses` WHERE `user_id` = :uid ORDER BY `is_default` DESC",
+                ['uid' => \App\Core\Auth::id()]
+            );
+        }
+
+        $this->view('shop/checkout', [
+            'pageTitle'   => 'تسویه حساب و پرداخت نهایی | ترموبان',
             'currentPage' => 'checkout',
-            'csrfToken' => Security::generateCsrf(),
-            'addresses' => $addresses,
-            'totalAmount' => '۲۹,۱۵۰,۰۰۰',
-            'itemsCount' => 2
-        ];
-
-        $this->view('shop/checkout', $data);
+            'csrfToken'   => Security::generateCsrf(),
+            'addresses'   => $addresses
+        ]);
     }
 
     public function paymentSuccess(): void {
-        $data = [
-            'pageTitle' => 'پرداخت موفق و ثبت سفارش | ترموبان',
-            'currentPage' => 'checkout',
-            'orderId' => 'TB-' . rand(10000, 99999),
-            'refId' => 'SHP-' . time(),
-            'date' => '۱۴۰۵/۰۸/۱۵ - ساعت ۱۶:۴۵',
-            'amount' => '۲۹,۱۵۰,۰۰۰',
-            'gateway' => 'درگاه پرداخت اینترنتی بانک سامان (سپهر)',
-            'delivery_time' => 'فردا - شیفت صبح (۱۰:۰۰ الی ۱۳:۰۰)'
-        ];
-
-        $this->view('shop/payment-success', $data);
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $_SESSION['cart'] = []; // Clear cart on successful order
+        $this->view('shop/payment-success', [
+            'pageTitle'   => 'پرداخت موفق و ثبت سفارش | ترموبان',
+            'currentPage' => 'payment-success'
+        ]);
     }
 
     public function paymentFailed(): void {
-        $data = [
-            'pageTitle' => 'تراکنش ناموفق | ترموبان',
-            'currentPage' => 'checkout',
-            'orderId' => 'TB-' . rand(10000, 99999),
-            'errorCode' => 'ERR-1049',
-            'reason' => 'انصراف کاربر از پرداخت یا عدم تایید اطلاعات کارت توسط بانک صادرکننده.',
-            'date' => '۱۴۰۵/۰۸/۱۵ - ساعت ۱۶:۴۸'
-        ];
-
-        $this->view('shop/payment-failed', $data);
+        $this->view('shop/payment-failed', [
+            'pageTitle'   => 'خطا در پرداخت | ترموبان',
+            'currentPage' => 'payment-failed'
+        ]);
     }
 }

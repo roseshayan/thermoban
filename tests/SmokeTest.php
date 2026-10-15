@@ -59,6 +59,11 @@ class SmokeTestRunner {
         $this->testPaymentGateways();
         $this->testMeliPayamakSmsService();
         $this->testModelCrudOperations();
+        $this->testCommentsAndModeration();
+        $this->testVisitorAnalytics();
+        $this->testDatabaseBackupAndRetention();
+        $this->testWebInstallerAssets();
+        $this->testZeroCdnCompliance();
         $this->testErrorTemplates();
 
         echo "\n-------------------------------------------------------\n";
@@ -193,6 +198,59 @@ class SmokeTestRunner {
 
         $ordersCount = Order::count();
         $this->assert("Order::count() >= 0", $ordersCount >= 0);
+    }
+
+    private function testCommentsAndModeration(): void {
+        $comments = Database::fetchAll("SELECT * FROM `comments`");
+        $this->assert("Comments Table Exists in Database", is_array($comments));
+        
+        $pComments = \App\Models\Comment::forProduct(1);
+        $this->assert("Product Comments Query Returned Array", is_array($pComments));
+    }
+
+    private function testVisitorAnalytics(): void {
+        \App\Models\VisitorLog::track();
+        $stats = \App\Models\VisitorLog::getStats();
+        $this->assert("VisitorLog::getStats() Returns Required Keys", isset($stats['total_visits']) && isset($stats['today_visits']) && isset($stats['devices']));
+    }
+
+    private function testDatabaseBackupAndRetention(): void {
+        $res = \App\Services\BackupService::createBackup(false);
+        $this->assert("BackupService::createBackup() Executed", !empty($res['success']) && !empty($res['filename']));
+        
+        $backups = \App\Services\BackupService::getBackups();
+        $this->assert("Backups Count <= 2 (Strict Retention)", count($backups) <= 2);
+
+        $path = \App\Services\BackupService::getBackupPath($res['filename']);
+        $this->assert("Created Backup File Exists on Disk", !empty($path) && file_exists($path));
+    }
+
+    private function testWebInstallerAssets(): void {
+        $this->assert("InstallController Class Exists", class_exists(\App\Controllers\InstallController::class));
+        $this->assert("Installer View Template Exists", file_exists(VIEW_PATH . '/install/index.php'));
+        $this->assert("Database v2 Schema File Exists", file_exists(ROOT_PATH . '/database/v2_update.sql'));
+    }
+
+    private function testZeroCdnCompliance(): void {
+        $forbiddenCdns = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'unpkg.com', 'fonts.googleapis.com', 'cdn.tailwindcss.com'];
+        $hasCdn = false;
+        $violatingFile = '';
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(VIEW_PATH));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $content = file_get_contents($file->getPathname());
+                foreach ($forbiddenCdns as $cdn) {
+                    if (str_contains($content, $cdn)) {
+                        $hasCdn = true;
+                        $violatingFile = $file->getFilename() . " ({$cdn})";
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        $this->assert("Zero CDN Policy (All Assets 100% Local)", !$hasCdn, $violatingFile);
     }
 
     private function testErrorTemplates(): void {

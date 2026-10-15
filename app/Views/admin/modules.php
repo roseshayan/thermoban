@@ -167,6 +167,52 @@
             <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 0;">
                 امکان ایجاد خودکار حساب کاربری توسط بازدیدکنندگان سایت یا محدود کردن ثبت‌نام تنها از طریق ادمین.
             </p>
+        <!-- Module Card: Files.ir Cloud Storage -->
+        <div class="admin-card" style="background: #fff; border-radius: 14px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <div style="display: flex; gap: 14px; align-items: center;">
+                    <div style="width: 48px; height: 48px; background: #e0e7ff; color: #4338ca; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #011C39; font-weight: 800;">هاست ابری و بک‌آپ files.ir</h3>
+                        <span style="font-size: 0.78rem; color: #64748b;">ذخیره‌سازی امن بک‌آپ‌ها در سرورهای ابری ایران</span>
+                    </div>
+                </div>
+                <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                    <input type="checkbox" name="module_files_ir" value="1" <?= ($settings['module_files_ir'] ?? '0') === '1' ? 'checked' : '' ?> style="opacity: 0; width: 0; height: 0;">
+                    <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px;"></span>
+                </label>
+            </div>
+            <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin-bottom: 12px;">
+                طبق درخواست، این قابلیت به صورت پیش‌فرض غیرفعال است و به عنوان پلن سازمانی قابل فعال‌سازی است.
+            </p>
+            <div class="form-group" style="margin: 0;">
+                <label style="font-weight: 600; font-size: 0.8rem; color: #334155; margin-bottom: 4px; display: block;">کلید دسترسی (API Token):</label>
+                <input type="text" name="files_ir_api_key" class="form-control" dir="ltr" value="<?= e($settings['files_ir_api_key'] ?? '') ?>" placeholder="files_ir_secret_token_..." style="font-size: 0.82rem; padding: 8px 12px;">
+            </div>
+        </div>
+
+        <!-- Module Card: Visitor Analytics -->
+        <div class="admin-card" style="background: #fff; border-radius: 14px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <div style="display: flex; gap: 14px; align-items: center;">
+                    <div style="width: 48px; height: 48px; background: #cffafe; color: #0891b2; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        <i class="fa-solid fa-chart-simple"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #011C39; font-weight: 800;">آمار پیشرفته بازدیدکنندگان</h3>
+                        <span style="font-size: 0.78rem; color: #64748b;">رهگیری ترافیک، مرورگرها، موبایل و لندینگ‌ها</span>
+                    </div>
+                </div>
+                <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                    <input type="checkbox" name="module_analytics" value="1" <?= ($settings['module_analytics'] ?? '1') === '1' ? 'checked' : '' ?> style="opacity: 0; width: 0; height: 0;">
+                    <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px;"></span>
+                </label>
+            </div>
+            <p style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 0;">
+                تحلیل جامع ورودی‌های گوگل و بازدیدهای روزانه بدون نیاز به کوکی خارجی، کاملاً منطبق بر حریم خصوصی و بهینه.
+            </p>
         </div>
 
     </div>

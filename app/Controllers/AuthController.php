@@ -16,10 +16,14 @@ class AuthController extends Controller {
      */
     public function showLogin(): void {
         if (Auth::check()) {
-            if (Auth::isAdmin()) {
-                $this->redirect('admin');
-            } else {
-                $this->redirect('profile');
+            // If user was redirected here with an error (e.g. tried accessing /admin as normal user),
+            // do NOT auto-bounce back to profile. Allow them to log in with admin account or switch!
+            if (!isset($_SESSION['auth_error']) && !isset($_GET['switch'])) {
+                if (Auth::isAdmin()) {
+                    $this->redirect('admin');
+                } else {
+                    $this->redirect('profile');
+                }
             }
         }
 

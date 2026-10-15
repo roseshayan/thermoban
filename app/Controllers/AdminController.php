@@ -341,6 +341,9 @@ class AdminController extends Controller {
                 'module_gateways'     => isset($_POST['module_gateways']) ? '1' : '0',
                 'module_sms'          => isset($_POST['module_sms']) ? '1' : '0',
                 'module_registration' => isset($_POST['module_registration']) ? '1' : '0',
+                'module_files_ir'     => isset($_POST['module_files_ir']) ? '1' : '0',
+                'files_ir_api_key'    => trim($_POST['files_ir_api_key'] ?? ''),
+                'module_analytics'    => isset($_POST['module_analytics']) ? '1' : '0',
                 'maintenance_mode'    => isset($_POST['maintenance_mode']) ? '1' : '0',
                 'maintenance_title'   => trim($_POST['maintenance_title'] ?? ''),
                 'maintenance_message' => trim($_POST['maintenance_message'] ?? ''),
@@ -608,5 +611,161 @@ class AdminController extends Controller {
             'success'     => $_SESSION['admin_success'] ?? null
         ], 'layouts/admin');
         unset($_SESSION['admin_success']);
+    }
+
+    /**
+     * Database Backups, Retention & Restore (cPanel Safe & Files.ir Cloud)
+     */
+    public function backups(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+
+            if ($action === 'create') {
+                $uploadCloud = isset($_POST['upload_cloud']) && $_POST['upload_cloud'] === '1';
+                $result = \App\Services\BackupService::createBackup($uploadCloud);
+                if ($result['success']) {
+                    $_SESSION['admin_success'] = $result['message'];
+                } else {
+                    $_SESSION['admin_error'] = $result['message'];
+                }
+            } elseif ($action === 'restore') {
+                $filename = $_POST['filename'] ?? '';
+                $result = \App\Services\BackupService::restoreBackup($filename);
+                if ($result['success']) {
+                    $_SESSION['admin_success'] = $result['message'];
+                } else {
+                    $_SESSION['admin_error'] = $result['message'];
+                }
+            } elseif ($action === 'delete') {
+                $filename = $_POST['filename'] ?? '';
+                if (\App\Services\BackupService::deleteBackup($filename)) {
+                    $_SESSION['admin_success'] = "فایل پشتیبان {$filename} با موفقیت حذف گردید.";
+                } else {
+                    $_SESSION['admin_error'] = "خطا در حذف فایل پشتیبان.";
+                }
+            } elseif ($action === 'upload_cloud') {
+                $filename = $_POST['filename'] ?? '';
+                $path = \App\Services\BackupService::getBackupPath($filename);
+                if ($path) {
+                    $cloud = new \App\Services\Storage\FilesIrService();
+                    $res = $cloud->uploadFile($path);
+                    if ($res['success']) {
+                        $_SESSION['admin_success'] = $res['message'];
+                    } else {
+                        $_SESSION['admin_error'] = $res['message'];
+                    }
+                } else {
+                    $_SESSION['admin_error'] = 'فایل پشتیبان یافت نشد.';
+                }
+            } elseif ($action === 'save_schedule') {
+                $schedule = $_POST['backup_schedule'] ?? 'daily';
+                Setting::set('backup_schedule', $schedule);
+                $_SESSION['admin_success'] = 'زمان‌بندی خودکار پشتیبان‌گیری بروزرسانی گردید.';
+            }
+
+            $this->redirect('admin/backups');
+        }
+
+        $backups = \App\Services\BackupService::getBackups();
+        $schedule = Setting::get('backup_schedule', 'daily');
+        $lastRun = Setting::get('backup_last_run', 'ثبت نشده');
+        $filesIrEnabled = Setting::get('module_files_ir', '0') === '1';
+
+        $this->view('admin/backups', [
+            'pageTitle'      => 'مدیریت و بازیابی فایل‌های پشتیبان دیتابیس (Backup & Restore)',
+            'backups'        => $backups,
+            'schedule'       => $schedule,
+            'lastRun'        => $lastRun,
+            'filesIrEnabled' => $filesIrEnabled,
+            'activeNav'      => 'backups',
+            'success'        => $_SESSION['admin_success'] ?? null,
+            'error'          => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Download Backup File
+     */
+    public function downloadBackup(string $file = ''): void {
+        $path = \App\Services\BackupService::getBackupPath($file);
+        if (!$path) {
+            $_SESSION['admin_error'] = 'فایل مورد نظر یافت نشد.';
+            $this->redirect('admin/backups');
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/sql');
+        header('Content-Disposition: attachment; filename="' . basename($path) . '"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($path));
+        readfile($path);
+        exit;
+    }
+
+    /**
+     * Visitor Analytics Dashboard
+     */
+    public function analytics(): void {
+        $analyticsEnabled = Setting::get('module_analytics', '1') === '1';
+        $stats = \App\Models\VisitorLog::getStats();
+        $recentVisitors = Database::fetchAll("SELECT * FROM `visitor_logs` ORDER BY id DESC LIMIT 25");
+
+        $this->view('admin/analytics', [
+            'pageTitle'        => 'آمار و تحلیل بازدیدکنندگان سایت | CMS ترموبان',
+            'analyticsEnabled' => $analyticsEnabled,
+            'stats'            => $stats,
+            'recentVisitors'   => $recentVisitors,
+            'activeNav'        => 'analytics'
+        ], 'layouts/admin');
+    }
+
+    /**
+     * Comments & Reviews Moderation
+     */
+    public function comments(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['comment_id'] ?? 0);
+
+            if ($action === 'approve') {
+                Database::query("UPDATE `comments` SET `status` = 'approved' WHERE `id` = :id", ['id' => $id]);
+                $_SESSION['admin_success'] = 'دیدگاه تایید شد و در سایت نمایش داده می‌شود.';
+            } elseif ($action === 'reject') {
+                Database::query("UPDATE `comments` SET `status` = 'rejected' WHERE `id` = :id", ['id' => $id]);
+                $_SESSION['admin_success'] = 'دیدگاه رد شد.';
+            } elseif ($action === 'reply') {
+                $reply = trim($_POST['reply'] ?? '');
+                Database::query("UPDATE `comments` SET `reply` = :reply, `status` = 'approved' WHERE `id` = :id", [
+                    'reply' => $reply,
+                    'id'    => $id
+                ]);
+                $_SESSION['admin_success'] = 'پاسخ رسمی شما ثبت و دیدگاه تایید گردید.';
+            } elseif ($action === 'delete') {
+                Database::query("DELETE FROM `comments` WHERE `id` = :id", ['id' => $id]);
+                $_SESSION['admin_success'] = 'دیدگاه با موفقیت حذف گردید.';
+            }
+
+            $this->redirect('admin/comments');
+        }
+
+        $comments = Database::fetchAll(
+            "SELECT c.*, p.title as product_title, a.title as article_title 
+             FROM `comments` c 
+             LEFT JOIN `products` p ON c.product_id = p.id 
+             LEFT JOIN `articles` a ON c.article_id = a.id 
+             ORDER BY c.id DESC"
+        );
+
+        $this->view('admin/comments', [
+            'pageTitle' => 'مدیریت و پاسخ‌گویی به نظرات و دیدگاه‌ها | CMS ترموبان',
+            'comments'  => $comments,
+            'activeNav' => 'comments',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
     }
 }

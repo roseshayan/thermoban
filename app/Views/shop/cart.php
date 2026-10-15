@@ -37,9 +37,15 @@
                 <!-- Main Items Column -->
                 <div class="cart-items-column">
                     <div class="cart-table-card">
-                        <div class="cart-card-header">
-                            <h3 class="cart-header-title">اقلام سفارش (<?= count($cartItems) ?> کالا)</h3>
-                            <span class="cart-header-badge">ارسال و نصب رایگان</span>
+                        <div class="cart-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <h3 class="cart-header-title" style="margin: 0;">اقلام سفارش (<?= count($cartItems) ?> کالا)</h3>
+                                <span class="cart-header-badge">ارسال و نصب رایگان</span>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px 12px; color: #ef4444; border-color: #fca5a5; background: #fff;" onclick="clearEntireCart()">
+                                <i class="fa-solid fa-trash" style="margin-left: 4px;"></i>
+                                <span>خالی کردن سبد خرید</span>
+                            </button>
                         </div>
 
                         <div class="cart-items-list">

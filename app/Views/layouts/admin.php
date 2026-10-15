@@ -203,6 +203,18 @@
                 <i class="fa-solid fa-newspaper" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>مقالات آموزشی</span>
             </a>
+            <a href="<?= url('admin/comments') ?>" class="admin-nav-item <?= ($activeNav === 'comments') ? 'active' : '' ?>">
+                <i class="fa-solid fa-comments" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>نظرات و دیدگاه‌ها</span>
+            </a>
+            <a href="<?= url('admin/analytics') ?>" class="admin-nav-item <?= ($activeNav === 'analytics') ? 'active' : '' ?>">
+                <i class="fa-solid fa-chart-simple" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>آمار بازدیدکنندگان</span>
+            </a>
+            <a href="<?= url('admin/backups') ?>" class="admin-nav-item <?= ($activeNav === 'backups') ? 'active' : '' ?>">
+                <i class="fa-solid fa-database" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>پشتیبان‌گیری و بازیابی</span>
+            </a>
             <a href="<?= url('admin/users') ?>" class="admin-nav-item <?= ($activeNav === 'users') ? 'active' : '' ?>">
                 <i class="fa-solid fa-users" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>مدیریت کاربران</span>

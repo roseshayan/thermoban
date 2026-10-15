@@ -12,6 +12,13 @@
                 <p class="auth-subtitle">برای دسترسی به سوابق سفارش، فاکتورها، آدرس‌ها و تیکت‌های پشتیبانی وارد شوید</p>
             </div>
 
+            <?php if (\App\Core\Auth::check()): ?>
+                <div class="form-alert-msg" style="background: #fff8e1; color: #b78103; border: 1px solid #ffe082; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>شما هم‌اکنون با حساب <strong><?= e(\App\Core\Auth::user()['name']) ?></strong> وارد شده‌اید. برای دسترسی به پنل مدیریت با مشخصات مدیر وارد شوید، یا <a href="<?= url('logout') ?>" style="text-decoration: underline; font-weight: bold; color: #b78103;">از حساب جاری خارج شوید</a>.</span>
+                </div>
+            <?php endif; ?>
+
             <?php if (!empty($error)): ?>
                 <div class="form-alert-msg alert-error">
                     <?= icon('alert', '', 18) ?>

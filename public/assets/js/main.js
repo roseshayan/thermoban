@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initQuickOrderForm();
     initProductSlider();
     initSmoothScroll();
+    initProfileAjaxForms();
 });
 
 /**
@@ -860,6 +861,7 @@ window.updateCartItemQty = function(btn, delta) {
 window.removeCartItemRow = function(btn) {
     const row = btn.closest('.cart-item-row');
     if (!row) return;
+    const productId = row.getAttribute('data-id');
 
     if (typeof Swal !== 'undefined') {
         Swal.fire({
@@ -873,22 +875,121 @@ window.removeCartItemRow = function(btn) {
             cancelButtonText: 'انصراف'
         }).then((result) => {
             if (result.isConfirmed) {
-                row.style.opacity = '0';
-                row.style.transform = 'translateX(20px)';
-                setTimeout(() => {
+                const formData = new FormData();
+                formData.append('product_id', productId);
+                const baseUrl = window.THERMOBAN_CONFIG ? window.THERMOBAN_CONFIG.baseUrl : '/';
+                fetch(baseUrl + 'api/cart/remove', {
+                    method: 'POST',
+                    body: formData
+                }).then(res => res.json()).then(() => {
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        row.remove();
+                        recalculateCartTotals();
+                        checkCartEmptyState();
+                    }, 300);
+                }).catch(() => {
                     row.remove();
                     recalculateCartTotals();
                     checkCartEmptyState();
-                }, 300);
+                });
             }
         });
     } else {
         if (confirm('آیا از حذف این کالا از سبد خرید اطمینان دارید؟')) {
-            row.remove();
-            recalculateCartTotals();
-            checkCartEmptyState();
+            const formData = new FormData();
+            formData.append('product_id', productId);
+            const baseUrl = window.THERMOBAN_CONFIG ? window.THERMOBAN_CONFIG.baseUrl : '/';
+            fetch(baseUrl + 'api/cart/remove', {
+                method: 'POST',
+                body: formData
+            }).finally(() => {
+                row.remove();
+                recalculateCartTotals();
+                checkCartEmptyState();
+            });
         }
     }
+};
+
+window.clearEntireCart = function() {
+    const baseUrl = window.THERMOBAN_CONFIG ? window.THERMOBAN_CONFIG.baseUrl : '/';
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'خالی کردن کل سبد خرید؟',
+            text: 'تمامی کالاهای موجود در سبد خرید حذف خواهند شد.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'بله، سبد خرید را خالی کن',
+            cancelButtonText: 'انصراف'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(baseUrl + 'api/cart/clear', {
+                    method: 'POST'
+                }).then(res => res.json()).then(() => {
+                    window.location.reload();
+                }).catch(() => {
+                    window.location.reload();
+                });
+            }
+        });
+    } else {
+        if (confirm('آیا از خالی کردن کل سبد خرید مطمئن هستید؟')) {
+            fetch(baseUrl + 'api/cart/clear', {
+                method: 'POST'
+            }).finally(() => {
+                window.location.reload();
+            });
+        }
+    }
+};
+
+window.addToCart = function(productId, qty = 1) {
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', qty);
+    const baseUrl = window.THERMOBAN_CONFIG ? window.THERMOBAN_CONFIG.baseUrl : '/';
+
+    fetch(baseUrl + 'api/cart/add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'افزوده شد به سبد خرید',
+                    text: data.message,
+                    showCancelButton: true,
+                    confirmButtonText: 'مشاهده سبد خرید',
+                    cancelButtonText: 'ادامه خرید',
+                    confirmButtonColor: '#EF5C16'
+                }).then(res => {
+                    if (res.isConfirmed) {
+                        window.location.href = baseUrl + 'cart';
+                    }
+                });
+            } else {
+                alert(data.message);
+            }
+        } else {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'خطا', text: data.message });
+            } else {
+                alert(data.message);
+            }
+        }
+    })
+    .catch(() => {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'خطا در ارتباط با سرور' });
+        }
+    });
 };
 
 function recalculateCartTotals() {
@@ -1080,4 +1181,200 @@ window.openOrderEditModal = function(orderId, orderNum, currentStatus, currentTe
         }
     });
 };
+
+/**
+ * AJAX Handlers for User Profile (New Address, Edit Info, New Ticket)
+ */
+function initProfileAjaxForms() {
+    // 1. New Address Form with Map Pin Coordinates
+    const addressForm = document.getElementById('newAddressForm');
+    if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = addressForm.querySelector('button[type="submit"]');
+            const origHTML = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>در حال ثبت موقعیت...</span>';
+            }
+
+            const formData = new FormData(addressForm);
+            fetch(addressForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHTML;
+                }
+                if (data.success) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ثبت موقعیت مکانی',
+                            text: data.message,
+                            confirmButtonColor: '#EF5C16',
+                            confirmButtonText: 'تایید'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطا در ثبت اطلاعات',
+                            text: data.message || 'لطفاً تمامی فیلدهای الزامی را بررسی نمایید.',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            })
+            .catch(err => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHTML;
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطای ارتباط با سرور',
+                        text: 'امکان ارسال اطلاعات به سرور فراهم نشد. لطفاً اینترنت خود را بررسی نمایید.'
+                    });
+                }
+            });
+        });
+    }
+
+    // 2. Personal Info Form
+    const userInfoForm = document.getElementById('userInfoForm');
+    if (userInfoForm) {
+        userInfoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = userInfoForm.querySelector('button[type="submit"]');
+            const origHTML = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>در حال ذخیره...</span>';
+            }
+
+            const formData = new FormData(userInfoForm);
+            fetch(userInfoForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHTML;
+                }
+                if (data.success) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ویرایش مشخصات فردی',
+                            text: data.message,
+                            confirmButtonColor: '#EF5C16',
+                            confirmButtonText: 'متوجه شدم'
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطا',
+                            text: data.message || 'خطا در ذخیره مشخصات.',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            })
+            .catch(() => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHTML;
+                }
+            });
+        });
+    }
+
+    // 3. New Support Ticket Form
+    const newTicketForm = document.getElementById('newTicketForm');
+    if (newTicketForm) {
+        newTicketForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = newTicketForm.querySelector('button[type="submit"]');
+            const origHTML = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>در حال ارسال تیکت...</span>';
+            }
+
+            const formData = new FormData(newTicketForm);
+            fetch(newTicketForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHTML;
+                }
+                if (data.success) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ثبت تیکت پشتیبانی',
+                            text: data.message,
+                            confirmButtonColor: '#EF5C16'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطا',
+                            text: data.message || 'خطا در ارسال تیکت.'
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            })
+            .catch(() => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHTML;
+                }
+            });
+        });
+    }
+}
 

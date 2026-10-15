@@ -71,8 +71,8 @@
                     <i class="fa-solid fa-house"></i>
                     <span>صفحه اصلی ترموبان</span>
                 </a>
-                <a href="<?= url('services') ?>" class="btn btn-outline" style="padding: 12px 24px; color: #fff; border-color: rgba(255,255,255,0.3);">
-                    <i class="fa-solid fa-wrench"></i>
+                <a href="<?= url('services') ?>" class="btn" style="padding: 12px 24px; color: #FFFFFF; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.25s ease;" onmouseover="this.style.background='#FFFFFF'; this.style.color='#011C39'; this.style.borderColor='#FFFFFF';" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.color='#FFFFFF'; this.style.borderColor='rgba(255,255,255,0.4)';">
+                    <i class="fa-solid fa-wrench" style="color: #EF5C16;"></i>
                     <span>خدمات تخصصی پکیج</span>
                 </a>
             </div>

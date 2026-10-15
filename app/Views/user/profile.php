@@ -70,9 +70,19 @@
                         <span>تیکت‌های پشتیبانی و رزرو</span>
                         <span class="count-badge"><?= count($tickets) ?></span>
                     </button>
-                    <a href="<?= url() ?>" class="profile-nav-link logout-link">
+                    <?php if (\App\Core\Auth::isAdmin()): ?>
+                        <a href="<?= url('admin') ?>" class="profile-nav-link" style="color: #ff5722 !important; font-weight: bold;">
+                            <i class="fa-solid fa-gauge-high nav-icon"></i>
+                            <span>پنل مدیریت CMS</span>
+                        </a>
+                    <?php endif; ?>
+                    <a href="<?= url() ?>" class="profile-nav-link">
                         <?= icon('arrow-left', 'nav-icon', 18) ?>
-                        <span>بازگشت به سایت</span>
+                        <span>بازگشت به صفحه اصلی</span>
+                    </a>
+                    <a href="<?= url('logout') ?>" class="profile-nav-link logout-link text-danger" style="color: #ef4444 !important; font-weight: 600;">
+                        <i class="fa-solid fa-right-from-bracket nav-icon"></i>
+                        <span>خروج از حساب کاربری</span>
                     </a>
                 </nav>
 

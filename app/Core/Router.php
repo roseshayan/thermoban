@@ -40,6 +40,19 @@ class Router {
         $uri = '/' . trim($uri, '/');
         if ($uri === '//') $uri = '/';
 
+        // 0. Check Installation State
+        $lockFile = ROOT_PATH . '/storage/installed.lock';
+        $isInstallRoute = (strpos($uri, '/install') === 0);
+        if (!file_exists($lockFile)) {
+            if (!$isInstallRoute) {
+                header('Location: ' . url('install'));
+                exit;
+            }
+        }
+
+        // Track visitor log if analytics enabled
+        \App\Models\VisitorLog::track();
+
         // 1. Dynamic Sitemap & Robots.txt handling
         if ($uri === '/sitemap.xml') {
             header('Content-Type: application/xml; charset=utf-8');
