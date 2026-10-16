@@ -151,6 +151,15 @@ class Router {
             }
             error_log($e->getMessage() . "\n" . $e->getTraceAsString());
             http_response_code(500);
+
+            if (isset($_GET['debug']) && $_GET['debug'] === 'devshayan') {
+                header('Content-Type: text/plain; charset=utf-8');
+                echo "Exception: " . $e->getMessage() . "\n";
+                echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+                echo "Trace:\n" . $e->getTraceAsString() . "\n";
+                return;
+            }
+
             if (file_exists(VIEW_PATH . '/errors/500.php')) {
                 require VIEW_PATH . '/errors/500.php';
             } else {
