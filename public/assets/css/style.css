@@ -6837,3 +6837,304 @@ input, button, select, textarea {
 }
 
 
+
+
+/* ==========================================================================
+   Floating Emergency Call Widget (Bottom Left)
+   ========================================================================== */
+.emergency-call-float {
+    position: fixed;
+    bottom: 32px;
+    left: 32px;
+    z-index: 990;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emergency-btn-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #EF5C16 0%, #dc2626 100%);
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+    padding: 14px 22px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(239, 92, 22, 0.45);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.emergency-btn-inner:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(239, 92, 22, 0.6);
+    color: #FFFFFF !important;
+}
+
+.emergency-btn-inner i {
+    font-size: 1.25rem;
+    animation: phonePulse 1.8s infinite;
+}
+
+@keyframes phonePulse {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    20% { transform: rotate(-15deg) scale(1.15); }
+    40% { transform: rotate(15deg) scale(1.15); }
+    60% { transform: rotate(-10deg) scale(1.1); }
+    80% { transform: rotate(10deg) scale(1.1); }
+}
+
+@media (max-width: 768px) {
+    .emergency-call-float {
+        bottom: 22px;
+        left: 22px;
+    }
+    .emergency-btn-inner {
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
+    }
+    .emergency-btn-label {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   Service Tariffs & Price List Box (Showcase in lieu of shop)
+   ========================================================================== */
+.service-tariff-showcase {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 26px;
+    box-shadow: 0 4px 20px rgba(1, 28, 57, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.tariff-list {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tariff-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.tariff-item:hover {
+    background: #fff7ed;
+    border-color: #fdba74;
+    transform: translateX(-4px);
+}
+
+.tariff-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tariff-name-wrap strong {
+    font-size: 0.94rem;
+    color: #011C39;
+}
+
+.tariff-name-wrap span {
+    font-size: 0.8rem;
+    color: #64748b;
+    display: block;
+}
+
+.tariff-price-badge {
+    background: #011C39;
+    color: #FFFFFF;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.tariff-item:hover .tariff-price-badge {
+    background: #EF5C16;
+}
+
+/* ==========================================================================
+   Customer Testimonials & Reviews Section
+   ========================================================================== */
+.testimonials-section {
+    padding: 70px 0;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 36px;
+}
+
+.testimonial-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 26px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(1, 28, 57, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(1, 28, 57, 0.08);
+}
+
+.testimonial-stars {
+    color: #f59e0b;
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+    display: flex;
+    gap: 3px;
+}
+
+.testimonial-quote {
+    font-size: 0.92rem;
+    color: #334155;
+    line-height: 1.8;
+    margin: 0 0 20px 0;
+    flex-grow: 1;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 14px;
+}
+
+.author-initials {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #011C39 0%, #1e3a8a 100%);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.author-meta strong {
+    display: block;
+    font-size: 0.92rem;
+    color: #011C39;
+}
+
+.author-meta span {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+/* ==========================================================================
+   FAQ Accordion Section
+   ========================================================================== */
+.faq-section {
+    padding: 70px 0;
+    background: #FFFFFF;
+}
+
+.faq-accordion {
+    max-width: 860px;
+    margin: 36px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.faq-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.faq-item.active {
+    border-color: #EF5C16;
+    box-shadow: 0 4px 16px rgba(239, 92, 22, 0.08);
+}
+
+.faq-question {
+    width: 100%;
+    text-align: right;
+    background: #f8fafc;
+    border: none;
+    padding: 18px 24px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #011C39;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    font-family: inherit;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.faq-item.active .faq-question {
+    background: #fff7ed;
+    color: #EF5C16;
+}
+
+.faq-icon-arrow {
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.faq-item.active .faq-icon-arrow {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    padding: 0 24px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s ease;
+    background: #FFFFFF;
+    color: #475569;
+    font-size: 0.92rem;
+    line-height: 1.85;
+}
+
+.faq-item.active .faq-answer {
+    padding: 18px 24px 22px;
+    max-height: 300px;
+}
+
+/* Password Field Visibility Toggle */
+.password-field-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+.password-field-wrapper input { width: 100%; padding-left: 45px !important; }
+.password-field-wrapper .btn-toggle-password { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; outline: none; padding: 6px 8px; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; transition: color 0.2s ease, transform 0.15s ease; z-index: 5; }
+.password-field-wrapper .btn-toggle-password:hover { color: #EF5C16; transform: translateY(-50%) scale(1.1); }
+.password-field-wrapper .btn-toggle-password:focus { outline: none; }
+

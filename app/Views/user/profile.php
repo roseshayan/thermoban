@@ -26,7 +26,7 @@
                 <!-- User Summary Card -->
                 <div class="profile-user-badge">
                     <div class="user-avatar-box">
-                        <img src="<?= asset('images/' . $user['avatar']) ?>" alt="<?= e($user['name']) ?>" class="profile-avatar-img">
+                        <img src="<?= avatar_url($user['avatar'] ?? null) ?>" alt="<?= e($user['name']) ?>" class="profile-avatar-img">
                         <span class="verified-icon" title="حساب تایید شده">
                             <?= icon('check', 'verified-svg', 14) ?>
                         </span>
@@ -251,7 +251,12 @@
                             </div>
                             <div class="form-group">
                                 <label for="u_password">تغییر رمز عبور (در صورت تمایل)</label>
-                                <input type="password" id="u_password" name="password" class="form-control" placeholder="حداقل ۶ کاراکتر...">
+                                <div class="password-field-wrapper">
+                                    <input type="password" id="u_password" name="password" class="form-control" placeholder="حداقل ۶ کاراکتر...">
+                                    <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

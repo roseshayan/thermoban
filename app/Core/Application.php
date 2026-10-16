@@ -41,6 +41,7 @@ class Application {
         $this->router->get('/blog', [\App\Controllers\BlogController::class, 'index']);
         $this->router->get('/articles', [\App\Controllers\BlogController::class, 'index']);
         $this->router->get('/blog/{slug}', [\App\Controllers\BlogController::class, 'detail']);
+        $this->router->post('/api/comment', [\App\Controllers\BlogController::class, 'submitComment']);
         
         // Shop / Products / Cart / Checkout
         $this->router->get('/shop', [\App\Controllers\ShopController::class, 'index']);
@@ -129,5 +130,6 @@ class Application {
         $this->router->get('/admin/analytics', [\App\Controllers\AdminController::class, 'analytics']);
         $this->router->get('/admin/comments', [\App\Controllers\AdminController::class, 'comments']);
         $this->router->post('/admin/comments', [\App\Controllers\AdminController::class, 'comments']);
+        $this->router->post('/admin/notifications/mark-read', [\App\Controllers\AdminController::class, 'markNotificationsRead']);
     }
 }

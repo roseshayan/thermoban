@@ -3,230 +3,160 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Security;
+use App\Core\Database;
+use App\Models\Article;
+use App\Models\Comment;
 
 class BlogController extends Controller {
-    protected array $articles = [
-        [
-            'id' => 1,
-            'slug' => 'error-e81-iran-radiator-fix',
-            'title' => 'راهنمای جامع رفع خطای E81 پکیج ایران رادیاتور',
-            'excerpt' => 'بررسی کامل دلایل بروز ارور E81، نحوه ریست کردن دستگاه، تست ترموستات حد و اقدامات ایمنی فوری.',
-            'category' => 'کدهای خطای پکیج',
-            'category_slug' => 'error-codes',
-            'author' => 'مهندس رضایی (تکنسین ارشد)',
-            'author_role' => 'کارشناس رسمی ایران رادیاتور',
-            'date' => '۱۴۰۵/۰۸/۱۰',
-            'read_time' => '۶ دقیقه',
-            'views' => 1420,
-            'image' => 'technician-thumb.jpg',
-            'content' => '
-                <p class="lead-text">کد خطای E81 در پکیج‌های دیجیتال ایران رادیاتور (مانند مدل‌های L24FF، L28FF و K24) یکی از خطاهای شایع در فصول سرد سال است که نشان‌دهنده <strong>فعال شدن کلید حرارتی (ترموستات حد)</strong> به دلیل دمای بیش از حد مجاز (بالای ۱۰۵ درجه سانتی‌گراد) در مبدل اصلی می‌باشد.</p>
 
-                <div class="article-callout alert-warning">
-                    <div class="callout-icon">⚠️</div>
-                    <div class="callout-body">
-                        <h4>نکته ایمنی فوق‌العاده مهم</h4>
-                        <p>در صورتی که ارور E81 همراه با صدای جوشیدن آب از داخل دستگاه یا بوی سوختگی باشد، بلافاصله پکیج را خاموش کرده و شیر گاز ورودی را ببندید. هرگز اقدام به باز کردن قطعات برق‌دار در هنگام روشن بودن دستگاه نکنید.</p>
-                    </div>
-                </div>
-
-                <h3>دلایل اصلی بروز خطای E81 در پکیج ایران رادیاتور</h3>
-                <p>این خطا زمانی رخ می‌دهد که حرارت تولید شده توسط شعله مشعل نمی‌تواند به گردش درآید و در مبدل اصلی حبس می‌شود. شایع‌ترین عوامل عبارتند از:</p>
-                <ul class="article-checklist">
-                    <li><strong>سوختن یا گیرپاژ بودن پمپ سیرکولاتور:</strong> پمپ وظیفه گردش مداوم آب در مدار رادیاتورها را دارد. در صورت گیرپاژ پروانه پمپ، آب از حرکت ایستاده و فورا به جوش می‌آید.</li>
-                    <li><strong>گرفتگی شدید و رسوب‌گرفتگی مبدل اصلی یا ثانویه:</strong> رسوب کلسیم و منیزیم جریان آب را مسدود می‌کند.</li>
-                    <li><strong>بسته بودن شیرهای رفت و برگشت رادیاتورها:</strong> اطمینان حاصل کنید شیرهای زیر پکیج و شیرهای کلیه رادیاتورها باز هستند.</li>
-                    <li><strong>خرابی ترموستات حد (سنسور ۱۰۵ درجه):</strong> در برخی مواقع سنسور مستهلک شده و در دمای پایین‌تر قطع می‌کند.</li>
-                    <li><strong>کثیف بودن صافی برگشت شوفاژ:</strong> توری فیلتر مدار برگشت اگر با براده و لجن پر شود، مانع چرخش آب می‌گردد.</li>
-                </ul>
-
-                <h3>مراحل گام به گام رفع خطای E81 توسط کاربر</h3>
-                <ol class="article-steps">
-                    <li><strong>گام اول: ریست کردن دستگاه:</strong> سلکتور کوچک پکیج را روی علامت R (Reset) برده و پس از ۳ ثانیه مجددا روی حالت زمستانه یا تابستانه برگردانید.</li>
-                    <li><strong>گام دوم: بررسی فشار بار دستگاه:</strong> عقربه مانومتر باید بین ۱.۵ تا ۲ بار باشد. اگر فشار زیر ۱ است، شیر پرکن زیر پکیج را باز کنید تا عقربه به ۱.۵ برسد.</li>
-                    <li><strong>گام سوم: باز کردن شیرهای رادیاتورها:</strong> بررسی کنید حداقل ۳ رادیاتور در خانه کاملا باز باشند.</li>
-                    <li><strong>گام چهارم: هواگیری مدار:</strong> اگر رادیاتورها دارای هوا هستند، با آچار هواگیری اقدام به تخلیه هوای آن‌ها نمایید.</li>
-                </ol>
-
-                <div class="article-callout alert-info">
-                    <div class="callout-icon"><i class="fa-solid fa-lightbulb"></i></div>
-                    <div class="callout-body">
-                        <h4>آیا نیاز به حضور تکنسین دارید؟</h4>
-                        <p>اگر با یک‌بار ریست دستگاه خطا برطرف نشد یا بلافاصله پس از روشن شدن شعله مجدداً ارور E81 ظاهر گردید، قطعا پمپ یا مبدل دچار مشکل شده است و نیاز به باز شدن و اسیدشویی تخصصی با پمپ رسوب‌زدا دارد. برای اعزام سریع تکنسین مجاز با شماره <a href="tel:02177428596" class="text-orange font-bold">۰۲۱-۷۷۴۲۸۵۹۶</a> تماس حاصل فرمایید.</p>
-                    </div>
-                </div>
-            '
-        ],
-        [
-            'id' => 2,
-            'slug' => 'package-not-turning-on-causes',
-            'title' => 'علت روشن نشدن پکیج چیست؟ بررسی ۷ دلیل اصلی',
-            'excerpt' => 'چرا پکیج روشن نمی‌شود؟ عیب‌یابی دقیق افت فشار بار، قطعی گاز و برق، خرابی برد الکترونیک و جرقه زن.',
-            'category' => 'راهنمای عیب‌یابی پکیج',
-            'category_slug' => 'troubleshooting',
-            'author' => 'مهندس کاظمی',
-            'author_role' => 'تکنسین برق و الکترونیک پکیج',
-            'date' => '۱۴۰۵/۰۸/۰۸',
-            'read_time' => '۵ دقیقه',
-            'views' => 980,
-            'image' => 'technician-thumb.jpg',
-            'content' => '
-                <p class="lead-text">خاموش شدن ناگهانی پکیج دیواری و روشن نشدن آن، یکی از آزاردهنده‌ترین اتفاقاتی است که به خصوص در صبح‌های سرد زمستان با آن مواجه می‌شویم. در این مطلب تخصصی، علل روشن نشدن پکیج را از ساده‌ترین تا پیچیده‌ترین حالت بررسی می‌کنیم.</p>
-                
-                <h3>۱. افت فشار آب مدار گرمایش (زیر ۰.۵ بار)</h3>
-                <p>تمام پکیج‌های مدرن مجهز به کلید ایمنی فشار آب (پرشر سوئیچ آب) هستند. اگر فشار مدار به زیر ۰.۷ یا ۰.۵ بار برسد، برد الکترونیک برای جلوگیری از سوختن مبدل، اجازه روشن شدن مشعل را نخواهد داد. کافیست شیر پرکن مشکی یا آبی زیر دستگاه را در خلاف جهت عقربه‌های ساعت بچرخانید تا عقربه مانومتر روی ۱.۵ بار قرار گیرد.</p>
-
-                <h3>۲. قطع بودن یا افت فشار گاز ورودی</h3>
-                <p>بررسی کنید آیا گاز شهری منزل وصل است یا خیر. همچنین شیر ورودی گاز پکیج در حالت باز (هم‌راستا با لوله) قرار داشته باشد. شیلنگ گاز نباید تاخوردگی داشته باشد.</p>
-
-                <h3>۳. ایراد در مدار جرقه‌زن و یون تشخیص شعله</h3>
-                <p>اگر پکیج صدای جرقه می‌دهد اما شعله پایدار نمی‌ماند یا اصلاً جرقه نمی‌زند، ممکن است الکترود یون دوده گرفته باشد یا ترانس جرقه زن سوخته باشد.</p>
-            '
-        ],
-        [
-            'id' => 3,
-            'slug' => 'best-time-for-package-service',
-            'title' => 'بهترین زمان سرویس دوره‌ای پکیج و نکات افزایش طول عمر',
-            'excerpt' => 'سرویس سالیانه پکیج دیواری چگونه مصرف گاز را تا ۲۵ درصد کاهش می‌دهد و از هزینه‌های سنگین جلوگیری می‌کند؟',
-            'category' => 'نکات نگهداری و رسوب‌زدایی',
-            'category_slug' => 'maintenance',
-            'author' => 'شایان نماینده',
-            'author_role' => 'مدیر فنی ترموبان',
-            'date' => '۱۴۰۵/۰۸/۰۴',
-            'read_time' => '۷ دقیقه',
-            'views' => 1150,
-            'image' => 'technician-thumb.jpg',
-            'content' => '
-                <p class="lead-text">پکیج شوفاژ دیواری یک نیروگاه حرارتی مینیاتوری در منزل شماست که همواره با آب، برق و گاز پرفشار سروکار دارد. انجام سرویس سالیانه منظم نه تنها ایمنی خانواده شما را تضمین می‌کند، بلکه راندمان حرارتی دستگاه را به حداکثر رسانده و از استهلاک قطعات گران‌قیمت جلوگیری می‌کند.</p>
-
-                <h3>چرا شهریور و مهرماه بهترین زمان سرویس است؟</h3>
-                <p>پیش از فرا رسیدن سرمای شدید پاییز و زمستان، لوله‌ها و رادیاتورها باید از رسوبات تابستانی پاکسازی شده و منبع انبساط بادگیری شود. در این صورت در اولین روزهای سرد سال بدون وقفه و دغدغه از گرمایش مطبوع لذت خواهید برد.</p>
-            '
-        ],
-        [
-            'id' => 4,
-            'slug' => 'how-to-choose-best-package-capacity',
-            'title' => 'راهنمای محاسبه ظرفیت و خرید بهترین پکیج دیواری بر اساس متراژ',
-            'excerpt' => 'فرمول دقیق انتخاب پکیج ۲۲، ۲۴، ۲۸ و ۳۶ هزار برای آپارتمان‌ها با متراژهای ۶۰ تا ۳۰۰ متر.',
-            'category' => 'خرید و انتخاب پکیج',
-            'category_slug' => 'buying-guide',
-            'author' => 'مهندس رضایی',
-            'author_role' => 'کارشناس رسمی ایران رادیاتور',
-            'date' => '۱۴۰۵/۰۷/۲۸',
-            'read_time' => '۴ دقیقه',
-            'views' => 840,
-            'image' => 'technician-thumb.jpg',
-            'content' => '
-                <p class="lead-text">یکی از مهم‌ترین پرسش‌های خریداران پکیج دیواری این است که برای آپارتمان ما پکیج ۲۴ هزار مناسب است یا ۲۸ هزار؟ انتخاب ظرفیت نادرست موجب سرد ماندن خانه یا مصرف گاز بیش از حد و استهلاک زودهنگام دستگاه خواهد شد.</p>
-
-                <h3>جدول استاندارد انتخاب ظرفیت پکیج بر اساس متراژ در تهران</h3>
-                <table class="article-table">
-                    <thead>
-                        <tr>
-                            <th>متراژ واحد (متر مربع)</th>
-                            <th>ظرفیت پیشنهادی</th>
-                            <th>مدل پیشنهادی ایران رادیاتور</th>
-                            <th>مدل پیشنهادی بوتان</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>تا ۸۰ متر</td>
-                            <td>۲۲,۰۰۰ کیلوکالری</td>
-                            <td>مدل Eco 22FF</td>
-                            <td>مدل بیتا ۲۲</td>
-                        </tr>
-                        <tr>
-                            <td>۸۰ تا ۱۴۰ متر</td>
-                            <td>۲۴,۰۰۰ کیلوکالری</td>
-                            <td>مدل L24FF / M24FF</td>
-                            <td>مدل پارما ۲۴ / بیتا ۲۴</td>
-                        </tr>
-                        <tr>
-                            <td>۱۴۰ تا ۲۱۰ متر</td>
-                            <td>۲۸,۰۰۰ کیلوکالری</td>
-                            <td>مدل L28FF</td>
-                            <td>مدل پرلا پرو ۲۸</td>
-                        </tr>
-                        <tr>
-                            <td>۲۱۰ تا ۳۰۰ متر</td>
-                            <td>۳۶,۰۰۰ کیلوکالری</td>
-                            <td>مدل L36FF</td>
-                            <td>مدل پاویا ۳۲ / ۳۶</td>
-                        </tr>
-                    </tbody>
-                </table>
-            '
-        ]
-    ];
-
+    /**
+     * Blog Archive / List of Articles from Database
+     */
     public function index(): void {
-        $category = $_GET['cat'] ?? '';
+        $category = trim($_GET['cat'] ?? '');
         $search = trim($_GET['q'] ?? '');
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = 9;
+        $offset = ($page - 1) * $perPage;
 
-        $filtered = $this->articles;
+        // Build query for published articles
+        $whereClauses = ["`is_published` = 1"];
+        $params = [];
 
         if (!empty($category)) {
-            $filtered = array_filter($filtered, function ($item) use ($category) {
-                return $item['category_slug'] === $category;
-            });
+            $whereClauses[] = "(`category_slug` = :cat OR `category` = :cat)";
+            $params['cat'] = $category;
         }
 
         if (!empty($search)) {
-            $filtered = array_filter($filtered, function ($item) use ($search) {
-                return mb_stripos($item['title'], $search) !== false ||
-                       mb_stripos($item['excerpt'], $search) !== false;
-            });
+            $whereClauses[] = "(`title` LIKE :q OR `excerpt` LIKE :q OR `content` LIKE :q)";
+            $params['q'] = '%' . $search . '%';
         }
 
+        $whereSql = implode(' AND ', $whereClauses);
+
+        // Count total matching articles
+        $totalRow = Database::fetchOne("SELECT COUNT(*) as total FROM `articles` WHERE {$whereSql}", $params);
+        $totalArticles = (int)($totalRow['total'] ?? 0);
+        $totalPages = max(1, (int)ceil($totalArticles / $perPage));
+
+        // Fetch paginated articles from database
+        $sql = "SELECT * FROM `articles` WHERE {$whereSql} ORDER BY `id` DESC LIMIT {$perPage} OFFSET {$offset}";
+        $rawArticles = Database::fetchAll($sql, $params);
+
+        $articles = [];
+        foreach ($rawArticles as $art) {
+            $articles[] = $this->formatArticle($art);
+        }
+
+        // Fetch dynamic categories with actual counts from database
+        $catRows = Database::fetchAll(
+            "SELECT `category`, `category_slug`, COUNT(*) as cnt 
+             FROM `articles` 
+             WHERE `is_published` = 1 AND `category` IS NOT NULL AND `category` != ''
+             GROUP BY `category`, `category_slug`"
+        );
+
+        $allCountRow = Database::fetchOne("SELECT COUNT(*) as total FROM `articles` WHERE `is_published` = 1");
         $categories = [
-            ['slug' => '', 'title' => 'همه مقالات', 'count' => count($this->articles)],
-            ['slug' => 'error-codes', 'title' => 'کدهای خطای پکیج', 'count' => 1],
-            ['slug' => 'troubleshooting', 'title' => 'راهنمای عیب‌یابی', 'count' => 1],
-            ['slug' => 'maintenance', 'title' => 'نگهداری و رسوب‌زدایی', 'count' => 1],
-            ['slug' => 'buying-guide', 'title' => 'راهنمای خرید و ظرفیت', 'count' => 1]
+            ['slug' => '', 'title' => 'همه مقالات', 'count' => (int)($allCountRow['total'] ?? count($articles))]
         ];
 
+        foreach ($catRows as $cr) {
+            $categories[] = [
+                'slug'  => $cr['category_slug'] ?: $cr['category'],
+                'title' => $cr['category'],
+                'count' => (int)$cr['cnt']
+            ];
+        }
+
+        // Featured article (first in list or top viewed)
+        $featured = !empty($articles) ? $articles[0] : null;
+
+        // Recent articles for sidebar
+        $recentRows = Database::fetchAll("SELECT * FROM `articles` WHERE `is_published` = 1 ORDER BY `id` DESC LIMIT 4");
+        $recentArticles = [];
+        foreach ($recentRows as $r) {
+            $recentArticles[] = $this->formatArticle($r);
+        }
+
         $data = [
-            'pageTitle' => 'مقالات و آموزش‌های تخصصی پکیج و رادیاتور | ترموبان',
+            'pageTitle' => 'مقالات و آموزش‌های تخصصی پکیج و رادیاتور | دانشنامه ترموبان',
             'currentPage' => 'blog',
             'csrfToken' => Security::generateCsrf(),
-            'articles' => array_values($filtered),
+            'articles' => $articles,
             'categories' => $categories,
             'currentCategory' => $category,
             'searchQuery' => $search,
-            'featuredArticle' => $this->articles[0],
-            'recentArticles' => array_slice($this->articles, 0, 3)
+            'featuredArticle' => $featured,
+            'recentArticles' => $recentArticles,
+            'currentPageNum' => $page,
+            'totalPages' => $totalPages,
+            'totalArticles' => $totalArticles
         ];
 
         $this->view('blog/index', $data);
     }
 
+    /**
+     * Single Article Detail from Database
+     */
     public function detail(string $slug = ''): void {
-        $article = null;
-        foreach ($this->articles as $item) {
-            if ($item['slug'] === $slug || (string)$item['id'] === $slug) {
-                $article = $item;
-                break;
+        $slug = trim($slug);
+        
+        // Find article in database by slug or numeric ID
+        $articleRow = null;
+        if (!empty($slug)) {
+            $articleRow = Article::findBySlug($slug);
+        }
+
+        if (!$articleRow) {
+            // Fallback: get latest published article or show 404
+            $fallback = Database::fetchOne("SELECT * FROM `articles` WHERE `is_published` = 1 ORDER BY `id` DESC LIMIT 1");
+            if ($fallback) {
+                $articleRow = $fallback;
+            } else {
+                http_response_code(404);
+                $this->view('errors/404', ['pageTitle' => 'مقاله یافت نشد']);
+                return;
             }
         }
 
-        if (!$article) {
-            // Default to first article if slug not found
-            $article = $this->articles[0];
+        // Increment views count
+        Article::incrementViews((int)$articleRow['id']);
+
+        $article = $this->formatArticle($articleRow);
+
+        // Fetch related articles from database
+        $relatedRows = Database::fetchAll(
+            "SELECT * FROM `articles` WHERE `is_published` = 1 AND `id` != :id ORDER BY `id` DESC LIMIT 3",
+            ['id' => $article['id']]
+        );
+        $relatedArticles = [];
+        foreach ($relatedRows as $rel) {
+            $relatedArticles[] = $this->formatArticle($rel);
         }
 
-        $related = array_filter($this->articles, function($item) use ($article) {
-            return $item['id'] !== $article['id'];
-        });
+        // Fetch approved comments for this article from database
+        $commentRows = Database::fetchAll(
+            "SELECT * FROM `comments` WHERE `article_id` = :aid AND `status` = 'approved' ORDER BY `id` DESC",
+            ['aid' => $article['id']]
+        );
 
-        $data = [
-            'pageTitle' => $article['title'] . ' | مقالات آموزشی ترموبان',
-            'currentPage' => 'blog',
-            'csrfToken' => Security::generateCsrf(),
-            'article' => $article,
-            'relatedArticles' => array_slice($related, 0, 3),
-            'comments' => [
+        $comments = [];
+        foreach ($commentRows as $cr) {
+            $comments[] = [
+                'id' => $cr['id'],
+                'author' => $cr['author_name'] ?? 'کاربر مهمان',
+                'date' => !empty($cr['created_at']) ? to_shamsi($cr['created_at']) : 'امروز',
+                'text' => $cr['content'] ?? '',
+                'reply' => $cr['reply'] ?? null
+            ];
+        }
+
+        // Fallback default helpful comments if none approved yet
+        if (empty($comments)) {
+            $comments = [
                 [
                     'author' => 'علی محمدی',
                     'date' => '۱۴۰۵/۰۸/۱۱',
@@ -239,9 +169,87 @@ class BlogController extends Controller {
                     'text' => 'سلام، آیا ارور E81 می‌تونه ناشی از خرابی شیر برقی هم باشه؟',
                     'reply' => 'درود بر شما. بله اگر شیر سه‌طرفه موتوری گیر کند و آب در مبدل ثانویه گردش نیابد نیز ممکن است این ارور رخ دهد.'
                 ]
-            ]
+            ];
+        }
+
+        $data = [
+            'pageTitle' => ($articleRow['meta_title'] ?: $article['title']) . ' | مقالات آموزشی ترموبان',
+            'metaDescription' => $articleRow['meta_description'] ?? $article['excerpt'],
+            'canonicalUrl' => $articleRow['canonical_url'] ?? url('blog/' . $article['slug']),
+            'currentPage' => 'blog',
+            'csrfToken' => Security::generateCsrf(),
+            'article' => $article,
+            'relatedArticles' => $relatedArticles,
+            'comments' => $comments
         ];
 
         $this->view('blog/detail', $data);
+    }
+
+    /**
+     * Submit user comment for article
+     */
+    public function submitComment(): void {
+        $token = $_POST['csrf_token'] ?? '';
+        if (!Security::verifyCsrf($token)) {
+            $this->json(['success' => false, 'message' => 'توکن امنیتی نامعتبر است.'], 403);
+            return;
+        }
+
+        $articleId = (int)($_POST['article_id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $comment = trim($_POST['comment'] ?? '');
+
+        if (empty($name) || empty($comment)) {
+            $this->json(['success' => false, 'message' => 'لطفاً نام و متن دیدگاه را تکمیل فرمایید.'], 422);
+            return;
+        }
+
+        try {
+            Database::insert('comments', [
+                'article_id'   => $articleId > 0 ? $articleId : null,
+                'author_name'  => $name,
+                'author_phone' => $phone ?: null,
+                'content'      => $comment,
+                'status'       => 'approved', // Auto-approved for friendly customer experience
+                'created_at'   => date('Y-m-d H:i:s')
+            ]);
+
+            $this->json([
+                'success' => true,
+                'message' => 'دیدگاه شما با موفقیت ثبت گردید و در سایت نمایش داده شد.'
+            ]);
+        } catch (\Throwable $e) {
+            $this->json([
+                'success' => false,
+                'message' => 'خطا در ثبت دیدگاه: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Format raw DB article array for view consistency
+     */
+    protected function formatArticle(array $art): array {
+        $dateFormatted = !empty($art['created_at']) 
+            ? to_shamsi($art['created_at']) 
+            : '۱۴۰۵/۰۸/۱۰';
+
+        return [
+            'id' => (int)$art['id'],
+            'slug' => $art['slug'] ?? 'post-' . $art['id'],
+            'title' => $art['title'] ?? '',
+            'excerpt' => $art['excerpt'] ?? '',
+            'content' => $art['content'] ?? '',
+            'category' => $art['category'] ?? 'راهنمای پکیج',
+            'category_slug' => $art['category_slug'] ?? 'guide',
+            'author' => $art['author_name'] ?? 'مهندس رضایی (تکنسین ارشد)',
+            'author_role' => 'کارشناس مجاز ترموبان',
+            'date' => $dateFormatted,
+            'read_time' => $art['reading_time'] ?? '۵ دقیقه',
+            'views' => (int)($art['views_count'] ?? 100),
+            'image' => $art['image'] ?? 'technician-thumb.jpg'
+        ];
     }
 }

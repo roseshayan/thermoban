@@ -58,7 +58,7 @@
                             </td>
                             <td><?= e($qo['service']) ?></td>
                             <td><?= e($qo['district']) ?></td>
-                            <td dir="ltr" style="text-align: right;"><?= e($qo['created_at']) ?></td>
+                            <td dir="rtl" style="text-align: right; font-size: 0.84rem; color: #64748b;"><?= to_shamsi($qo['created_at'], 'Y/m/d H:i') ?></td>
                             <td>
                                 <form action="<?= url('admin/leads') ?>" method="POST" style="display: flex; gap: 6px; align-items: center; margin: 0;">
                                     <?= csrf_field() ?>
@@ -130,7 +130,7 @@
                             <td><?= e($c['district']) ?></td>
                             <td><?= e($c['service']) ?></td>
                             <td style="max-width: 320px; font-size: 0.88rem; line-height: 1.6;"><?= nl2br(e($c['message'])) ?></td>
-                            <td dir="ltr" style="text-align: right;"><?= e($c['created_at']) ?></td>
+                            <td dir="rtl" style="text-align: right; font-size: 0.84rem; color: #64748b;"><?= to_shamsi($c['created_at'], 'Y/m/d H:i') ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

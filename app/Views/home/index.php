@@ -142,8 +142,8 @@
                     <h3 class="service-title"><?= e($srv['title']) ?></h3>
                     <p class="service-desc"><?= e($srv['desc']) ?></p>
                     
-                    <button type="button" class="btn btn-outline service-btn" onclick="openServiceModal('<?= e($srv['id']) ?>', '<?= e($srv['title']) ?>')">
-                        جزئیات بیشتر
+                    <button type="button" class="btn btn-outline service-btn" onclick="openServiceBooking('<?= e($srv['title']) ?>')">
+                        درخواست این خدمت
                     </button>
                 </div>
             <?php endforeach; ?>
@@ -213,17 +213,17 @@
     </div>
 </section>
 
-<!-- Shop & Articles Section -->
+<!-- Shop / Service Tariffs & Articles Section -->
 <?php if (!empty($shopEnabled) || !empty($blogEnabled)): ?>
-<section class="showcase-section" id="shop">
+<section class="showcase-section" id="showcase">
     <div class="site-container">
-        <div class="showcase-grid <?= (empty($shopEnabled) || empty($blogEnabled)) ? 'single-column-grid' : '' ?>">
+        <div class="showcase-grid">
             
             <?php if (!empty($shopEnabled)): ?>
             <!-- Right in RTL: Product Showcase (فروشگاه) -->
-            <div class="showcase-column products-column">
+            <div class="showcase-column products-column" id="shop">
                 <div class="column-heading">
-                    <h2 class="column-title">فروشگاه</h2>
+                    <h2 class="column-title">فروشگاه تجهیزات</h2>
                     <p class="column-subtitle">خرید پکیج دیواری با گارانتی معتبر و نصب رایگان</p>
                 </div>
 
@@ -262,14 +262,89 @@
                     <a href="<?= url('shop') ?>" class="btn btn-outline btn-pill">مشاهده همه محصولات</a>
                 </div>
             </div>
+            <?php else: ?>
+            <!-- Right in RTL: Service Tariffs List (تعرفه و نرخ مصوب خدمات پکیج) -->
+            <div class="showcase-column service-tariff-showcase" id="tariffs">
+                <div class="column-heading">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <h2 class="column-title">نرخ مصوب خدمات و تعمیرات</h2>
+                            <p class="column-subtitle">شفافیت ۱۰۰٪ هزینه‌ها بر اساس تعرفه رسمی اتحادیه تأسیسات</p>
+                        </div>
+                        <span style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">نرخ مصوب ۱۴۰۵</span>
+                    </div>
+                </div>
+
+                <ul class="tariff-list">
+                    <li class="tariff-item">
+                        <div class="tariff-name-wrap">
+                            <i class="fa-solid fa-screwdriver-wrench" style="color: #EF5C16;"></i>
+                            <div>
+                                <strong>عیب‌یابی، کارشناسی و تست نشتی در محل</strong>
+                                <span>(در صورت توافق و انجام تعمیرات کاملاً رایگان)</span>
+                            </div>
+                        </div>
+                        <span class="tariff-price-badge">۲۵۰,۰۰۰ تومان</span>
+                    </li>
+                    <li class="tariff-item">
+                        <div class="tariff-name-wrap">
+                            <i class="fa-solid fa-arrows-rotate" style="color: #EF5C16;"></i>
+                            <div>
+                                <strong>سرویس کامل دوره‌ای، تنظیم فشار و هواگیری</strong>
+                                <span>شستشوی مدار، تنظیم باد مخزن، تمیزکاری محفظه</span>
+                            </div>
+                        </div>
+                        <span class="tariff-price-badge">۳۸۰,۰۰۰ تومان</span>
+                    </li>
+                    <li class="tariff-item">
+                        <div class="tariff-name-wrap">
+                            <i class="fa-solid fa-fire-burner" style="color: #EF5C16;"></i>
+                            <div>
+                                <strong>اسیدشویی مبدل اصلی و ثانویه با پمپ مخصوص</strong>
+                                <span>رسوب‌زدایی بدون آسیب با دیسکلر استاندارد ۳۳٪</span>
+                            </div>
+                        </div>
+                        <span class="tariff-price-badge">۴۵۰,۰۰۰ تومان</span>
+                    </li>
+                    <li class="tariff-item">
+                        <div class="tariff-name-wrap">
+                            <i class="fa-solid fa-microchip" style="color: #EF5C16;"></i>
+                            <div>
+                                <strong>تعمیر و عیب‌یابی تخصصی برد الکترونیک</strong>
+                                <span>رفع ارورهای دیجیتال همراه با ضمانت ۶ ماهه</span>
+                            </div>
+                        </div>
+                        <span class="tariff-price-badge">از ۵۵۰,۰۰۰ تومان</span>
+                    </li>
+                    <li class="tariff-item">
+                        <div class="tariff-name-wrap">
+                            <i class="fa-solid fa-shield-halved" style="color: #EF5C16;"></i>
+                            <div>
+                                <strong>نصب استاندارد و راه‌اندازی اولیه پکیج دیواری</strong>
+                                <span>همراه با مهر گارانتی رسمی شرکت ایران رادیاتور</span>
+                            </div>
+                        </div>
+                        <span class="tariff-price-badge">طبق مصوبه شرکت</span>
+                    </li>
+                </ul>
+
+                <div class="column-footer-action" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button style="color: #fff;" type="button" class="btn btn-primary btn-pill" onclick="openServiceBooking('تعمیر و سرویس پکیج')">
+                        <i class="fa-solid fa-calendar-check" style="margin-left: 6px;"></i> ثبت آنلاین درخواست اعزام تعمیرکار
+                    </button>
+                    <a href="tel:02122145678" class="btn btn-outline btn-pill">
+                        <i class="fa-solid fa-phone" style="margin-left: 6px;"></i> مشاوره تلفنی رایگان
+                    </a>
+                </div>
+            </div>
             <?php endif; ?>
 
             <?php if (!empty($blogEnabled)): ?>
             <!-- Left in RTL: Blog / Articles (آخرین مقالات) -->
             <div class="showcase-column articles-column" id="blog">
                 <div class="column-heading">
-                    <h2 class="column-title">آخرین مقالات</h2>
-                    <p class="column-subtitle">دانشنامه و راهنمای نگهداری پکیج</p>
+                    <h2 class="column-title">دانشنامه و مقالات تخصصی</h2>
+                    <p class="column-subtitle">راهنمای رفع کدهای خطا، نگهداری و عیب‌یابی انواع پکیج</p>
                 </div>
 
                 <div class="articles-list">
@@ -287,7 +362,7 @@
                                 </h3>
                                 <p class="article-excerpt"><?= e($art['excerpt']) ?></p>
                                 <div class="article-meta">
-                                    <span class="article-date"><?= e($art['date']) ?></span>
+                                    <span class="article-date"><i class="fa-regular fa-clock" style="margin-left: 4px;"></i> <?= e($art['date']) ?></span>
                                 </div>
                             </div>
                             <div class="article-thumb-side">
@@ -298,7 +373,9 @@
                 </div>
 
                 <div class="column-footer-action">
-                    <a href="<?= url('blog') ?>" class="btn btn-outline btn-pill">مشاهده همه مقالات</a>
+                    <a href="<?= url('blog') ?>" class="btn btn-outline btn-pill">
+                        مشاهده همه مقالات دانشنامه <i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i>
+                    </a>
                 </div>
             </div>
             <?php endif; ?>
@@ -307,6 +384,205 @@
     </div>
 </section>
 <?php endif; ?>
+
+<!-- Customer Testimonials Section -->
+<section class="testimonials-section" id="testimonials">
+    <div class="site-container">
+        <div class="section-heading text-center">
+            <h2 class="section-title">نظرات و رضایت مشتریان</h2>
+            <p class="section-subtitle" style="color: #64748b; font-size: 0.95rem; margin-top: 6px;">
+                بیش از ۲۵,۰۰۰ تجربه موفق عیب‌یابی و سرویس پکیج در ۲۲ منطقه تهران
+            </p>
+            <div class="title-underline"></div>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div>
+                    <div class="testimonial-stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="testimonial-quote">
+                        «پکیج ایران رادیاتور L24FF ارور E81 می‌داد و آب حمام کاملاً سرد شده بود. بعد از تماس کمتر از ۴۰ دقیقه تکنسین رسید و با اسیدشویی اصولی مبدل و تنظیم گیج منبع مشکل کاملاً برطرف شد. برخورد عالی و صدور فاکتور شرکتی با ضمانت ۶ ماهه.»
+                    </p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-initials">رس</div>
+                    <div class="author-meta">
+                        <strong>مهندس رامین سلیمانی</strong>
+                        <span>منطقه ۲ تهران (سعادت‌آباد) • تعمیر ایران رادیاتور</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div>
+                    <div class="testimonial-stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="testimonial-quote">
+                        «در شب‌های سرد آذر ماه پکیج بوتان ما افت فشار شدید داشت و مدام خاموش می‌شد. با کشیک اضطراری ترموبان هماهنگ شدیم و سرویس‌کار با قطعه اصل منبع انبساط آمد و در حضور خودم تعویض کرد. گارانتی کتبی ارائه دادند و بسیار راضی هستم.»
+                    </p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-initials">فک</div>
+                    <div class="author-meta">
+                        <strong>دکتر فرزانه کریمی</strong>
+                        <span>منطقه ۳ تهران (پاسداران) • تعویض منبع و سرویس دوره‌ای</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div>
+                    <div class="testimonial-stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="testimonial-quote">
+                        «بزرگترین مزیت ترموبان شفافیت و صداقت در نرخ‌هاست. دقیقاً طبق نرخ مصوب اتحادیه هزینه را دریافت کردند، بدون هیچ هزینه تراشی اضافی و قطعه داغی قبلی را هم تحویل دادند. واقعاً تیمی متعهد و حرفه‌ای هستند.»
+                    </p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-initials">حم</div>
+                    <div class="author-meta">
+                        <strong>مهندس حامد موسوی</strong>
+                        <span>منطقه ۵ تهران (پونک) • تعمیر برد الکترونیک</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Frequently Asked Questions Section -->
+<section class="faq-section" id="faq">
+    <div class="site-container">
+        <div class="section-heading text-center">
+            <h2 class="section-title">سوالات متداول شما</h2>
+            <p class="section-subtitle" style="color: #64748b; font-size: 0.95rem; margin-top: 6px;">
+                پاسخ به سوالات پرتکرار مشتریان درباره نحوه اعزام، هزینه‌ها و گارانتی خدمات
+            </p>
+            <div class="title-underline"></div>
+        </div>
+
+        <div class="faq-accordion">
+            <div class="faq-item">
+                <button type="button" class="faq-question">
+                    <span>اعزام تکنسین چقدر زمان می‌برد؟</span>
+                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    با توجه به استقرار تکنسین‌های ترموبان در شعب ۴ گانه (شمال، شرق، غرب و مرکز)، پس از ثبت درخواست یا تماس تلفنی، نزدیک‌ترین تکنسین متخصص حداکثر بین ۳۰ الی ۶۰ دقیقه در محل شما حاضر خواهد بود.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button type="button" class="faq-question">
+                    <span>آیا خدمات و قطعات تعویض شده دارای گارانتی هستند؟</span>
+                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    بله، کلیه خدمات عیب‌یابی و تعمیراتی ترموبان به همراه تمامی قطعات یدکی اورجینال تعویض شده، دارای ۶ ماه ضمانت کتبی شرکتی با مهر رسمی می‌باشند و در صورت بروز هرگونه مشکل مجدد، خدمات به صورت کاملاً رایگان ارائه خواهد شد.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button type="button" class="faq-question">
+                    <span>هزینه ایاب و ذهاب و کارشناسی در صورت عدم تمایل به تعمیر چقدر است؟</span>
+                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    هزینه کارشناسی و عیب‌یابی دستگاه بر طبق نرخنامه مصوب اتحادیه محاسبه می‌گردد. شایان ذکر است در صورتی که عیب‌یابی منتهی به انجام تعمیرات توسط تکنسین ترموبان گردد، هزینه کارشناسی و ایاب و ذهاب کاملاً رایگان منظور خواهد شد.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button type="button" class="faq-question">
+                    <span>چه برندهایی از پکیج‌های دیواری را پوشش می‌دهید؟</span>
+                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    ترموبان دارای کد رسمی مجاز نصب ایران رادیاتور است و خدمات تخصصی تمامی مدل‌های ایران رادیاتور (L, M, K, Eco)، بوتان (پاویا، پرلا، بیتا، اپتیما، بنسر)، لورچ، ایساتیس، تاچی، بوش، آریستون، مرکوری و گلدیران را با قطعات فابریک ارائه می‌دهد.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button type="button" class="faq-question">
+                    <span>آیا فاکتور رسمی و داغی قطعات تحویل داده می‌شود؟</span>
+                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    بله، پس از اتمام کار و تست کامل دستگاه در حضور شما، فاکتور شرکتی با جزئیات کامل خدمات و قطعات تحویل داده می‌شود و تمامی قطعات داغی و فرسوده تعویض شده به مشتری محترم تحویل داده خواهد شد.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Structured Data (Schema.org) for Local HVAC Business & FAQ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HVACBusiness",
+      "name": "ترموبان | مرکز تخصصی تعمیر و نصب پکیج تهران",
+      "image": "<?= asset('images/logo-thermoban.png') ?>",
+      "telephone": "021-22145678",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "تهران، مناطق ۲۲ گانه",
+        "addressLocality": "تهران",
+        "addressRegion": "تهران",
+        "addressCountry": "IR"
+      },
+      "areaServed": "Tehran",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+        ],
+        "opens": "00:00",
+        "closes": "23:59"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "اعزام تکنسین پکیج در تهران چقدر زمان می‌برد؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "حداکثر بین ۳۰ الی ۶۰ دقیقه پس از ثبت درخواست در تمامی مناطق ۲۲‌گانه تهران."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "آیا خدمات و قطعات تعویض شده پکیج گارانتی دارند؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "بله، کلیه خدمات و قطعات دارای ۶ ماه ضمانت کتبی شرکتی با مهر رسمی می‌باشند."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 
 <!-- Interactive Tehran Coverage Modal -->
 <div class="site-modal" id="coverageModal">
@@ -355,30 +631,11 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a href="#quick-order" class="btn btn-primary" onclick="document.getElementById('coverageModal').classList.remove('active');">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('coverageModal').classList.remove('active'); openServiceBooking('اعزام فوری تکنسین');">
                     ثبت فوری سفارش اعزام تکنسین
-                </a>
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Interactive Service Detail Modal -->
-<div class="site-modal" id="serviceModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="serviceModalTitle">جزئیات خدمات</h3>
-                <button class="modal-close" id="serviceModalClose">&times;</button>
-            </div>
-            <div class="modal-body" id="serviceModalBody">
-                <p>توضیحات خدمات تخصصی ترموبان...</p>
-            </div>
-            <div class="modal-footer">
-                <a href="#quick-order" class="btn btn-primary" onclick="document.getElementById('serviceModal').classList.remove('active');">
-                    ثبت درخواست این خدمت
-                </a>
-            </div>
-        </div>
-    </div>
-</div>

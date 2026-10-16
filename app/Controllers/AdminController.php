@@ -26,6 +26,42 @@ class AdminController extends Controller {
     }
 
     /**
+     * Check module authorization for store managers
+     */
+    protected function requireModule(string $moduleKey, string $moduleName): void {
+        if (!Auth::isSuperAdmin()) {
+            $enabled = Setting::get($moduleKey, '1');
+            if ($enabled === '0' || $enabled === false) {
+                $_SESSION['admin_error'] = "ماژول «{$moduleName}» در حال حاضر غیرفعال است و تنها توسط سوپر ادمین (برنامه‌نویس) قابل فعال‌سازی می‌باشد.";
+                header('Location: ' . url('admin'));
+                exit;
+            }
+        }
+    }
+
+    /**
+     * Ensure only super admin can access developer tools
+     */
+    protected function requireSuperAdmin(): void {
+        if (!Auth::isSuperAdmin()) {
+            $_SESSION['admin_error'] = 'این بخش فقط برای سوپر ادمین (برنامه‌نویس سامانه) در دسترس است.';
+            header('Location: ' . url('admin'));
+            exit;
+        }
+    }
+
+    /**
+     * AJAX: Mark all notifications as read
+     */
+    public function markNotificationsRead(): void {
+        \App\Services\NotificationService::markAllAsRead();
+        $this->json([
+            'success' => true,
+            'message' => 'تمامی اعلان‌ها با موفقیت علامت‌گذاری و خوانده شدند.'
+        ]);
+    }
+
+    /**
      * Admin Dashboard Overview
      */
     public function dashboard(): void {
@@ -47,11 +83,79 @@ class AdminController extends Controller {
 
         $recentLeads = QuickOrder::where("1=1", [], "id DESC", 5);
 
+        // 1. Real Monthly Sales Trend (Last 7 Months)
+        $monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        $currentJalali = \App\Core\Jalali::toJalali(time());
+        $curMonth = $currentJalali['m'];
+        $labels = [];
+        $salesData = [];
+        $ordersCountData = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $mIdx = $curMonth - $i;
+            if ($mIdx <= 0) $mIdx += 12;
+            $labels[] = $monthNames[$mIdx - 1];
+            $salesData[] = 0;
+            $ordersCountData[] = 0;
+        }
+
+        $realOrders = Database::fetchAll("SELECT created_at, payable_amount, payment_status FROM `orders` ORDER BY id ASC");
+        if (!empty($realOrders)) {
+            foreach ($realOrders as $ro) {
+                $ts = strtotime($ro['created_at']);
+                $j = \App\Core\Jalali::toJalali($ts);
+                $mName = $monthNames[$j['m'] - 1];
+                $idx = array_search($mName, $labels, true);
+                if ($idx !== false) {
+                    $ordersCountData[$idx]++;
+                    if (($ro['payment_status'] ?? '') === 'paid') {
+                        $salesData[$idx] += round(((float)$ro['payable_amount']) / 1000000, 2);
+                    }
+                }
+            }
+        }
+
+        $salesChart = [
+            'labels' => $labels,
+            'sales'  => $salesData,
+            'counts' => $ordersCountData
+        ];
+
+        // 2. Real Brands Distribution from Database
+        $brandRows = Database::fetchAll(
+            "SELECT b.name, COUNT(p.id) as cnt 
+             FROM `brands` b 
+             LEFT JOIN `products` p ON p.brand_id = b.id 
+             GROUP BY b.id, b.name 
+             ORDER BY cnt DESC"
+        );
+        $brandLabels = [];
+        $brandCounts = [];
+        $palette = ['#EF5C16', '#011C39', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+        
+        foreach ($brandRows as $br) {
+            $brandLabels[] = $br['name'];
+            $brandCounts[] = (int) $br['cnt'];
+        }
+
+        if (empty($brandLabels)) {
+            $brandLabels = ['ایران رادیاتور', 'بوتان'];
+            $brandCounts = [0, 0];
+        }
+
+        $brandsChart = [
+            'labels' => $brandLabels,
+            'data'   => $brandCounts,
+            'colors' => array_slice($palette, 0, count($brandLabels))
+        ];
+
         $this->view('admin/dashboard', [
             'pageTitle'    => 'داشبورد مدیریت CMS ترموبان',
             'stats'        => $stats,
             'recentOrders' => $recentOrders,
             'recentLeads'  => $recentLeads,
+            'salesChart'   => $salesChart,
+            'brandsChart'  => $brandsChart,
             'activeNav'    => 'dashboard'
         ], 'layouts/admin');
     }
@@ -60,6 +164,7 @@ class AdminController extends Controller {
      * Manage Products (List, Create, Delete)
      */
     public function products(): void {
+        $this->requireModule('module_shop', 'فروشگاه آنلاین و محصولات');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? 'create';
 
@@ -145,6 +250,7 @@ class AdminController extends Controller {
      * Edit Single Product
      */
     public function editProduct(int|string $id): void {
+        $this->requireModule('module_shop', 'فروشگاه آنلاین و محصولات');
         $product = Product::find($id);
         if (!$product) {
             $_SESSION['admin_error'] = 'محصول یافت نشد.';
@@ -226,6 +332,7 @@ class AdminController extends Controller {
      * Manage Orders & Manual Order Creation
      */
     public function orders(): void {
+        $this->requireModule('module_shop', 'فروشگاه آنلاین و سفارش‌ها');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? 'update_status';
 
@@ -305,6 +412,7 @@ class AdminController extends Controller {
      * Manage Support Tickets & Customer Ticket Creation with Notifications
      */
     public function tickets(): void {
+        $this->requireModule('module_tickets', 'تیکت‌های پشتیبانی');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? 'reply';
 
@@ -430,6 +538,7 @@ class AdminController extends Controller {
      * Manage Articles (List, Create, Delete)
      */
     public function articles(): void {
+        $this->requireModule('module_blog', 'مقالات و آموزش‌ها');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? 'create';
 
@@ -439,13 +548,18 @@ class AdminController extends Controller {
                     $image = trim($_POST['image'] ?: 'hero-technician.jpg');
                 }
 
+                $catTitle = trim($_POST['category'] ?? 'راهنمای پکیج') ?: 'راهنمای پکیج';
+                $catSlug = trim($_POST['category_slug'] ?? '') ?: 'guide';
+
                 Article::create([
                     'title'            => trim($_POST['title']),
                     'slug'             => trim($_POST['slug'] ?? ('article-' . time())),
+                    'category'         => $catTitle,
+                    'category_slug'    => $catSlug,
                     'excerpt'          => trim($_POST['excerpt']),
                     'content'          => trim($_POST['content']),
                     'image'            => $image,
-                    'author_name'      => 'تیم فنی ترموبان',
+                    'author_name'      => trim($_POST['author_name'] ?? 'تیم فنی ترموبان') ?: 'تیم فنی ترموبان',
                     'reading_time'     => trim($_POST['reading_time'] ?: '۵ دقیقه'),
                     'is_published'     => 1,
                     'meta_title'       => trim($_POST['meta_title'] ?? '') ?: null,
@@ -478,6 +592,7 @@ class AdminController extends Controller {
      * Edit Single Article
      */
     public function editArticle(int|string $id): void {
+        $this->requireModule('module_blog', 'مقالات و آموزش‌ها');
         $article = Article::find($id);
         if (!$article) {
             $_SESSION['admin_error'] = 'مقاله یافت نشد.';
@@ -490,12 +605,18 @@ class AdminController extends Controller {
                 $image = trim($_POST['image'] ?? '') ?: ($article['image'] ?? 'hero-technician.jpg');
             }
 
+            $catTitle = trim($_POST['category'] ?? ($article['category'] ?? 'راهنمای پکیج')) ?: 'راهنمای پکیج';
+            $catSlug = trim($_POST['category_slug'] ?? ($article['category_slug'] ?? 'guide')) ?: 'guide';
+
             Article::update($id, [
                 'title'            => trim($_POST['title']),
                 'slug'             => trim($_POST['slug']),
+                'category'         => $catTitle,
+                'category_slug'    => $catSlug,
                 'excerpt'          => trim($_POST['excerpt']),
                 'content'          => trim($_POST['content']),
                 'image'            => $image,
+                'author_name'      => trim($_POST['author_name'] ?? ($article['author_name'] ?? 'تیم فنی ترموبان')) ?: 'تیم فنی ترموبان',
                 'reading_time'     => trim($_POST['reading_time'] ?: '۵ دقیقه'),
                 'is_published'     => isset($_POST['is_published']) ? 1 : 0,
                 'meta_title'       => trim($_POST['meta_title'] ?? '') ?: null,
@@ -603,7 +724,9 @@ class AdminController extends Controller {
      * Payment Gateways Configuration
      */
     public function gateways(): void {
+        $this->requireModule('module_gateways', 'درگاه‌های پرداخت آنلاین');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->requireSuperAdmin();
             $keys = [
                 'gateway_default'           => trim($_POST['gateway_default'] ?? 'zarinpal'),
                 'gateway_zarinpal_merchant' => trim($_POST['gateway_zarinpal_merchant'] ?? ''),
@@ -636,9 +759,11 @@ class AdminController extends Controller {
      * SMS Panel Configuration & Testing
      */
     public function sms(): void {
+        $this->requireModule('module_sms', 'سامانه پیامک');
         $testResult = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->requireSuperAdmin();
             $action = $_POST['action'] ?? 'save_settings';
 
             if ($action === 'save_settings') {
@@ -835,6 +960,7 @@ class AdminController extends Controller {
      * Database Backups, Retention & Restore (cPanel Safe & Files.ir Cloud)
      */
     public function backups(): void {
+        $this->requireSuperAdmin();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? '';
 
@@ -906,6 +1032,7 @@ class AdminController extends Controller {
      * Download Backup File
      */
     public function downloadBackup(string $file = ''): void {
+        $this->requireSuperAdmin();
         $path = \App\Services\BackupService::getBackupPath($file);
         if (!$path) {
             $_SESSION['admin_error'] = 'فایل مورد نظر یافت نشد.';
@@ -927,6 +1054,7 @@ class AdminController extends Controller {
      * Visitor Analytics Dashboard
      */
     public function analytics(): void {
+        $this->requireModule('module_analytics', 'آمار بازدیدکنندگان');
         $analyticsEnabled = Setting::get('module_analytics', '1') === '1';
         $stats = \App\Models\VisitorLog::getStats();
         $recentVisitors = Database::fetchAll("SELECT * FROM `visitor_logs` ORDER BY id DESC LIMIT 25");
@@ -991,6 +1119,7 @@ class AdminController extends Controller {
      * Brand Management under coverage
      */
     public function brands(): void {
+        $this->requireModule('module_shop', 'برندهای تحت پوشش فروشگاه');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? 'create';
 
@@ -1079,6 +1208,9 @@ class AdminController extends Controller {
     public function media(): void {
         if (isset($_GET['format']) && $_GET['format'] === 'json') {
             $mediaItems = \App\Models\Media::getRecent(60);
+            foreach ($mediaItems as &$item) {
+                $item['url'] = upload_url($item['file_path']);
+            }
             $this->json(['success' => true, 'media' => $mediaItems]);
             return;
         }
@@ -1153,7 +1285,7 @@ class AdminController extends Controller {
                         'filename'      => $newFilename,
                         'original_name' => $origName,
                         'file_path'     => $relPath,
-                        'url'           => url($relPath)
+                        'url'           => upload_url($relPath)
                     ]
                 ]);
                 return;

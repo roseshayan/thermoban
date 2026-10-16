@@ -53,7 +53,7 @@ class HomeController extends Controller {
                         'title' => $a['title'],
                         'slug' => $a['slug'] ?? 'post-' . $a['id'],
                         'excerpt' => $a['excerpt'] ?? '',
-                        'date' => !empty($a['created_at']) ? date('Y/m/d', strtotime($a['created_at'])) : '۱۴۰۵/۰۸/۰۶',
+                        'date' => !empty($a['created_at']) ? to_shamsi($a['created_at']) : '۱۴۰۵/۰۸/۰۶',
                         'image' => $a['image'] ?? 'technician-thumb.jpg'
                     ];
                 }
@@ -144,6 +144,15 @@ class HomeController extends Controller {
         $phone = trim($_POST['phone'] ?? '');
         $service = trim($_POST['service'] ?? '');
         $district = trim($_POST['district'] ?? '');
+        $brand = trim($_POST['brand'] ?? '');
+        $userNotes = trim($_POST['notes'] ?? '');
+        $combinedNotes = '';
+        if (!empty($brand)) {
+            $combinedNotes .= "برند: " . $brand . " | ";
+        }
+        if (!empty($userNotes)) {
+            $combinedNotes .= $userNotes;
+        }
 
         if (empty($fullname) || empty($phone)) {
             $this->json(['success' => false, 'message' => 'لطفاً نام و شماره تماس را وارد فرمایید.'], 422);
@@ -154,9 +163,10 @@ class HomeController extends Controller {
             \App\Models\QuickOrder::create([
                 'fullname'   => $fullname,
                 'phone'      => $phone,
-                'service'    => $service,
-                'district'   => $district,
+                'service'    => $service ?: 'تعمیر و سرویس پکیج',
+                'district'   => $district ?: 'تهران',
                 'status'     => 'pending',
+                'notes'      => $combinedNotes ?: null,
                 'created_at' => date('Y-m-d H:i:s')
             ]);
         } catch (\Throwable $e) {

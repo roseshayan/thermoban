@@ -2,6 +2,9 @@
 // Prevent direct access
 defined('ROOT_PATH') or exit('No direct script access allowed');
 
+// Set default timezone to Iran / Tehran
+date_default_timezone_set('Asia/Tehran');
+
 // Base paths
 define('APP_PATH', ROOT_PATH . DIRECTORY_SEPARATOR . 'app');
 define('VIEW_PATH', APP_PATH . DIRECTORY_SEPARATOR . 'Views');
@@ -53,7 +56,76 @@ define('BASE_URL', rtrim(get_base_url(), '/') . '/');
  * Return absolute URL for a given path
  */
 function url(string $path = ''): string {
-    return BASE_URL . ltrim($path, '/');
+    $cleanPath = ltrim($path, '/');
+    // If it's an uploaded file (e.g. uploads/avatars/...) ensure it resolves properly
+    if (str_starts_with($cleanPath, 'uploads/') || str_starts_with($cleanPath, 'public/uploads/')) {
+        return upload_url($cleanPath);
+    }
+    return BASE_URL . $cleanPath;
+}
+
+/**
+ * Return correct URL for uploaded files (avatars, media, products, brands)
+ */
+function upload_url(?string $path = ''): string {
+    if (empty($path)) return '';
+    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+        return $path;
+    }
+    $cleanPath = ltrim($path, '/');
+    if (str_starts_with($cleanPath, 'public/')) {
+        $cleanPath = substr($cleanPath, 7);
+    }
+    if (strpos(BASE_URL, '/public/') !== false) {
+        return BASE_URL . $cleanPath;
+    }
+    return BASE_URL . 'public/' . $cleanPath;
+}
+
+/**
+ * Return correct avatar URL (uploaded avatar or default fallback)
+ */
+function avatar_url(?string $avatar = ''): string {
+    if (empty($avatar)) {
+        return asset('images/hero-technician.jpg');
+    }
+    if (str_starts_with($avatar, 'http://') || str_starts_with($avatar, 'https://')) {
+        return $avatar;
+    }
+    $clean = ltrim($avatar, '/');
+    if (str_starts_with($clean, 'uploads/') || str_starts_with($clean, 'public/uploads/')) {
+        return upload_url($clean);
+    }
+    // If it's a filename from assets/images
+    return asset('images/' . $clean);
+}
+
+/**
+ * Format Gregorian date/timestamp to Solar Hijri (Shamsi / Jalali)
+ */
+function to_shamsi($datetime = null, string $format = 'Y/m/d', bool $persianDigits = true): string {
+    return \App\Core\Jalali::format($format, $datetime, $persianDigits);
+}
+
+/**
+ * Convert numbers to Persian digits (e.g. 123 -> ۱۲۳)
+ */
+function fa_num($str): string {
+    return \App\Core\Jalali::toPersianNumbers((string)$str);
+}
+
+/**
+ * Convert Persian numbers to English digits
+ */
+function en_num($str): string {
+    return \App\Core\Jalali::toEnglishNumbers((string)$str);
+}
+
+/**
+ * Return relative Persian time (e.g. ۱۰ دقیقه پیش)
+ */
+function time_ago($datetime): string {
+    return \App\Core\Jalali::timeAgo($datetime);
 }
 
 /**

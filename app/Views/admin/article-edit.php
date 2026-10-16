@@ -158,8 +158,8 @@
                 </div>
 
                 <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px;">
-                    <div><i class="fa-solid fa-calendar-days" style="margin-left: 6px;"></i> تاریخ ثبت: <?= date('Y/m/d', strtotime($article['created_at'])) ?></div>
-                    <div style="margin-top: 6px;"><i class="fa-solid fa-eye" style="margin-left: 6px;"></i> مجموع بازدید: <?= number_format($article['views_count'] ?? 0) ?></div>
+                    <div><i class="fa-solid fa-calendar-days" style="margin-left: 6px;"></i> تاریخ ثبت: <?= to_shamsi($article['created_at']) ?></div>
+                    <div style="margin-top: 6px;"><i class="fa-solid fa-eye" style="margin-left: 6px;"></i> مجموع بازدید: <?= fa_num(number_format($article['views_count'] ?? 0)) ?></div>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100" style="padding: 12px; font-weight: 800; font-size: 0.95rem;">
@@ -200,6 +200,26 @@
                 </div>
             </div>
 
+            <!-- Category & Author Box -->
+            <div class="admin-card" style="background: #fff; border-radius: 16px; padding: 22px; border: 1px solid #e2e8f0;">
+                <h3 style="margin: 0 0 14px 0; font-size: 1rem; color: #011C39; font-weight: 800;">
+                    <i class="fa-solid fa-folder-tree text-orange"></i>
+                    دسته‌بندی و نویسنده
+                </h3>
+                <div class="admin-form-group" style="margin-bottom: 12px;">
+                    <label class="admin-label">عنوان دسته‌بندی</label>
+                    <input type="text" name="category" class="admin-input" value="<?= e($article['category'] ?? 'راهنمای پکیج') ?>" placeholder="مثال: کدهای خطای پکیج">
+                </div>
+                <div class="admin-form-group" style="margin-bottom: 12px;">
+                    <label class="admin-label">نامک دسته‌بندی (Slug)</label>
+                    <input type="text" name="category_slug" class="admin-input" dir="ltr" value="<?= e($article['category_slug'] ?? 'error-codes') ?>" placeholder="error-codes">
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">نام نویسنده</label>
+                    <input type="text" name="author_name" class="admin-input" value="<?= e($article['author_name'] ?? 'مهندس رضایی (تکنسین ارشد)') ?>">
+                </div>
+            </div>
+
             <!-- Reading Time Box -->
             <div class="admin-card" style="background: #fff; border-radius: 16px; padding: 22px; border: 1px solid #e2e8f0;">
                 <h3 style="margin: 0 0 14px 0; font-size: 1rem; color: #011C39; font-weight: 800;">
@@ -215,33 +235,13 @@
 </form>
 
 <script>
-    // Initialize Quill Editor
+    // Initialize Persian RTL Quill Editor
     var quill;
     document.addEventListener('DOMContentLoaded', function() {
-        if (typeof Quill !== 'undefined') {
-            quill = new Quill('#quillEditor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, 4, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'align': [] }],
-                        ['link', 'image', 'blockquote', 'code-block'],
-                        ['clean']
-                    ]
-                }
+        if (typeof window.initPersianQuill === 'function') {
+            quill = window.initPersianQuill('#quillEditor', '#quillHiddenContent', {
+                placeholder: 'متن کامل مقاله تخصصی را اینجا وارد نمایید...'
             });
-
-            // Sync with hidden input on submit
-            var form = document.getElementById('articleEditForm');
-            if (form) {
-                form.addEventListener('submit', function() {
-                    var html = quill.root.innerHTML;
-                    document.getElementById('quillHiddenContent').value = html;
-                });
-            }
         }
         updateSeoPreview();
     });

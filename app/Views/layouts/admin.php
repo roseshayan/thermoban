@@ -1,4 +1,14 @@
-<?php defined('ROOT_PATH') or exit('No direct script access allowed'); ?>
+<?php 
+defined('ROOT_PATH') or exit('No direct script access allowed'); 
+$isSuperAdmin = \App\Core\Auth::isSuperAdmin();
+$modSettings = \App\Models\Setting::allKeyVal();
+$shopActive = $isSuperAdmin || (($modSettings['module_shop'] ?? '1') === '1');
+$blogActive = $isSuperAdmin || (($modSettings['module_blog'] ?? '1') === '1');
+$ticketsActive = $isSuperAdmin || (($modSettings['module_tickets'] ?? '1') === '1');
+$analyticsActive = $isSuperAdmin || (($modSettings['module_analytics'] ?? '1') === '1');
+$gatewaysActive = $isSuperAdmin || (($modSettings['module_gateways'] ?? '1') === '1');
+$smsActive = $isSuperAdmin || (($modSettings['module_sms'] ?? '1') === '1');
+?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -7,325 +17,12 @@
     <title><?= e($pageTitle ?? 'پنل مدیریت اختصاصی ترموبان') ?></title>
     <link rel="icon" type="image/png" href="<?= asset('images/logo-icon.png') ?>">
     <link rel="stylesheet" href="<?= asset('css/fonts.css') ?>">
+    <link rel="stylesheet" href="<?= asset('vendor/bootstrap/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= asset('vendor/fontawesome/css/all.min.css') ?>">
     <link rel="stylesheet" href="<?= asset('vendor/sweetalert2/sweetalert2.min.css') ?>">
     <link rel="stylesheet" href="<?= asset('vendor/quill/quill.snow.css') ?>">
-    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
-    <style>
-        :root {
-            --admin-sidebar-w: 260px;
-        }
-        body.admin-body {
-            background-color: #f1f5f9;
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
-        }
-        .admin-sidebar {
-            width: var(--admin-sidebar-w);
-            background-color: #011C39;
-            color: #FFFFFF;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            z-index: 100;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-        }
-        .admin-brand {
-            padding: 24px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .admin-brand img {
-            width: 36px;
-            height: 36px;
-        }
-        .admin-brand-text h2 {
-            font-size: 1.1rem;
-            color: #FFFFFF;
-            margin: 0;
-            font-weight: 800;
-        }
-        .admin-brand-text span {
-            font-size: 0.75rem;
-            color: #EF5C16;
-            font-weight: 700;
-        }
-        .admin-menu {
-            padding: 20px 0;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        .admin-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 24px;
-            color: #cbd5e1;
-            font-size: 0.92rem;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            border-right: 4px solid transparent;
-        }
-        .admin-nav-item:hover {
-            background-color: rgba(255,255,255,0.06);
-            color: #FFFFFF;
-        }
-        .admin-nav-item.active {
-            background-color: rgba(239, 92, 22, 0.15);
-            color: #EF5C16;
-            border-right-color: #EF5C16;
-        }
-        .admin-main-wrap {
-            margin-right: var(--admin-sidebar-w);
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            width: calc(100% - var(--admin-sidebar-w));
-            transition: all 0.3s ease;
-        }
-        .admin-topbar {
-            background-color: #FFFFFF;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 35px;
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            z-index: 90;
-        }
-        .admin-topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .admin-hamburger-btn {
-            display: none;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            width: 42px;
-            height: 42px;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            color: #011C39;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .admin-hamburger-btn:hover {
-            background: #e2e8f0;
-            color: #EF5C16;
-        }
-        .admin-sidebar-close {
-            display: none;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #ffffff;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin-right: auto;
-            align-items: center;
-            justify-content: center;
-        }
-        .admin-sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(1, 28, 57, 0.65);
-            backdrop-filter: blur(2px);
-            z-index: 9998;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .admin-sidebar-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-        .admin-topbar-title {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #011C39;
-        }
-        .admin-user-nav {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .admin-user-pill {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #334155;
-        }
-        .admin-user-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 2px solid #EF5C16;
-            object-fit: cover;
-        }
-        .admin-content-area {
-            padding: 30px;
-            flex-grow: 1;
-        }
-        .admin-footer-bar {
-            padding: 18px 30px;
-            background-color: #FFFFFF;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.82rem;
-            color: #64748b;
-        }
-        .btn-live-site {
-            background-color: #f1f5f9;
-            color: #011C39;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.84rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-live-site:hover {
-            background-color: #011C39;
-            color: #FFFFFF;
-        }
-
-        /* 100% Mobile & Tablet Responsive Engine */
-        @media (max-width: 992px) {
-            .admin-hamburger-btn {
-                display: flex;
-            }
-            .admin-sidebar-close {
-                display: flex;
-            }
-            .admin-sidebar {
-                width: 280px;
-                right: -290px;
-                z-index: 9999;
-                transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: -4px 0 25px rgba(0,0,0,0.3);
-            }
-            .admin-sidebar.active {
-                right: 0;
-            }
-            .admin-main-wrap {
-                margin-right: 0 !important;
-                width: 100% !important;
-            }
-            .admin-topbar {
-                padding: 0 16px;
-                height: 64px;
-            }
-            .admin-topbar-title {
-                font-size: 0.98rem;
-                max-width: 240px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .admin-content-area {
-                padding: 16px 12px;
-            }
-            .admin-footer-bar {
-                flex-direction: column;
-                gap: 8px;
-                text-align: center;
-                padding: 14px;
-            }
-            .btn-live-site span {
-                display: none;
-            }
-            .admin-user-pill span {
-                display: none;
-            }
-        }
-        @media (max-width: 576px) {
-            .admin-topbar-title {
-                display: none;
-            }
-            .admin-user-nav {
-                gap: 8px;
-            }
-            .admin-card {
-                padding: 16px 12px !important;
-                border-radius: 10px !important;
-        }
-
-        /* Admin Table Pagination & Filtering Styles */
-        .admin-table-pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            font-size: 0.86rem;
-            color: #64748b;
-        }
-        .admin-pagination-pages {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .admin-page-btn {
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-            color: #334155;
-            min-width: 34px;
-            height: 34px;
-            padding: 0 8px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .admin-page-btn:hover:not(:disabled) {
-            background: #f1f5f9;
-            color: #EF5C16;
-            border-color: #cbd5e1;
-        }
-        .admin-page-btn.active {
-            background: #EF5C16;
-            color: #ffffff;
-            border-color: #EF5C16;
-        }
-        .admin-page-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .admin-page-size-select {
-            padding: 5px 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.82rem;
-            color: #334155;
-            background: #ffffff;
-            outline: none;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="<?= asset('css/quill-persian.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>">
 </head>
 <body class="admin-body">
 
@@ -350,30 +47,36 @@
                 <i class="fa-solid fa-chart-pie" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>داشبورد آماری</span>
             </a>
-            <a href="<?= url('admin/orders') ?>" class="admin-nav-item <?= ($activeNav === 'orders') ? 'active' : '' ?>">
-                <i class="fa-solid fa-file-invoice-dollar" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>مدیریت سفارش‌ها</span>
-            </a>
-            <a href="<?= url('admin/products') ?>" class="admin-nav-item <?= ($activeNav === 'products') ? 'active' : '' ?>">
-                <i class="fa-solid fa-boxes-stacked" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>محصولات پکیج</span>
-            </a>
-            <a href="<?= url('admin/brands') ?>" class="admin-nav-item <?= ($activeNav === 'brands') ? 'active' : '' ?>">
-                <i class="fa-solid fa-certificate" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>برندهای تحت پوشش</span>
-            </a>
-            <a href="<?= url('admin/tickets') ?>" class="admin-nav-item <?= ($activeNav === 'tickets') ? 'active' : '' ?>">
-                <i class="fa-solid fa-headset" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>تیکت‌های پشتیبانی</span>
-            </a>
+            <?php if ($shopActive): ?>
+                <a href="<?= url('admin/orders') ?>" class="admin-nav-item <?= ($activeNav === 'orders') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-file-invoice-dollar" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>مدیریت سفارش‌ها</span>
+                </a>
+                <a href="<?= url('admin/products') ?>" class="admin-nav-item <?= ($activeNav === 'products') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-boxes-stacked" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>محصولات پکیج</span>
+                </a>
+                <a href="<?= url('admin/brands') ?>" class="admin-nav-item <?= ($activeNav === 'brands') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-certificate" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>برندهای تحت پوشش</span>
+                </a>
+            <?php endif; ?>
+            <?php if ($ticketsActive): ?>
+                <a href="<?= url('admin/tickets') ?>" class="admin-nav-item <?= ($activeNav === 'tickets') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-headset" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>تیکت‌های پشتیبانی</span>
+                </a>
+            <?php endif; ?>
             <a href="<?= url('admin/leads') ?>" class="admin-nav-item <?= ($activeNav === 'leads') ? 'active' : '' ?>">
                 <i class="fa-solid fa-phone-volume" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>سفارشات سریع و تماس‌ها</span>
             </a>
-            <a href="<?= url('admin/articles') ?>" class="admin-nav-item <?= ($activeNav === 'articles') ? 'active' : '' ?>">
-                <i class="fa-solid fa-newspaper" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>مقالات آموزشی</span>
-            </a>
+            <?php if ($blogActive): ?>
+                <a href="<?= url('admin/articles') ?>" class="admin-nav-item <?= ($activeNav === 'articles') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-newspaper" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>مقالات آموزشی</span>
+                </a>
+            <?php endif; ?>
             <a href="<?= url('admin/media') ?>" class="admin-nav-item <?= ($activeNav === 'media') ? 'active' : '' ?>">
                 <i class="fa-solid fa-photo-film" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>کتابخانه پرونده‌ها</span>
@@ -382,14 +85,18 @@
                 <i class="fa-solid fa-comments" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>نظرات و دیدگاه‌ها</span>
             </a>
-            <a href="<?= url('admin/analytics') ?>" class="admin-nav-item <?= ($activeNav === 'analytics') ? 'active' : '' ?>">
-                <i class="fa-solid fa-chart-simple" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>آمار بازدیدکنندگان</span>
-            </a>
-            <a href="<?= url('admin/backups') ?>" class="admin-nav-item <?= ($activeNav === 'backups') ? 'active' : '' ?>">
-                <i class="fa-solid fa-database" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>پشتیبان‌گیری و بازیابی</span>
-            </a>
+            <?php if ($analyticsActive): ?>
+                <a href="<?= url('admin/analytics') ?>" class="admin-nav-item <?= ($activeNav === 'analytics') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-chart-simple" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>آمار بازدیدکنندگان</span>
+                </a>
+            <?php endif; ?>
+            <?php if ($isSuperAdmin): ?>
+                <a href="<?= url('admin/backups') ?>" class="admin-nav-item <?= ($activeNav === 'backups') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-database" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>پشتیبان‌گیری و بازیابی</span>
+                </a>
+            <?php endif; ?>
             <a href="<?= url('admin/users') ?>" class="admin-nav-item <?= ($activeNav === 'users') ? 'active' : '' ?>">
                 <i class="fa-solid fa-users" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>مدیریت کاربران</span>
@@ -398,15 +105,19 @@
                 <i class="fa-solid fa-chart-line" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>سئو (Rank Math Pro)</span>
             </a>
-            <a href="<?= url('admin/gateways') ?>" class="admin-nav-item <?= ($activeNav === 'gateways') ? 'active' : '' ?>">
-                <i class="fa-solid fa-credit-card" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>درگاه‌های پرداخت</span>
-            </a>
-            <a href="<?= url('admin/sms') ?>" class="admin-nav-item <?= ($activeNav === 'sms') ? 'active' : '' ?>">
-                <i class="fa-solid fa-comment-sms" style="font-size: 1.1rem; width: 22px;"></i>
-                <span>پنل پیامک (ملی‌پیامک)</span>
-            </a>
-            <?php if (\App\Core\Auth::isSuperAdmin()): ?>
+            <?php if ($isSuperAdmin && $gatewaysActive): ?>
+                <a href="<?= url('admin/gateways') ?>" class="admin-nav-item <?= ($activeNav === 'gateways') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-credit-card" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>درگاه‌های پرداخت</span>
+                </a>
+            <?php endif; ?>
+            <?php if ($isSuperAdmin && $smsActive): ?>
+                <a href="<?= url('admin/sms') ?>" class="admin-nav-item <?= ($activeNav === 'sms') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-comment-sms" style="font-size: 1.1rem; width: 22px;"></i>
+                    <span>پنل پیامک (ملی‌پیامک)</span>
+                </a>
+            <?php endif; ?>
+            <?php if ($isSuperAdmin): ?>
                 <a href="<?= url('admin/modules') ?>" class="admin-nav-item <?= ($activeNav === 'modules') ? 'active' : '' ?>" style="border-right-color: #f59e0b; color: #fbbf24;">
                     <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 1.1rem; width: 22px;"></i>
                     <span>ماژول‌ها و پلن‌ها</span>
@@ -436,17 +147,113 @@
                     <?= e($pageTitle ?? 'سیستم مدیریت محتوای اختصاصی ترموبان') ?>
                 </div>
             </div>
+            
             <div class="admin-user-nav">
+                <!-- Live Clock & Persian Shamsi Date Widget -->
+                <div class="admin-live-clock-badge" id="adminLiveClockWidget" title="تاریخ و ساعت زنده سیستم">
+                    <div class="live-clock-item time">
+                        <i class="fa-solid fa-clock text-orange"></i>
+                        <span id="liveClockTime"><?= fa_num(date('H:i:s')) ?></span>
+                    </div>
+                    <div class="live-clock-divider"></div>
+                    <div class="live-clock-item date">
+                        <i class="fa-solid fa-calendar-days text-orange"></i>
+                        <span id="liveClockDate"><?= to_shamsi(null, 'l d F Y') ?></span>
+                    </div>
+                </div>
+
+                <!-- Notifications Bell & Dropdown -->
+                <?php 
+                $adminAlerts = \App\Services\NotificationService::getAdminAlerts();
+                ?>
+                <div class="admin-notifications-dropdown" id="adminNotificationsWrap">
+                    <button type="button" class="admin-notif-btn" id="adminNotifToggleBtn" aria-label="اعلان‌ها" title="اعلان‌ها و رویدادهای جدید">
+                        <i class="fa-solid fa-bell"></i>
+                        <?php if ($adminAlerts['total'] > 0): ?>
+                            <span class="notif-badge-pill"><?= fa_num($adminAlerts['total']) ?></span>
+                            <span class="notif-pulse"></span>
+                        <?php endif; ?>
+                    </button>
+
+                    <div class="notif-dropdown-menu" id="adminNotifMenu">
+                        <div class="notif-dropdown-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; background: #fafafa;">
+                            <div style="font-weight: 800; color: #011C39; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-bell text-orange"></i>
+                                <span>مرکز اعلان‌ها</span>
+                                <span class="notif-header-counter" style="font-size: 0.72rem; background: #ffedd5; color: #ea580c; padding: 2px 8px; border-radius: 10px; font-weight: 800;"><?= $adminAlerts['total'] > 0 ? (fa_num($adminAlerts['total']) . ' جدید') : 'به‌روز' ?></span>
+                            </div>
+                            <button type="button" id="btnMarkAllAlertsRead" style="background: none; border: 1px solid #bae6fd; color: #0284c7; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="علامت‌گذاری تمامی اعلان‌ها به عنوان خوانده شده">
+                                <i class="fa-solid fa-check-double"></i>
+                                <span>خواندن همه</span>
+                            </button>
+                        </div>
+
+                        <div class="notif-list">
+                            <!-- Tickets Alert -->
+                            <a href="<?= url('admin/tickets') ?>" class="notif-item <?= $adminAlerts['open_tickets'] > 0 ? 'unread' : '' ?>">
+                                <div class="notif-icon-box ticket">
+                                    <i class="fa-solid fa-headset"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title">تیکت‌های مشتریان</div>
+                                    <div class="notif-desc">
+                                        <?= $adminAlerts['open_tickets'] > 0 ? (fa_num($adminAlerts['open_tickets']) . ' تیکت جدید در انتظار بررسی') : 'تیکت جدیدی در انتظار نیست' ?>
+                                    </div>
+                                </div>
+                                <?php if ($adminAlerts['open_tickets'] > 0): ?>
+                                    <span class="notif-counter"><?= fa_num($adminAlerts['open_tickets']) ?></span>
+                                <?php endif; ?>
+                            </a>
+
+                            <!-- Contact Messages & Leads Alert -->
+                            <a href="<?= url('admin/leads') ?>" class="notif-item <?= $adminAlerts['unread_leads'] > 0 ? 'unread' : '' ?>">
+                                <div class="notif-icon-box lead">
+                                    <i class="fa-solid fa-phone-volume"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title">تماس‌ها و پیام‌های جدید</div>
+                                    <div class="notif-desc">
+                                        <?= $adminAlerts['unread_leads'] > 0 ? (fa_num($adminAlerts['unread_leads']) . ' پیام تماس و سفارش سریع جدید') : 'پیام جدیدی وجود ندارد' ?>
+                                    </div>
+                                </div>
+                                <?php if ($adminAlerts['unread_leads'] > 0): ?>
+                                    <span class="notif-counter"><?= fa_num($adminAlerts['unread_leads']) ?></span>
+                                <?php endif; ?>
+                            </a>
+
+                            <!-- Comments Alert -->
+                            <a href="<?= url('admin/comments') ?>" class="notif-item <?= $adminAlerts['pending_comments'] > 0 ? 'unread' : '' ?>">
+                                <div class="notif-icon-box comment">
+                                    <i class="fa-solid fa-comments"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title">دیدگاه‌ها و نظرات</div>
+                                    <div class="notif-desc">
+                                        <?= $adminAlerts['pending_comments'] > 0 ? (fa_num($adminAlerts['pending_comments']) . ' نظر جدید در انتظار تایید') : 'دیدگاه معلقی وجود ندارد' ?>
+                                    </div>
+                                </div>
+                                <?php if ($adminAlerts['pending_comments'] > 0): ?>
+                                    <span class="notif-counter"><?= fa_num($adminAlerts['pending_comments']) ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </div>
+
+                        <div class="notif-dropdown-footer">
+                            <a href="<?= url('admin') ?>"><i class="fa-solid fa-chart-pie" style="margin-left: 4px;"></i> مشاهده داشبورد آماری کل</a>
+                        </div>
+                    </div>
+                </div>
+
                 <a href="<?= url() ?>" target="_blank" class="btn-live-site">
                     <?= icon('eye', '', 16) ?>
                     <span>مشاهده سایت اصلی</span>
                 </a>
                 <?php 
                 $currAdmin = \App\Core\Auth::user();
-                $adminAvatar = !empty($currAdmin['avatar']) ? (str_starts_with($currAdmin['avatar'], 'http') ? $currAdmin['avatar'] : url($currAdmin['avatar'])) : asset('images/hero-technician.jpg');
+                $adminAvatar = avatar_url($currAdmin['avatar'] ?? null);
                 ?>
                 <a href="<?= url('admin/profile') ?>" class="admin-user-pill" style="text-decoration: none; color: inherit;" title="مشاهده و ویرایش مشخصات من">
-                    <img src="<?= $adminAvatar ?>" alt="مدیر" class="admin-user-avatar">
+                    <img src="<?= $adminAvatar ?>" alt="مدیر" class="admin-user-avatar" id="topbarAdminAvatar">
                     <span><?= e($currAdmin['name'] ?? 'مدیریت سیستم') ?></span>
                 </a>
                 <a href="<?= url('logout') ?>" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.82rem; color: #ef4444; border-color: #fca5a5;">
@@ -471,6 +278,7 @@
     </div>
 
     <!-- Vendor JS (Zero CDN) -->
+    <script src="<?= asset('vendor/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
     <script src="<?= asset('vendor/chartjs/chart.umd.min.js') ?>"></script>
     <script src="<?= asset('vendor/sweetalert2/sweetalert2.all.min.js') ?>"></script>
     <script>
@@ -521,6 +329,7 @@
         })();
     </script>
     <script src="<?= asset('vendor/quill/quill.js') ?>"></script>
+    <script src="<?= asset('js/quill-persian.js') ?>"></script>
 
     <!-- Global Media Picker Modal -->
     <div id="globalMediaPickerModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:99999; align-items:center; justify-content:center; padding:20px;">
@@ -598,9 +407,8 @@
             }
 
             var html = '';
-            var baseUrl = "<?= url() ?>";
             items.forEach(function(item) {
-                var fileUrl = baseUrl + item.file_path.replace(/^\//, '');
+                var fileUrl = item.url ? item.url : ("<?= url() ?>" + item.file_path.replace(/^\//, ''));
                 html += '<div class="media-pick-item" onclick="selectMediaPickerItem(\'' + fileUrl + '\', this)" style="border:2px solid #e2e8f0; border-radius:10px; overflow:hidden; cursor:pointer; background:#fff; text-align:center; transition:all 0.2s ease;">' +
                     '<div style="height:100px; display:flex; align-items:center; justify-content:center; background:#f8fafc; overflow:hidden;">' +
                         '<img src="' + fileUrl + '" alt="' + item.original_name + '" style="max-width:100%; max-height:100px; object-fit:contain;">' +
@@ -674,6 +482,91 @@
                 loadMediaPickerItems();
             });
         }
+
+        // Live Clock & Notifications Dropdown Handler
+        (function() {
+            function updateAdminLiveClock() {
+                var now = new Date();
+                try {
+                    var timeStr = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    var dateStr = now.toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    var timeEl = document.getElementById('liveClockTime');
+                    var dateEl = document.getElementById('liveClockDate');
+                    if (timeEl) timeEl.innerText = timeStr;
+                    if (dateEl) dateEl.innerText = dateStr;
+                } catch (e) {
+                    var h = String(now.getHours()).padStart(2, '0');
+                    var m = String(now.getMinutes()).padStart(2, '0');
+                    var s = String(now.getSeconds()).padStart(2, '0');
+                    var timeEl = document.getElementById('liveClockTime');
+                    if (timeEl) timeEl.innerText = h + ':' + m + ':' + s;
+                }
+            }
+            setInterval(updateAdminLiveClock, 1000);
+            updateAdminLiveClock();
+
+            var notifBtn = document.getElementById('adminNotifToggleBtn');
+            var notifMenu = document.getElementById('adminNotifMenu');
+            var notifWrap = document.getElementById('adminNotificationsWrap');
+
+            if (notifBtn && notifMenu) {
+                notifBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notifMenu.classList.toggle('show');
+                    notifBtn.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (notifWrap && !notifWrap.contains(e.target)) {
+                        notifMenu.classList.remove('show');
+                        notifBtn.classList.remove('active');
+                    }
+                });
+            }
+
+            var markReadBtn = document.getElementById('btnMarkAllAlertsRead');
+            if (markReadBtn) {
+                markReadBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    markReadBtn.disabled = true;
+                    markReadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت...';
+
+                    var formData = new FormData();
+                    formData.append('csrf_token', window.THERMOBAN_CONFIG ? window.THERMOBAN_CONFIG.csrfToken : '');
+
+                    fetch("<?= url('admin/notifications/mark-read') ?>", {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        markReadBtn.innerHTML = '<i class="fa-solid fa-check" style="color:#16a34a;"></i> خوانده شد';
+                        var badge = document.querySelector('.notif-badge-pill');
+                        var pulse = document.querySelector('.notif-pulse');
+                        if (badge) badge.style.display = 'none';
+                        if (pulse) pulse.style.display = 'none';
+                        var headerCounter = document.querySelector('.notif-header-counter');
+                        if (headerCounter) {
+                            headerCounter.innerText = 'به‌روز';
+                            headerCounter.style.background = '#e2e8f0';
+                            headerCounter.style.color = '#64748b';
+                        }
+                        document.querySelectorAll('.notif-item.unread').forEach(function(el) {
+                            el.classList.remove('unread');
+                        });
+                        document.querySelectorAll('.notif-list .notif-counter').forEach(function(el) {
+                            el.style.display = 'none';
+                        });
+                        setTimeout(function() { markReadBtn.disabled = false; }, 1000);
+                    })
+                    .catch(function() {
+                        markReadBtn.disabled = false;
+                        markReadBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> خواندن همه';
+                    });
+                });
+            }
+        })();
     </script>
     <script src="<?= asset('js/main.js') ?>"></script>
 </body>

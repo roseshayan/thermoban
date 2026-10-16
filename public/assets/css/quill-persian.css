@@ -1,0 +1,149 @@
+/**
+ * Thermoban CMS - Quill Rich Text Editor Persian & RTL Customization
+ * Full RTL support, Vazirmatn typography, Persian toolbar labels & tooltips
+ */
+
+.ql-snow .ql-editor {
+    direction: rtl !important;
+    text-align: right !important;
+    font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 0.96rem !important;
+    line-height: 1.85 !important;
+    min-height: 260px;
+    color: #1e293b;
+}
+
+.ql-snow .ql-editor.ql-blank::before {
+    right: 16px !important;
+    left: auto !important;
+    font-style: normal !important;
+    font-family: 'Vazirmatn', sans-serif !important;
+    color: #94a3b8 !important;
+    text-align: right !important;
+}
+
+.ql-toolbar.ql-snow {
+    direction: rtl !important;
+    text-align: right !important;
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    align-items: center !important;
+}
+
+.ql-container.ql-snow {
+    border-color: #cbd5e1 !important;
+    border-radius: 0 0 12px 12px !important;
+    background: #ffffff !important;
+}
+
+/* Persian Picker Header Options */
+.ql-snow .ql-picker.ql-header {
+    width: 140px !important;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item::before {
+    font-family: 'Vazirmatn', sans-serif !important;
+    font-size: 0.85rem !important;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="1"]::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-value="1"]::before {
+    content: 'تیتر اصلی (H1)' !important;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="2"]::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-value="2"]::before {
+    content: 'تیتر بخش (H2)' !important;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="3"]::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-value="3"]::before {
+    content: 'تیتر فرعی (H3)' !important;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="4"]::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-value="4"]::before {
+    content: 'تیتر کوچک (H4)' !important;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label:not([data-value])::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item:not([data-value])::before {
+    content: 'متن عادی (پاراگراف)' !important;
+}
+
+/* RTL Blockquote */
+.ql-snow .ql-editor blockquote {
+    border-right: 4px solid #EF5C16 !important;
+    border-left: none !important;
+    padding-right: 14px !important;
+    padding-left: 0 !important;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    background: #f8fafc;
+    border-radius: 0 8px 8px 0;
+    color: #475569;
+    font-style: normal;
+}
+
+/* RTL Lists */
+.ql-snow .ql-editor li {
+    padding-right: 1.5em !important;
+    padding-left: 0 !important;
+}
+
+.ql-snow .ql-editor li:not(.ql-direction-rtl)::before {
+    right: 0 !important;
+    left: auto !important;
+    margin-right: -1.5em !important;
+    margin-left: 0 !important;
+    text-align: left !important;
+}
+
+/* RTL Toolbar Groups */
+.ql-snow .ql-formats {
+    margin-left: 12px !important;
+    margin-right: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+
+.ql-snow.ql-toolbar button:hover,
+.ql-snow .ql-toolbar button:hover,
+.ql-snow.ql-toolbar button.ql-active,
+.ql-snow .ql-toolbar button.ql-active {
+    color: #EF5C16 !important;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow .ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow .ql-toolbar button.ql-active .ql-stroke {
+    stroke: #EF5C16 !important;
+}
+
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow .ql-toolbar button:hover .ql-fill,
+.ql-snow.ql-toolbar button.ql-active .ql-fill,
+.ql-snow .ql-toolbar button.ql-active .ql-fill {
+    fill: #EF5C16 !important;
+}
+
+/* Persian Tooltip Badges */
+.ql-persian-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+}

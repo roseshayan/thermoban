@@ -78,14 +78,14 @@
     <?php else: ?>
         <?php foreach ($mediaList as $item): ?>
             <?php
-            $fileUrl = url(ltrim($item['file_path'], '/'));
+            $fileUrl = upload_url($item['file_path']);
             $isImg = str_starts_with($item['mime_type'], 'image/');
-            $fileSizeKb = round($item['file_size'] / 1024, 1);
+            $fileSizeKb = fa_num(round($item['file_size'] / 1024, 1));
             ?>
             <div class="media-card-item" data-name="<?= strtolower(e($item['original_name'])) ?>" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
                 <div style="height: 140px; background: #f8fafc; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border-bottom: 1px solid #f1f5f9;">
                     <?php if ($isImg): ?>
-                        <img src="<?= $fileUrl ?>" alt="<?= e($item['original_name']) ?>" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease;" class="media-thumb">
+                        <img src="<?= $fileUrl ?>" alt="<?= e($item['original_name']) ?>" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease;" class="media-thumb" loading="lazy">
                     <?php else: ?>
                         <i class="fa-solid fa-file-pdf text-danger" style="font-size: 3.5rem;"></i>
                     <?php endif; ?>
@@ -100,8 +100,8 @@
                             <?= e($item['original_name']) ?>
                         </div>
                         <div style="font-size: 0.75rem; color: #94a3b8; display: flex; justify-content: space-between;">
-                            <span><?= $fileSizeKb ?> KB</span>
-                            <span><?= date('Y/m/d', strtotime($item['created_at'])) ?></span>
+                            <span><?= $fileSizeKb ?> کیلوبایت</span>
+                            <span><?= to_shamsi($item['created_at']) ?></span>
                         </div>
                     </div>
 

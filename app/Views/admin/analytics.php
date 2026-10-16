@@ -210,8 +210,8 @@
                             <td style="padding: 14px 20px; color: #64748b;" dir="ltr">
                                 <?= e($v['referer'] ?: 'Direct / مستقیم') ?>
                             </td>
-                            <td style="padding: 14px 24px; text-align: left; color: #64748b;" dir="ltr">
-                                <?= e($v['created_at']) ?>
+                            <td style="padding: 14px 24px; text-align: left; color: #64748b;" dir="rtl">
+                                <?= to_shamsi($v['created_at'], 'Y/m/d H:i:s') ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

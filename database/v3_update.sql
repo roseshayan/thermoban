@@ -12,8 +12,10 @@ ALTER TABLE `brands`
 ALTER TABLE `products`
     ADD COLUMN IF NOT EXISTS `gallery` JSON NULL AFTER `image`;
 
--- 3. Update Articles Table with SEO Fields
+-- 3. Update Articles Table with SEO and Category Fields
 ALTER TABLE `articles`
+    ADD COLUMN IF NOT EXISTS `category` VARCHAR(100) DEFAULT 'آموزش و عیب‌یابی' AFTER `excerpt`,
+    ADD COLUMN IF NOT EXISTS `category_slug` VARCHAR(100) DEFAULT 'troubleshooting' AFTER `category`,
     ADD COLUMN IF NOT EXISTS `meta_title` VARCHAR(255) NULL AFTER `reading_time`,
     ADD COLUMN IF NOT EXISTS `meta_description` TEXT NULL AFTER `meta_title`,
     ADD COLUMN IF NOT EXISTS `focus_keyword` VARCHAR(150) NULL AFTER `meta_description`,

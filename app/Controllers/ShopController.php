@@ -16,26 +16,26 @@ class ShopController extends Controller {
         $capacity = (int) ($_GET['capacity'] ?? 0);
         $sort = $_GET['sort'] ?? 'newest';
 
-        $where = ["`is_active` = 1"];
+        $where = ["p.`is_active` = 1"];
         $params = [];
 
         if (!empty($brandSlug)) {
             $brand = Database::fetchOne("SELECT id FROM `brands` WHERE `slug` = :b", ['b' => $brandSlug]);
             if ($brand) {
-                $where[] = "`brand_id` = :bid";
+                $where[] = "p.`brand_id` = :bid";
                 $params['bid'] = $brand['id'];
             }
         }
 
         if ($capacity > 0) {
-            $where[] = "`capacity` = :cap";
+            $where[] = "p.`capacity` = :cap";
             $params['cap'] = $capacity;
         }
 
         $orderBy = match ($sort) {
-            'price_asc'  => '`price` ASC',
-            'price_desc' => '`price` DESC',
-            default      => '`id` DESC'
+            'price_asc'  => 'p.`price` ASC',
+            'price_desc' => 'p.`price` DESC',
+            default      => 'p.`id` DESC'
         };
 
         $whereSql = implode(' AND ', $where);
@@ -413,7 +413,7 @@ class ShopController extends Controller {
         $delivery_time = trim($_GET['slot'] ?? 'هماهنگی تلفنی');
         $method = trim($_GET['method'] ?? 'cod');
         $gateway = ($method === 'online') ? 'درگاه شاپرک (بانک سامان / ملت)' : 'پرداخت در محل (کارتخوان سیار)';
-        $date = date('Y/m/d H:i');
+        $date = to_shamsi(null, 'Y/m/d - H:i');
 
         $this->view('shop/payment-success', [
             'pageTitle'     => 'پرداخت موفق و ثبت سفارش | ترموبان',
@@ -430,7 +430,10 @@ class ShopController extends Controller {
     public function paymentFailed(): void {
         $this->view('shop/payment-failed', [
             'pageTitle'   => 'خطا در پرداخت | ترموبان',
-            'currentPage' => 'payment-failed'
+            'currentPage' => 'payment-failed',
+            'errorCode'   => trim($_GET['code'] ?? 'ERR-1004'),
+            'reason'      => trim($_GET['msg'] ?? 'لغو تراکنش توسط کاربر یا اختلال موقت در ارتباط با شبکه شاپرک'),
+            'date'        => to_shamsi(null, 'Y/m/d - H:i')
         ]);
     }
 }

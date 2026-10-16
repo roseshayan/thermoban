@@ -47,6 +47,7 @@ class UserController extends Controller {
         );
 
         foreach ($orders as &$ord) {
+            $ord['date'] = to_shamsi($ord['created_at'] ?? null);
             $ord['items'] = Database::fetchAll(
                 "SELECT oi.*, p.title as product_title, p.image as product_image 
                  FROM `order_items` oi 
@@ -77,6 +78,7 @@ class UserController extends Controller {
         );
 
         foreach ($tickets as &$t) {
+            $t['date'] = to_shamsi($t['created_at'] ?? null);
             $lastMsg = Database::fetchOne(
                 "SELECT * FROM `ticket_messages` WHERE `ticket_id` = :tid ORDER BY `id` DESC LIMIT 1",
                 ['tid' => $t['id']]
@@ -96,6 +98,9 @@ class UserController extends Controller {
                 "SELECT * FROM `ticket_messages` WHERE `ticket_id` = :tid ORDER BY `id` ASC",
                 ['tid' => $t['id']]
             );
+            foreach ($t['messages'] as &$m) {
+                $m['date'] = to_shamsi($m['created_at'] ?? null, 'Y/m/d - H:i');
+            }
         }
 
         // 4. Products for favorites/catalog
@@ -182,6 +187,8 @@ class UserController extends Controller {
                 default => 'پرداخت اینترنتی شاپرک'
             };
         }
+
+        $order['date'] = to_shamsi($order['created_at'] ?? null);
 
         $data = [
             'pageTitle'   => 'فاکتور رسمی فروش و خدمات ' . ($order['order_number'] ?? $order['id']) . ' | ترموبان',

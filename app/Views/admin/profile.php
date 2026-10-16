@@ -22,7 +22,7 @@
 <?php endif; ?>
 
 <?php
-$avatarUrl = !empty($user['avatar']) ? (str_starts_with($user['avatar'], 'http') ? $user['avatar'] : url($user['avatar'])) : asset('images/hero-technician.jpg');
+$avatarUrl = avatar_url($user['avatar'] ?? null);
 ?>
 
 <form method="POST" action="<?= url('admin/profile') ?>" enctype="multipart/form-data">
@@ -104,17 +104,32 @@ $avatarUrl = !empty($user['avatar']) ? (str_starts_with($user['avatar'], 'http')
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
                     <div class="admin-form-group">
                         <label class="admin-label">رمز عبور فعلی</label>
-                        <input type="password" name="current_password" class="admin-input" placeholder="••••••••" style="direction: ltr;">
+                        <div class="password-field-wrapper">
+                            <input type="password" name="current_password" class="admin-input" placeholder="••••••••" style="direction: ltr;">
+                            <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="admin-form-group">
                         <label class="admin-label">رمز عبور جدید</label>
-                        <input type="password" name="new_password" class="admin-input" placeholder="حداقل ۶ کاراکتر" style="direction: ltr;">
+                        <div class="password-field-wrapper">
+                            <input type="password" name="new_password" class="admin-input" placeholder="حداقل ۶ کاراکتر" style="direction: ltr;">
+                            <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="admin-form-group">
                         <label class="admin-label">تکرار رمز عبور جدید</label>
-                        <input type="password" name="confirm_password" class="admin-input" placeholder="تکرار رمز عبور جدید" style="direction: ltr;">
+                        <div class="password-field-wrapper">
+                            <input type="password" name="confirm_password" class="admin-input" placeholder="تکرار رمز عبور جدید" style="direction: ltr;">
+                            <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

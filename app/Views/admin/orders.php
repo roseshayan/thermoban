@@ -69,7 +69,10 @@
                 <?php else: ?>
                     <?php foreach ($orders as $ord): ?>
                         <tr>
-                            <td><strong style="color: #011C39;"><?= e($ord['order_number']) ?></strong></td>
+                            <td>
+                                <strong style="color: #011C39;"><?= e($ord['order_number']) ?></strong>
+                                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;"><i class="fa-regular fa-clock" style="margin-left: 3px;"></i><?= to_shamsi($ord['created_at']) ?></div>
+                            </td>
                             <td><?= e($ord['customer_name'] ?? 'مشتری آزاد / حضوری') ?></td>
                             <td dir="ltr" style="text-align: right;"><?= e($ord['customer_phone'] ?? '-') ?></td>
                             <td><?= e($ord['customer_district'] ?? 'نامشخص') ?></td>

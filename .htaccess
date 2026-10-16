@@ -1,5 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Route static uploaded files and assets to public/
+    RewriteRule ^uploads/(.*)$ public/uploads/$1 [L]
+    RewriteRule ^assets/(.*)$ public/assets/$1 [L]
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php [QSA,L]

@@ -282,27 +282,10 @@
 <script>
 var productQuill;
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof Quill !== 'undefined') {
-        productQuill = new Quill('#productQuillEditor', {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'color': [] }, { 'background': [] }],
-                    ['link', 'image', 'blockquote', 'code-block'],
-                    ['clean']
-                ]
-            }
+    if (typeof window.initPersianQuill === 'function') {
+        productQuill = window.initPersianQuill('#productQuillEditor', '#productQuillHidden', {
+            placeholder: 'توضیحات و نقد و بررسی کارشناسی دستگاه را اینجا وارد نمایید...'
         });
-
-        var form = document.getElementById('editProductForm');
-        if (form) {
-            form.addEventListener('submit', function() {
-                document.getElementById('productQuillHidden').value = productQuill.root.innerHTML;
-            });
-        }
     }
 });
 

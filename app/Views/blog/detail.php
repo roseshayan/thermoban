@@ -34,8 +34,14 @@
             <main class="article-content-main">
                 
                 <!-- Featured Image -->
+                <?php 
+                $artMainImg = $article['image'];
+                $artMainImgUrl = (str_starts_with($artMainImg, 'http') || str_starts_with($artMainImg, '/uploads') || str_starts_with($artMainImg, 'uploads/'))
+                    ? (str_starts_with($artMainImg, 'http') ? $artMainImg : url($artMainImg))
+                    : asset('images/' . $artMainImg);
+                ?>
                 <div class="article-main-image">
-                    <img src="<?= asset('images/' . $article['image']) ?>" alt="<?= e($article['title']) ?>">
+                    <img src="<?= $artMainImgUrl ?>" alt="<?= e($article['title']) ?>">
                 </div>
 
                 <!-- Rich Content -->
@@ -83,9 +89,15 @@
                         <h3 class="related-title">مقالات و راهنماهای مرتبط</h3>
                         <div class="related-grid">
                             <?php foreach ($relatedArticles as $rel): ?>
+                                <?php 
+                                $rImg = $rel['image'];
+                                $rImgUrl = (str_starts_with($rImg, 'http') || str_starts_with($rImg, '/uploads') || str_starts_with($rImg, 'uploads/'))
+                                    ? (str_starts_with($rImg, 'http') ? $rImg : url($rImg))
+                                    : asset('images/' . $rImg);
+                                ?>
                                 <div class="related-card">
                                     <a href="<?= url('blog/' . $rel['slug']) ?>" class="related-thumb">
-                                        <img src="<?= asset('images/' . $rel['image']) ?>" alt="<?= e($rel['title']) ?>">
+                                        <img src="<?= $rImgUrl ?>" alt="<?= e($rel['title']) ?>">
                                     </a>
                                     <div class="related-body">
                                         <span class="related-cat"><?= e($rel['category']) ?></span>

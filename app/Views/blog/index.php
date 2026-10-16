@@ -63,10 +63,16 @@
                     
                     <!-- Featured Article (if no search filter applied) -->
                     <?php if (empty($searchQuery) && empty($currentCategory) && !empty($featuredArticle)): ?>
+                        <?php 
+                        $fImg = $featuredArticle['image'];
+                        $fImgUrl = (str_starts_with($fImg, 'http') || str_starts_with($fImg, '/uploads') || str_starts_with($fImg, 'uploads/'))
+                            ? (str_starts_with($fImg, 'http') ? $fImg : url($fImg))
+                            : asset('images/' . $fImg);
+                        ?>
                         <article class="featured-article-card">
                             <div class="featured-card-badge">ویژه و برگزیده</div>
                             <div class="featured-card-image">
-                                <img src="<?= asset('images/' . $featuredArticle['image']) ?>" alt="<?= e($featuredArticle['title']) ?>">
+                                <img src="<?= $fImgUrl ?>" alt="<?= e($featuredArticle['title']) ?>">
                             </div>
                             <div class="featured-card-body">
                                 <div class="article-meta">
@@ -98,10 +104,16 @@
                     <!-- Standard Grid of Articles -->
                     <div class="articles-grid">
                         <?php foreach ($articles as $art): ?>
+                            <?php 
+                            $aImg = $art['image'];
+                            $aImgUrl = (str_starts_with($aImg, 'http') || str_starts_with($aImg, '/uploads') || str_starts_with($aImg, 'uploads/'))
+                                ? (str_starts_with($aImg, 'http') ? $aImg : url($aImg))
+                                : asset('images/' . $aImg);
+                            ?>
                             <article class="article-grid-card">
                                 <div class="article-card-image">
                                     <a href="<?= url('blog/' . $art['slug']) ?>">
-                                        <img src="<?= asset('images/' . $art['image']) ?>" alt="<?= e($art['title']) ?>" loading="lazy">
+                                        <img src="<?= $aImgUrl ?>" alt="<?= e($art['title']) ?>" loading="lazy">
                                     </a>
                                     <span class="article-badge-cat"><?= e($art['category']) ?></span>
                                 </div>
@@ -126,14 +138,21 @@
                         <?php endforeach; ?>
                     </div>
 
-                    <!-- Pagination -->
-                    <div class="archive-pagination">
-                        <span class="page-num active">۱</span>
-                        <a href="#" class="page-num">۲</a>
-                        <a href="#" class="page-num">۳</a>
-                        <span class="page-dots">...</span>
-                        <a href="#" class="page-num page-next">صفحه بعد ←</a>
-                    </div>
+                    <!-- Dynamic Pagination -->
+                    <?php if (!empty($totalPages) && $totalPages > 1): ?>
+                        <div class="archive-pagination">
+                            <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                                <?php
+                                $pageQuery = http_build_query(array_merge($_GET, ['page' => $p]));
+                                ?>
+                                <?php if ($p == ($currentPageNum ?? 1)): ?>
+                                    <span class="page-num active"><?= $p ?></span>
+                                <?php else: ?>
+                                    <a href="<?= url('blog?' . $pageQuery) ?>" class="page-num"><?= $p ?></a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+                        </div>
+                    <?php endif; ?>
 
                 <?php endif; ?>
 

@@ -46,7 +46,12 @@
                         <label for="password">کلمه عبور <span class="required">*</span></label>
                         <a href="<?= url('forgot-password') ?>" class="forgot-link">فراموشی رمز عبور؟</a>
                     </div>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="کلمه عبور خود را وارد کنید..." required data-msg="کلمه عبور الزامی است">
+                    <div class="password-field-wrapper">
+                        <input type="password" id="password" name="password" class="form-control" placeholder="کلمه عبور خود را وارد کنید..." required data-msg="کلمه عبور الزامی است">
+                        <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <?= \App\Services\CaptchaService::renderHtml() ?>
@@ -56,12 +61,6 @@
                     <?= icon('arrow-left', '', 18) ?>
                 </button>
             </form>
-
-            <div class="auth-demo-hint">
-                <p><strong>حساب‌های آزمایشی فعال جهت بررسی:</strong></p>
-                <div><?= icon('user-gear', '', 14) ?> مدیر کل: <code dir="ltr">09121111111</code> | رمز: <code dir="ltr">admin123</code></div>
-                <div><?= icon('user', '', 14) ?> مشتری ویژه: <code dir="ltr">09123456789</code> | رمز: <code dir="ltr">123456</code></div>
-            </div>
 
             <div class="auth-card-footer">
                 <span>هنوز حساب کاربری ندارید؟</span>

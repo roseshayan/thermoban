@@ -66,7 +66,7 @@
                                 <?php if (!empty($c['author_phone'])): ?>
                                     <span style="font-size: 0.78rem; color: #64748b;" dir="ltr"><?= e($c['author_phone']) ?></span>
                                 <?php endif; ?>
-                                <span style="display: block; font-size: 0.75rem; color: #94a3b8; margin-top: 4px;" dir="ltr"><?= e($c['created_at']) ?></span>
+                                <span style="display: block; font-size: 0.75rem; color: #94a3b8; margin-top: 4px;" dir="rtl"><?= to_shamsi($c['created_at'], 'Y/m/d - H:i') ?></span>
                             </td>
 
                             <td style="padding: 16px 20px; font-size: 0.85rem;">

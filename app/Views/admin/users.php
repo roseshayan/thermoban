@@ -92,7 +92,7 @@
                             <?php if ($u['role'] === 'super_admin'): ?>
                                 <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">سوپر ادمین</span>
                             <?php elseif ($u['role'] === 'admin'): ?>
-                                <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">مدیر سیستم</span>
+                                <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">مدیر فروشگاه</span>
                             <?php elseif ($u['role'] === 'technician'): ?>
                                 <span style="background: #dbeafe; color: #1d4ed8; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">تکنسین</span>
                             <?php else: ?>
@@ -110,7 +110,7 @@
                                 </span>
                             <?php endif; ?>
                         </td>
-                        <td style="padding: 14px; color: #64748b; font-size: 0.8rem;"><?= substr($u['created_at'] ?? '', 0, 10) ?></td>
+                        <td style="padding: 14px; color: #64748b; font-size: 0.8rem;"><?= to_shamsi($u['created_at']) ?></td>
                         <td style="padding: 14px; text-align: center;">
                             <div style="display: inline-flex; gap: 8px; justify-content: center;">
                                 <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.78rem; border-radius: 6px;" onclick="openEditModal(<?= htmlspecialchars(json_encode($u)) ?>)">
@@ -189,9 +189,9 @@
                         <select name="role" class="form-control" style="border-radius: 8px; font-size: 0.9rem; padding: 10px;">
                             <option value="user">مشتری / کاربر عادی</option>
                             <option value="technician">تکنسین نصب و تعمیر</option>
-                            <option value="admin">مدیر سیستم</option>
+                            <option value="admin">مدیر فروشگاه (دسترسی کنترل‌شده)</option>
                             <?php if (\App\Core\Auth::isSuperAdmin()): ?>
-                                <option value="super_admin">سوپر ادمین</option>
+                                <option value="super_admin">سوپر ادمین (دسترسی کامل برنامه‌نویس)</option>
                             <?php endif; ?>
                         </select>
                     </div>
@@ -255,9 +255,9 @@
                         <select name="role" id="editRole" class="admin-input">
                             <option value="user">مشتری / کاربر عادی</option>
                             <option value="technician">تکنسین نصب و تعمیر</option>
-                            <option value="admin">مدیر سیستم</option>
+                            <option value="admin">مدیر فروشگاه (دسترسی کنترل‌شده)</option>
                             <?php if (\App\Core\Auth::isSuperAdmin()): ?>
-                                <option value="super_admin">سوپر ادمین</option>
+                                <option value="super_admin">سوپر ادمین (دسترسی کامل برنامه‌نویس)</option>
                             <?php endif; ?>
                         </select>
                     </div>

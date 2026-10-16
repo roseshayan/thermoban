@@ -143,3 +143,88 @@
         </div>
     </div>
 </footer>
+
+<!-- Global Interactive Service Booking Modal -->
+<div class="site-modal" id="serviceModal" style="display:none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="serviceModalTitle">درخواست اعزام تکنسین پکیج</h3>
+                <button type="button" class="modal-close" id="serviceModalClose" aria-label="بستن">&times;</button>
+            </div>
+            <div class="modal-body" id="serviceModalBody">
+                <form id="globalServiceBookingForm" class="site-contact-form" onsubmit="submitGlobalBooking(event)">
+                    <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>نام و نام خانوادگی <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="fullname" class="form-control" placeholder="مثال: محمد احمدی" required>
+                        </div>
+                        <div class="form-group">
+                            <label>شماره تماس همراه <span style="color:#ef4444;">*</span></label>
+                            <input type="tel" name="phone" class="form-control" placeholder="۰۹۱۲۳۴۵۶۷۸۹" dir="ltr" required>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>نوع خدمت مورد نیاز</label>
+                            <select name="service" id="modalServiceSelect" class="form-control">
+                                <option value="تعمیر و عیب‌یابی پکیج">تعمیر و عیب‌یابی پکیج</option>
+                                <option value="نصب پکیج دیواری">نصب پکیج دیواری</option>
+                                <option value="سرویس دوره‌ای و اسیدشویی">سرویس دوره‌ای و اسیدشویی</option>
+                                <option value="راه‌اندازی و تنظیم فصلی">راه‌اندازی و تنظیم فصلی</option>
+                                <option value="مشاوره و استعلام قیمت">مشاوره و استعلام قیمت</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>برند پکیج دیواری</label>
+                            <select name="brand" class="form-control">
+                                <option value="ایران رادیاتور">ایران رادیاتور</option>
+                                <option value="بوتان">بوتان</option>
+                                <option value="لورچ">لورچ</option>
+                                <option value="ایساتیس">ایساتیس</option>
+                                <option value="بوش">بوش</option>
+                                <option value="آریستون">آریستون</option>
+                                <option value="تاچی">تاچی</option>
+                                <option value="سایر برندها">سایر برندها</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>منطقه سکونت در تهران <span style="color:#ef4444;">*</span></label>
+                        <select name="district" class="form-control" required>
+                            <option value="">انتخاب منطقه...</option>
+                            <option value="منطقه ۱">منطقه ۱ (تجریش، نیاوران، زعفرانیه، ولنجک)</option>
+                            <option value="منطقه ۲">منطقه ۲ (سعادت‌آباد، شهرک غرب، گیشا، صادقیه)</option>
+                            <option value="منطقه ۳">منطقه ۳ (پاسداران، میرداماد، ونک، ظفر)</option>
+                            <option value="منطقه ۴">منطقه ۴ (تهرانپارس، حکیمیه، رسالت، نارمک)</option>
+                            <option value="منطقه ۵">منطقه ۵ (پونک، جنت‌آباد، باغ فیض، فردوس)</option>
+                            <option value="منطقه ۶">منطقه ۶ (یوسف‌آباد، مطهری، امیرآباد، ولیعصر)</option>
+                            <option value="منطقه ۷">منطقه ۷ (سهروردی، بهشتی، هفت تیر، نامجو)</option>
+                            <option value="منطقه ۸">منطقه ۸ (نارمک، هفت حوض، مجیدیه)</option>
+                            <option value="منطقه ۱۱ و ۱۲">منطقه ۱۱ و ۱۲ (جمهوری، بازار، بهارستان)</option>
+                            <option value="منطقه ۱۳ و ۱۴">منطقه ۱۳ و ۱۴ (پیروزی، نیروهوایی، محلاتی)</option>
+                            <option value="منطقه ۱۵ تا ۲۰">جنوب تهران (شهرری، نازی‌آباد، افسریه)</option>
+                            <option value="منطقه ۲۱ و ۲۲">غرب تهران (تهرانسر، چیتگر، دریاچه، المپیک)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>شرح مشکل یا کد خطا (اختیاری)</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="مدل دستگاه و شرح مشکل، مثلاً افت بار یا ارور E81..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="globalBookingSubmitBtn" style="padding: 12px; font-weight: 800; font-size: 1rem; margin-top: 10px;">
+                        ثبت نهایی درخواست و اعزام فوری تکنسین
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Emergency Call Button (Bottom Left) -->
+<div class="emergency-call-float">
+    <a href="tel:02177428596" class="emergency-btn-inner" title="تماس فوری شبانه‌روزی" aria-label="تماس فوری شبانه‌روزی">
+        <i class="fa-solid fa-phone-volume"></i>
+        <span class="emergency-btn-label">تماس فوری: ۰۲۱-۷۷۴۲۸۵۹۶</span>
+    </a>
+</div>

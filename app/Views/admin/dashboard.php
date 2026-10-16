@@ -1,5 +1,13 @@
 <?php defined('ROOT_PATH') or exit('No direct script access allowed'); ?>
 
+<?php if (!empty($_SESSION['admin_error'])): ?>
+    <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 18px; border-radius: 10px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; font-weight: 700;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem; color: #dc2626;"></i>
+        <span><?= e($_SESSION['admin_error']) ?></span>
+    </div>
+    <?php unset($_SESSION['admin_error']); ?>
+<?php endif; ?>
+
 <div class="kpi-cards-grid" style="margin-bottom: 30px;">
     <div class="kpi-card" style="background:#fff;">
         <div class="kpi-icon-box kpi-blue">
@@ -48,9 +56,9 @@
         <div class="block-header" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
             <h3 class="block-title" style="font-size: 1.05rem; font-weight: 800; color: #011C39; margin: 0;">
                 <i class="fa-solid fa-chart-line" style="color: var(--color-primary); margin-left: 8px;"></i>
-                روند فروش ماهانه و خدمات نصب پکیج (میلیون تومان)
+                روند فروش و تعداد سفارشات (۷ ماه اخیر)
             </h3>
-            <span style="font-size: 0.8rem; background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 20px; font-weight: 700;">سال جاری</span>
+            <span style="font-size: 0.8rem; background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 20px; font-weight: 700;">داده‌های واقعی سیستم</span>
         </div>
         <div style="height: 280px; position: relative;">
             <canvas id="salesTrendsChart"></canvas>
@@ -61,7 +69,7 @@
         <div class="block-header" style="margin-bottom: 16px;">
             <h3 class="block-title" style="font-size: 1.05rem; font-weight: 800; color: #011C39; margin: 0;">
                 <i class="fa-solid fa-chart-pie" style="color: var(--color-primary); margin-left: 8px;"></i>
-                سهم فروش برندها
+                توزیع محصولات کاتالوگ بر اساس برند
             </h3>
         </div>
         <div style="height: 280px; position: relative;">
@@ -150,7 +158,7 @@
                             </td>
                             <td><?= e($lead['service']) ?></td>
                             <td><?= e($lead['district']) ?></td>
-                            <td><?= e($lead['created_at']) ?></td>
+                            <td><?= to_shamsi($lead['created_at'], 'Y/m/d H:i') ?></td>
                             <td>
                                 <a href="tel:<?= e($lead['phone']) ?>" class="btn-table-action" style="background: #10b981; color: #fff;">
                                     <?= icon('phone', '', 14) ?>
@@ -169,28 +177,31 @@
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof Chart === 'undefined') return;
 
-    // Sales Trends Line Chart
+    var salesInfo = <?= json_encode($salesChart ?? ['labels' => [], 'sales' => [], 'counts' => []]) ?>;
+    var brandsInfo = <?= json_encode($brandsChart ?? ['labels' => [], 'data' => [], 'colors' => []]) ?>;
+
+    // Sales Trends Line Chart (Real Data)
     const salesCanvas = document.getElementById('salesTrendsChart');
     if (salesCanvas) {
         new Chart(salesCanvas, {
             type: 'line',
             data: {
-                labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر'],
+                labels: salesInfo.labels,
                 datasets: [
                     {
-                        label: 'فروش پکیج ایران رادیاتور',
-                        data: [42, 58, 65, 80, 95, 110, 134],
+                        label: 'مبلغ فروش (میلیون تومان)',
+                        data: salesInfo.sales,
                         borderColor: '#EF5C16',
                         backgroundColor: 'rgba(239, 92, 22, 0.12)',
                         fill: true,
                         tension: 0.4,
                         borderWidth: 3,
-                        pointRadius: 4,
+                        pointRadius: 5,
                         pointBackgroundColor: '#EF5C16'
                     },
                     {
-                        label: 'فروش پکیج بوتان',
-                        data: [28, 35, 42, 55, 68, 79, 92],
+                        label: 'تعداد کل سفارشات',
+                        data: salesInfo.counts,
                         borderColor: '#011C39',
                         backgroundColor: 'rgba(1, 28, 57, 0.05)',
                         fill: true,
@@ -214,7 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 scales: {
                     y: {
                         ticks: { font: { family: 'Vazirmatn' } },
-                        grid: { color: '#f1f5f9' }
+                        grid: { color: '#f1f5f9' },
+                        beginAtZero: true
                     },
                     x: {
                         ticks: { font: { family: 'Vazirmatn' } },
@@ -225,16 +237,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Brands Share Doughnut Chart
+    // Brands Share Doughnut Chart (Real Product Distribution)
     const brandsCanvas = document.getElementById('brandsShareChart');
     if (brandsCanvas) {
         new Chart(brandsCanvas, {
             type: 'doughnut',
             data: {
-                labels: ['ایران رادیاتور', 'بوتان', 'خدمات نصب و سرویس'],
+                labels: brandsInfo.labels,
                 datasets: [{
-                    data: [58, 34, 8],
-                    backgroundColor: ['#EF5C16', '#011C39', '#10b981'],
+                    data: brandsInfo.data,
+                    backgroundColor: brandsInfo.colors,
                     borderWidth: 2,
                     borderColor: '#FFFFFF'
                 }]

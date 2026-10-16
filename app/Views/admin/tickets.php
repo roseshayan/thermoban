@@ -66,7 +66,7 @@
                     <h3 class="ticket-title" style="margin: 0 0 8px 0; font-size: 1.15rem; font-weight: 800; color: #011C39;"><?= e($t['subject']) ?></h3>
                     <div style="font-size: 0.84rem; color: #64748b; display: flex; gap: 16px; flex-wrap: wrap;">
                         <span><i class="fa-solid fa-folder-open" style="margin-left: 4px; color: #EF5C16;"></i> دسته‌بندی: <strong><?= e($t['category']) ?></strong></span>
-                        <span><i class="fa-solid fa-calendar-days" style="margin-left: 4px;"></i> تاریخ ثبت: <?= e($t['created_at']) ?></span>
+                        <span><i class="fa-solid fa-calendar-days" style="margin-left: 4px;"></i> تاریخ ثبت: <?= to_shamsi($t['created_at'], 'Y/m/d H:i') ?></span>
                     </div>
                 </div>
 
@@ -79,7 +79,7 @@
                                         <i class="fa-solid <?= ($msg['sender_type'] === 'admin') ? 'fa-user-tie' : 'fa-user' ?>" style="margin-left: 4px;"></i>
                                         <?= e($msg['sender_name']) ?>
                                     </strong>
-                                    <span style="color: #94a3b8; font-size: 0.8rem;"><?= e($msg['created_at']) ?></span>
+                                    <span style="color: #94a3b8; font-size: 0.8rem;"><?= to_shamsi($msg['created_at'], 'Y/m/d H:i') ?></span>
                                 </div>
                                 <div class="msg-body" style="font-size: 0.92rem; line-height: 1.7; color: #1e293b;">
                                     <?= nl2br(e($msg['message'])) ?>

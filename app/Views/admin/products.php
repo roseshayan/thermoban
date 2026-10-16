@@ -256,25 +256,10 @@ function toggleNewProductBox() {
         box.style.display = box.style.display === 'none' ? 'block' : 'none';
         if (box.style.display === 'block') {
             box.scrollIntoView({ behavior: 'smooth' });
-            if (!createProductQuillInst && typeof Quill !== 'undefined') {
-                createProductQuillInst = new Quill('#createProductQuill', {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link', 'image', 'clean']
-                        ]
-                    }
+            if (!createProductQuillInst && typeof window.initPersianQuill === 'function') {
+                createProductQuillInst = window.initPersianQuill('#createProductQuill', '#createProductQuillHidden', {
+                    placeholder: 'نقد و بررسی کارشناسی و مشخصات کامل فنی محصول...'
                 });
-
-                var form = document.getElementById('createProductForm');
-                if (form) {
-                    form.addEventListener('submit', function() {
-                        document.getElementById('createProductQuillHidden').value = createProductQuillInst.root.innerHTML;
-                    });
-                }
             }
         }
     }

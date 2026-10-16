@@ -34,7 +34,12 @@
 
                 <div class="form-group">
                     <label for="reg_password">کلمه عبور اختصاصی <span class="required">*</span></label>
-                    <input type="password" id="reg_password" name="password" class="form-control" placeholder="حداقل ۶ کاراکتر..." required data-msg="کلمه عبور الزامی است">
+                    <div class="password-field-wrapper">
+                        <input type="password" id="reg_password" name="password" class="form-control" placeholder="حداقل ۶ کاراکتر..." required data-msg="کلمه عبور الزامی است">
+                        <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="auth-terms-note">

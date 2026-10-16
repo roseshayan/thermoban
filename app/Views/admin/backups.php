@@ -139,7 +139,7 @@
                                 </div>
                             </td>
                             <td style="padding: 16px 20px; font-size: 0.88rem; color: #475569;"><?= e($b['size']) ?></td>
-                            <td style="padding: 16px 20px; font-size: 0.88rem; color: #475569;" dir="ltr"><?= e($b['created_at']) ?></td>
+                            <td style="padding: 16px 20px; font-size: 0.88rem; color: #475569;" dir="rtl"><?= to_shamsi($b['created_at'], 'Y/m/d - H:i:s') ?></td>
                             <td style="padding: 16px 24px; text-align: left;">
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                     

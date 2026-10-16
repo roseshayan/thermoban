@@ -44,12 +44,22 @@
 
                 <div class="form-group">
                     <label for="new_password">کلمه عبور جدید <span class="required">*</span></label>
-                    <input type="password" id="new_password" name="password" class="form-control" placeholder="حداقل ۶ کاراکتر..." required data-msg="کلمه عبور جدید الزامی است">
+                    <div class="password-field-wrapper">
+                        <input type="password" id="new_password" name="password" class="form-control" placeholder="حداقل ۶ کاراکتر..." required data-msg="کلمه عبور جدید الزامی است">
+                        <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password_confirm">تکرار کلمه عبور جدید <span class="required">*</span></label>
-                    <input type="password" id="password_confirm" name="password_confirm" class="form-control" placeholder="تکرار کلمه عبور جدید..." required data-msg="تکرار کلمه عبور الزامی است">
+                    <div class="password-field-wrapper">
+                        <input type="password" id="password_confirm" name="password_confirm" class="form-control" placeholder="تکرار کلمه عبور جدید..." required data-msg="تکرار کلمه عبور الزامی است">
+                        <button type="button" class="btn-toggle-password" aria-label="نمایش کلمه عبور" title="نمایش کلمه عبور" tabindex="-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-auth-submit w-100">

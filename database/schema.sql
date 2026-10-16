@@ -116,6 +116,8 @@ CREATE TABLE IF NOT EXISTS `articles` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `title` VARCHAR(255) NOT NULL,
     `slug` VARCHAR(255) UNIQUE NOT NULL,
+    `category` VARCHAR(100) DEFAULT 'آموزش و عیب‌یابی',
+    `category_slug` VARCHAR(100) DEFAULT 'troubleshooting',
     `excerpt` TEXT NOT NULL,
     `content` LONGTEXT NOT NULL,
     `image` VARCHAR(255) NOT NULL,
@@ -123,6 +125,10 @@ CREATE TABLE IF NOT EXISTS `articles` (
     `reading_time` VARCHAR(50) DEFAULT '۵ دقیقه',
     `views_count` INT DEFAULT 120,
     `is_published` TINYINT(1) DEFAULT 1,
+    `focus_keyword` VARCHAR(150) NULL,
+    `meta_title` VARCHAR(255) NULL,
+    `meta_description` TEXT NULL,
+    `canonical_url` VARCHAR(255) NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -181,13 +187,47 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `setting_value` TEXT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 14. Comments & Reviews Table
+CREATE TABLE IF NOT EXISTS `comments` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NULL,
+    `product_id` INT NULL,
+    `article_id` INT NULL,
+    `author_name` VARCHAR(150) NOT NULL,
+    `author_phone` VARCHAR(20) NULL,
+    `rating` TINYINT DEFAULT 5,
+    `content` TEXT NOT NULL,
+    `reply` TEXT NULL,
+    `status` ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_comments_status` (`status`),
+    INDEX `idx_comments_product` (`product_id`),
+    INDEX `idx_comments_article` (`article_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`article_id`) REFERENCES `articles`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 15. Media Library Table
+CREATE TABLE IF NOT EXISTS `media` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `filename` VARCHAR(255) NOT NULL,
+    `original_name` VARCHAR(255) NOT NULL,
+    `file_path` VARCHAR(255) NOT NULL,
+    `file_size` INT NOT NULL,
+    `mime_type` VARCHAR(100) NOT NULL,
+    `uploader_id` INT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_media_filename` (`filename`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =========================================================================
 -- Seed Data Insertion
 -- =========================================================================
 
 -- Admin & Default Demo User (Password: admin123 and 123456)
 INSERT INTO `users` (`id`, `name`, `phone`, `national_id`, `email`, `password_hash`, `role`) VALUES
-(1, 'مدیریت ارشد ترموبان', '09121111111', '0012345678', 'admin@thermoban.ir', '$2y$12$Nq96eE4gq5uN9p1n8LfZfeSgqT7oM2L9Z7cT0d6kX8kS7f1L8hQ.G', 'admin'),
+(1, 'مدیریت ارشد ترموبان', '09121111111', '0012345678', 'admin@thermoban.ir', '$2y$12$Nq96eE4gq5uN9p1n8LfZfeSgqT7oM2L9Z7cT0d6kX8kS7f1L8hQ.G', 'super_admin'),
 (2, 'شایان نماینده', '09123456789', '0082736451', 'namayandeshayan@gmail.com', '$2y$12$Nq96eE4gq5uN9p1n8LfZfeSgqT7oM2L9Z7cT0d6kX8kS7f1L8hQ.G', 'user')
 ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
 
@@ -227,9 +267,11 @@ INSERT INTO `products` (`id`, `brand_id`, `category_id`, `title`, `slug`, `model
 ON DUPLICATE KEY UPDATE `title`=VALUES(`title`);
 
 -- Articles
-INSERT INTO `articles` (`id`, `title`, `slug`, `excerpt`, `content`, `image`, `reading_time`, `views_count`) VALUES
-(1, 'علت افت فشار پکیج و راهکارهای حل آن', 'boiler-pressure-drop-causes', 'افت مداوم فشار مانومتر پکیج یکی از شایع‌ترین مشکلات پکیج‌های دیواری است که نشان‌دهنده نشتی پنهان، نقص در منبع انبساط یا شیر پرکن است.', 'محتوای کامل تخصصی درباره عیب‌یابی فشار بار پکیج...', 'hero-technician.jpg', '۶ دقیقه', 340),
-(2, 'راهنمای کامل رفع ارور E81 پکیج ایران رادیاتور', 'error-e81-iran-radiator-fix', 'ارور E81 مربوط به بالا رفتن بیش از حد دمای سنسور حد (کلید حرارتی ۱۰۵ درجه) و قطعی ترموستات ایمنی است که نیاز به اسیدشویی فوری دارد.', 'ارور E81 یکی از کدهای خطای مهم در پکیج‌های ایران رادیاتور مدل‌های L و M است...', 'hero-technician.jpg', '۵ دقیقه', 520)
+INSERT INTO `articles` (`id`, `title`, `slug`, `category`, `category_slug`, `excerpt`, `content`, `image`, `author_name`, `reading_time`, `views_count`, `is_published`, `focus_keyword`, `meta_title`, `meta_description`) VALUES
+(1, 'راهنمای جامع رفع خطای E81 پکیج ایران رادیاتور', 'error-e81-iran-radiator-fix', 'کدهای خطای پکیج', 'error-codes', 'بررسی کامل دلایل بروز ارور E81، نحوه ریست کردن دستگاه، تست ترموستات حد و اقدامات ایمنی فوری.', '<p class="lead-text">کد خطای E81 در پکیج‌های دیجیتال ایران رادیاتور یکی از خطاهای شایع است که نشان‌دهنده فعال شدن کلید حرارتی ۱۰۵ درجه به دلیل دمای بیش از حد مجاز می‌باشد.</p>', 'technician-thumb.jpg', 'مهندس رضایی', '۶ دقیقه', 1420, 1, 'ارور E81 ایران رادیاتور', 'رفع ارور E81 پکیج ایران رادیاتور | راهنمای تخصصی', 'آموزش گام به گام عیب‌یابی و رفع ارور E81 در پکیج‌های ایران رادیاتور با راهکارهای فوری.'),
+(2, 'علت روشن نشدن پکیج چیست؟ بررسی ۷ دلیل اصلی و راهکارهای فوری', 'package-not-turning-on-causes', 'راهنمای عیب‌یابی', 'troubleshooting', 'چرا پکیج روشن نمی‌شود؟ عیب‌یابی دقیق افت فشار بار، قطعی گاز و برق، خرابی برد الکترونیک و جرقه زن.', '<p class="lead-text">خاموش شدن ناگهانی پکیج دیواری و روشن نشدن آن، یکی از آزاردهنده‌ترین اتفاقاتی است که در فصول سرد رخ می‌دهد.</p>', 'technician-thumb.jpg', 'مهندس کاظمی', '۵ دقیقه', 980, 1, 'علت روشن نشدن پکیج', 'علت روشن نشدن پکیج دیواری | راهنمای عیب‌یابی', 'بررسی فشار بار آب، قطعی گاز، خرابی پرشر سوئیچ هوا، برد الکترونیک و راهکارهای حل سریع.'),
+(3, 'بهترین زمان سرویس دوره‌ای پکیج و نکات افزایش طول عمر', 'best-time-for-package-service', 'نگهداری و رسوب‌زدایی', 'maintenance', 'سرویس سالیانه پکیج دیواری چگونه مصرف گاز را تا ۲۵ درصد کاهش می‌دهد و از هزینه‌های سنگین جلوگیری می‌کند؟', '<p class="lead-text">انجام سرویس سالیانه منظم نه تنها ایمنی خانواده شما را تضمین می‌کند، بلکه راندمان حرارتی دستگاه را به حداکثر می‌رساند.</p>', 'technician-thumb.jpg', 'شایان نماینده', '۷ دقیقه', 1150, 1, 'سرویس دوره ای پکیج', 'بهترین زمان سرویس دوره‌ای پکیج دیواری', 'راهنمای کامل زمان‌بندی سرویس سالیانه پکیج و چک‌لیست اقدامات اسیدشویی و تنظیم مشعل.'),
+(4, 'راهنمای محاسبه ظرفیت و انتخاب بهترین پکیج دیواری بر اساس متراژ', 'how-to-choose-best-package-capacity', 'راهنمای خرید و ظرفیت', 'buying-guide', 'فرمول دقیق انتخاب پکیج ۲۲، ۲۴، ۲۸ و ۳۶ هزار برای آپارتمان‌ها با متراژهای ۶۰ تا ۳۰۰ متر در تهران.', '<p class="lead-text">انتخاب ظرفیت نادرست موجب سرد ماندن خانه یا مصرف گاز بیش از حد و استهلاک زودهنگام دستگاه خواهد شد.</p>', 'technician-thumb.jpg', 'مهندس رضایی', '۴ دقیقه', 840, 1, 'انتخاب ظرفیت پکیج بر اساس متراژ', 'راهنمای محاسبه ظرفیت پکیج دیواری بر اساس متراژ خانه', 'فرمول دقیق انتخاب ظرفیت پکیج شوفاژ دیواری ۲۴، ۲۸ و ۳۶ هزار برای انواع متراژها.')
 ON DUPLICATE KEY UPDATE `title`=VALUES(`title`);
 
 -- System Settings
@@ -239,5 +281,10 @@ INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
 ('site_phone_2', '۰۲۱-۷۷۴۲۸۵۹۶'),
 ('site_address', 'تهران، خیابان دماوند، بعد از پل خاقانی، پلاک ۳۴'),
 ('site_email', 'info@devshayan.ir'),
-('bale_support_url', 'https://ble.ir/thermoban_support')
+('bale_support_url', 'https://ble.ir/thermoban_support'),
+('module_shop', '0'),
+('module_blog', '1'),
+('module_tickets', '1'),
+('module_gateways', '0'),
+('module_sms', '0')
 ON DUPLICATE KEY UPDATE `setting_value`=VALUES(`setting_value`);

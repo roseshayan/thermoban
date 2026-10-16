@@ -469,27 +469,124 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Service Booking Helper
+ * Service Booking & Modal Helper
  */
 window.openServiceBooking = function(serviceTitle) {
     const serviceModal = document.getElementById('serviceModal');
     if (serviceModal) {
         const titleEl = document.getElementById('serviceModalTitle');
-        const bodyEl = document.getElementById('serviceModalBody');
-        if (titleEl) titleEl.textContent = 'درخواست ' + serviceTitle;
-        if (bodyEl) {
-            bodyEl.innerHTML = `
-                <p>جهت اعزام فوری تکنسین برای <strong>${serviceTitle}</strong>، لطفاً با شماره مستقیم <a href="tel:02177428596" class="text-orange font-bold">۰۲۱-۷۷۴۲۸۵۹۶</a> تماس حاصل فرمایید یا در پیام‌رسان بله پیام دهید.</p>
-                <div style="margin-top: 18px; display: flex; gap: 10px;">
-                    <a href="tel:02177428596" class="btn btn-primary" style="flex:1;">تماس تلفنی</a>
-                    <a href="https://ble.ir/thermoban_support" target="_blank" rel="noopener" class="btn btn-navy" style="flex:1;">پیام‌رسان بله</a>
-                </div>
-            `;
+        if (titleEl && serviceTitle) {
+            titleEl.textContent = 'درخواست آنلاین: ' + serviceTitle;
         }
+        const selectEl = document.getElementById('modalServiceSelect');
+        if (selectEl && serviceTitle) {
+            for (let i = 0; i < selectEl.options.length; i++) {
+                if (selectEl.options[i].value.includes(serviceTitle) || serviceTitle.includes(selectEl.options[i].value)) {
+                    selectEl.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        serviceModal.style.display = 'flex';
         serviceModal.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 };
+
+window.closeServiceBooking = function() {
+    const serviceModal = document.getElementById('serviceModal');
+    if (serviceModal) {
+        serviceModal.classList.remove('active');
+        serviceModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+};
+
+window.submitGlobalBooking = function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = document.getElementById('globalBookingSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت درخواست...';
+    }
+
+    const formData = new FormData(form);
+    const baseUrl = (window.THERMOBAN_CONFIG && window.THERMOBAN_CONFIG.baseUrl) ? window.THERMOBAN_CONFIG.baseUrl : '/';
+
+    fetch(baseUrl + 'api/quick-order', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'درخواست شما ثبت شد!',
+                    text: res.message || 'کارشناسان فنی ترموبان در کمتر از ۱۵ دقیقه با شما تماس خواهند گرفت.',
+                    confirmButtonText: 'متشکرم',
+                    confirmButtonColor: '#EF5C16'
+                });
+            } else {
+                alert(res.message || 'درخواست شما با موفقیت ثبت گردید.');
+            }
+            form.reset();
+            window.closeServiceBooking();
+        } else {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطا',
+                    text: res.message || 'خطا در ثبت درخواست',
+                    confirmButtonText: 'تلاش مجدد',
+                    confirmButtonColor: '#011C39'
+                });
+            } else {
+                alert(res.message || 'خطا در ثبت درخواست');
+            }
+        }
+    })
+    .catch(() => {
+        alert('خطا در برقراری ارتباط با سرور.');
+    })
+    .finally(() => {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'ثبت نهایی درخواست و اعزام فوری تکنسین';
+        }
+    });
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const closeBtn = document.getElementById('serviceModalClose');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', window.closeServiceBooking);
+    }
+    const serviceModal = document.getElementById('serviceModal');
+    if (serviceModal) {
+        serviceModal.addEventListener('click', function(e) {
+            if (e.target === serviceModal) {
+                window.closeServiceBooking();
+            }
+        });
+    }
+
+    // FAQ Accordion handler
+    document.querySelectorAll('.faq-question').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const item = btn.closest('.faq-item');
+            const isActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(function(el) {
+                el.classList.remove('active');
+            });
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        });
+    });
+});
 
 /* ==========================================================================
    Comprehensive Client-Side Form Validation Engine
@@ -1646,4 +1743,33 @@ function initProfileAjaxForms() {
         });
     }
 }
+
+
+// Universal Password Visibility Toggle (Eye Hint)
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-toggle-password');
+    if (!btn) return;
+    e.preventDefault();
+    var wrapper = btn.closest('.password-field-wrapper');
+    var input = wrapper ? wrapper.querySelector('input') : (btn.previousElementSibling || btn.parentElement.querySelector('input'));
+    if (!input) return;
+    var icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.setAttribute('aria-label', '���� ���� ���� ����');
+        btn.setAttribute('title', '���� ���� ���� ����');
+        if (icon) {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    } else {
+        input.type = 'password';
+        btn.setAttribute('aria-label', '����� ���� ����');
+        btn.setAttribute('title', '����� ���� ����');
+        if (icon) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+});
 

@@ -44,6 +44,17 @@
 
         <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <div class="form-group">
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">عنوان دسته‌بندی</label>
+                <input type="text" name="category" class="admin-input" placeholder="مثال: کدهای خطای پکیج" value="راهنمای پکیج">
+            </div>
+            <div class="form-group">
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">نامک دسته‌بندی (Slug انگلیسی)</label>
+                <input type="text" name="category_slug" class="admin-input" placeholder="error-codes" dir="ltr" value="error-codes">
+            </div>
+        </div>
+
+        <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
                 <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">زمان تقریبی مطالعه</label>
                 <input type="text" name="reading_time" class="admin-input" placeholder="۵ دقیقه" value="۵ دقیقه">
             </div>
@@ -132,6 +143,7 @@
                 <tr>
                     <th style="width: 70px;">تصویر</th>
                     <th>عنوان مقاله</th>
+                    <th>دسته‌بندی</th>
                     <th>نامک (Slug)</th>
                     <th>زمان مطالعه</th>
                     <th>تعداد بازدید</th>
@@ -143,7 +155,7 @@
             <tbody>
                 <?php if (empty($articles)): ?>
                     <tr class="no-records-row">
-                        <td colspan="8" style="text-align: center; color: #94a3b8; padding: 35px 20px;">هیچ مقاله‌ای یافت نشد.</td>
+                        <td colspan="9" style="text-align: center; color: #94a3b8; padding: 35px 20px;">هیچ مقاله‌ای یافت نشد.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($articles as $art): ?>
@@ -160,6 +172,9 @@
                             <td>
                                 <strong style="color: #011C39;"><a href="<?= url('blog/' . $art['slug']) ?>" target="_blank" style="color: inherit; text-decoration: none;"><?= e($art['title']) ?></a></strong>
                             </td>
+                            <td>
+                                <span class="badge" style="background: #f1f5f9; color: #011C39; font-weight: 700; border: 1px solid #e2e8f0;"><?= e($art['category'] ?? 'راهنمای پکیج') ?></span>
+                            </td>
                             <td dir="ltr" style="text-align: right; color: #64748b; font-size: 0.85rem;"><code><?= e($art['slug']) ?></code></td>
                             <td><?= e($art['reading_time']) ?></td>
                             <td><span style="font-weight: 700; color: #EF5C16;"><?= number_format($art['views_count'] ?? 0) ?></span></td>
@@ -170,7 +185,7 @@
                                     <span style="color: #cbd5e1;">—</span>
                                 <?php endif; ?>
                             </td>
-                            <td dir="ltr" style="text-align: right; font-size: 0.82rem; color: #64748b;"><?= !empty($art['created_at']) ? date('Y/m/d', strtotime($art['created_at'])) : '—' ?></td>
+                            <td dir="rtl" style="text-align: right; font-size: 0.82rem; color: #64748b;"><?= !empty($art['created_at']) ? to_shamsi($art['created_at']) : '—' ?></td>
                             <td style="text-align: center;">
                                 <div style="display: inline-flex; gap: 8px; justify-content: center;">
                                     <a href="<?= url('admin/articles/edit/' . $art['id']) ?>" class="btn btn-sm btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" title="ویرایش مقاله">
@@ -205,27 +220,10 @@ function toggleNewArticleBox() {
         box.style.display = box.style.display === 'none' ? 'block' : 'none';
         if (box.style.display === 'block') {
             box.scrollIntoView({ behavior: 'smooth' });
-            if (!createQuill && typeof Quill !== 'undefined') {
-                createQuill = new Quill('#createQuillEditor', {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            [{ 'color': [] }, { 'background': [] }],
-                            ['link', 'image', 'blockquote', 'code-block'],
-                            ['clean']
-                        ]
-                    }
+            if (!createQuill && typeof window.initPersianQuill === 'function') {
+                createQuill = window.initPersianQuill('#createQuillEditor', '#createQuillHidden', {
+                    placeholder: 'متن کامل مقاله جدید را اینجا بنویسید...'
                 });
-
-                var form = document.getElementById('createArticleForm');
-                if (form) {
-                    form.addEventListener('submit', function() {
-                        document.getElementById('createQuillHidden').value = createQuill.root.innerHTML;
-                    });
-                }
             }
         }
     }
