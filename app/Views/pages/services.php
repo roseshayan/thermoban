@@ -1,4 +1,15 @@
-<?php defined('ROOT_PATH') or exit('No direct script access allowed'); ?>
+<?php defined('ROOT_PATH') or exit('No direct script access allowed'); 
+
+$callPhone = site_phone_landline() ?: site_phone_mobile();
+$callPhoneClean = clean_phone_for_tel($callPhone);
+
+$serviceFaqs = [];
+try {
+    if (class_exists('\App\Models\Faq')) {
+        $serviceFaqs = \App\Models\Faq::getBySection('services');
+    }
+} catch (\Throwable $e) {}
+?>
 
 <!-- Page Hero / Breadcrumbs Banner -->
 <section class="page-banner services-banner">
@@ -56,9 +67,11 @@
                             <a href="<?= url('service-order?service=' . urlencode($srv['title'])) ?>" class="btn btn-primary">
                                 ثبت آنلاین درخواست این خدمت
                             </a>
-                            <a href="tel:02177428596" class="btn btn-outline">
-                                <?= icon('phone', '', 16) ?> مشاوره تلفنی فوری
-                            </a>
+                            <?php if (!empty($callPhone)): ?>
+                                <a href="tel:<?= e($callPhoneClean) ?>" class="btn btn-outline">
+                                    <?= icon('phone', '', 16) ?> مشاوره تلفنی (<?= e($callPhone) ?>)
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -101,3 +114,33 @@
         </div>
     </div>
 </section>
+
+<?php if (!empty($serviceFaqs)): ?>
+<!-- Services FAQ Section -->
+<section class="faq-section" style="padding: 60px 0; background: #fff;">
+    <div class="site-container">
+        <div class="section-heading text-center">
+            <h2 class="section-title">سوالات متداول خدمات و هزینه‌ها</h2>
+            <p class="section-subtitle" style="color: #64748b; font-size: 0.95rem; margin-top: 6px;">
+                پاسخ به سوالات پرتکرار مشتریان در خصوص نحوه محاسبه تعرفه‌ها و گارانتی ۶ ماهه
+            </p>
+            <div class="title-underline"></div>
+        </div>
+
+        <div class="faq-accordion">
+            <?php foreach ($serviceFaqs as $f): ?>
+                <div class="faq-item">
+                    <button type="button" class="faq-question">
+                        <span><?= e($f['question']) ?></span>
+                        <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <?= nl2br(e($f['answer'])) ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?= \App\Models\Faq::getSchemaJsonLd($serviceFaqs) ?>
+<?php endif; ?>

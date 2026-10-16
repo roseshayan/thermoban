@@ -1665,6 +1665,393 @@ class AdminController extends Controller {
     }
 
     /**
+     * Technician Dispatch Schedule & Calendar View
+     */
+    public function schedule(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('service_requests');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['request_id'] ?? 0);
+
+            if ($action === 'update_dispatch' && $id > 0) {
+                $status = $_POST['status'] ?? 'scheduled';
+                $techId = !empty($_POST['technician_id']) ? (int) $_POST['technician_id'] : null;
+                $preferredDate = trim($_POST['preferred_date'] ?? '');
+                $timeSlot = trim($_POST['time_slot'] ?? '');
+                $techNotes = trim($_POST['technician_notes'] ?? '');
+
+                Database::query(
+                    "UPDATE `service_requests` 
+                     SET `status` = :st, `technician_id` = :tech, `preferred_date` = :pdate, `time_slot` = :ts, `technician_notes` = :notes, `updated_at` = NOW() 
+                     WHERE `id` = :id",
+                    [
+                        'st'    => $status,
+                        'tech'  => $techId,
+                        'pdate' => $preferredDate,
+                        'ts'    => $timeSlot,
+                        'notes' => $techNotes,
+                        'id'    => $id
+                    ]
+                );
+
+                $_SESSION['admin_success'] = 'وضعیت نوبت و تکنسین اعزامی بروزرسانی شد.';
+            }
+
+            $this->redirect('admin/schedule');
+        }
+
+        $technicians = Database::fetchAll("SELECT id, name, phone, role FROM `users` WHERE `role` IN ('technician', 'admin', 'super_admin') AND `status` = 'active' ORDER BY `name` ASC");
+
+        $techFilter = !empty($_GET['technician_id']) ? (int) $_GET['technician_id'] : null;
+        $statusFilter = trim($_GET['status'] ?? '');
+        $dateFilter = trim($_GET['date'] ?? '');
+
+        $where = ["1=1"];
+        $params = [];
+
+        if ($techFilter) {
+            $where[] = "sr.technician_id = :tech";
+            $params['tech'] = $techFilter;
+        }
+
+        if (!empty($statusFilter)) {
+            $where[] = "sr.status = :status";
+            $params['status'] = $statusFilter;
+        }
+
+        if (!empty($dateFilter)) {
+            $where[] = "sr.preferred_date LIKE :dt";
+            $params['dt'] = "%$dateFilter%";
+        }
+
+        $whereSql = implode(" AND ", $where);
+
+        $requests = Database::fetchAll(
+            "SELECT sr.*, u.name as customer_name, u.phone as customer_phone, t.name as technician_name, t.phone as technician_phone 
+             FROM `service_requests` sr 
+             LEFT JOIN `users` u ON sr.user_id = u.id 
+             LEFT JOIN `users` t ON sr.technician_id = t.id 
+             WHERE {$whereSql} 
+             ORDER BY sr.preferred_date ASC, sr.created_at DESC",
+            $params
+        );
+
+        $this->view('admin/schedule', [
+            'pageTitle'    => 'تقویم کاری و زمان‌بندی اعزام تکنسین‌ها | CMS ترموبان',
+            'requests'     => $requests,
+            'technicians'  => $technicians,
+            'techFilter'   => $techFilter,
+            'statusFilter' => $statusFilter,
+            'dateFilter'   => $dateFilter,
+            'activeNav'    => 'schedule',
+            'success'      => $_SESSION['admin_success'] ?? null,
+            'error'        => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Menu & Mega Menu Manager
+     */
+    public function menus(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('menus');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['menu_id'] ?? 0);
+
+            if ($action === 'create' || $action === 'update') {
+                $title = trim($_POST['title'] ?? '');
+                $url = trim($_POST['url'] ?? '#');
+                $location = in_array($_POST['location'] ?? '', ['header', 'footer']) ? $_POST['location'] : 'header';
+                $parentId = !empty($_POST['parent_id']) ? (int) $_POST['parent_id'] : null;
+                $type = in_array($_POST['type'] ?? '', ['simple', 'dropdown', 'megamenu']) ? $_POST['type'] : 'simple';
+                $icon = trim($_POST['icon'] ?? '');
+                $badge = trim($_POST['badge'] ?? '');
+                $target = trim($_POST['target'] ?? '_self');
+                $sort = (int) ($_POST['sort_order'] ?? 0);
+                $isActive = isset($_POST['is_active']) ? 1 : 0;
+                $megamenuData = trim($_POST['megamenu_data'] ?? '');
+
+                if (!empty($megamenuData)) {
+                    // Test json validity
+                    $test = json_decode($megamenuData, true);
+                    if ($test === null && json_last_error() !== JSON_ERROR_NONE) {
+                        $megamenuData = null;
+                    }
+                } else {
+                    $megamenuData = null;
+                }
+
+                $data = [
+                    'title'         => $title,
+                    'url'           => $url,
+                    'location'      => $location,
+                    'parent_id'     => $parentId,
+                    'type'          => $type,
+                    'icon'          => $icon ?: null,
+                    'badge'         => $badge ?: null,
+                    'target'        => $target ?: '_self',
+                    'sort_order'    => $sort,
+                    'is_active'     => $isActive,
+                    'megamenu_data' => $megamenuData
+                ];
+
+                if (!empty($title)) {
+                    if ($action === 'create') {
+                        \App\Models\Menu::create($data);
+                        $_SESSION['admin_success'] = 'آیتم منو با موفقیت ایجاد گردید.';
+                    } else {
+                        \App\Models\Menu::update($id, $data);
+                        $_SESSION['admin_success'] = 'آیتم منو با موفقیت ویرایش گردید.';
+                    }
+                }
+            } elseif ($action === 'delete' && $id > 0) {
+                // Delete children first
+                Database::query("DELETE FROM `menus` WHERE `parent_id` = :id", ['id' => $id]);
+                \App\Models\Menu::delete($id);
+                $_SESSION['admin_success'] = 'آیتم منو و زیرمجموعه‌های آن با موفقیت حذف گردید.';
+            } elseif ($action === 'toggle' && $id > 0) {
+                $cur = \App\Models\Menu::find($id);
+                if ($cur) {
+                    $newVal = ((int)$cur['is_active'] === 1) ? 0 : 1;
+                    \App\Models\Menu::update($id, ['is_active' => $newVal]);
+                    $_SESSION['admin_success'] = 'وضعیت انتشار آیتم منو تغییر یافت.';
+                }
+            }
+
+            $this->redirect('admin/menus');
+        }
+
+        $locationFilter = in_array($_GET['location'] ?? '', ['header', 'footer']) ? $_GET['location'] : 'header';
+        $items = \App\Models\Menu::getAllFlat($locationFilter);
+        $parents = \App\Models\Menu::getParents($locationFilter);
+
+        $this->view('admin/menus', [
+            'pageTitle'      => 'مدیریت منوهای سایت و مگامنو | CMS ترموبان',
+            'items'          => $items,
+            'parents'        => $parents,
+            'locationFilter' => $locationFilter,
+            'activeNav'      => 'menus',
+            'success'        => $_SESSION['admin_success'] ?? null,
+            'error'          => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Frequently Asked Questions (FAQ) Manager
+     */
+    public function faqs(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('faqs');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['faq_id'] ?? 0);
+
+            if ($action === 'create' || $action === 'update') {
+                $section = trim($_POST['section'] ?? 'home');
+                $targetId = !empty($_POST['target_id']) ? (int) $_POST['target_id'] : null;
+                $question = trim($_POST['question'] ?? '');
+                $answer = trim($_POST['answer'] ?? '');
+                $sort = (int) ($_POST['sort_order'] ?? 0);
+                $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+                $data = [
+                    'section'   => $section,
+                    'target_id' => $targetId,
+                    'question'  => $question,
+                    'answer'    => $answer,
+                    'sort_order'=> $sort,
+                    'is_active' => $isActive
+                ];
+
+                if (!empty($question) && !empty($answer)) {
+                    if ($action === 'create') {
+                        \App\Models\Faq::create($data);
+                        $_SESSION['admin_success'] = 'پرسش و پاسخ جدید با موفقیت ذخیره شد.';
+                    } else {
+                        \App\Models\Faq::update($id, $data);
+                        $_SESSION['admin_success'] = 'پرسش متداول با موفقیت ویرایش شد.';
+                    }
+                }
+            } elseif ($action === 'delete' && $id > 0) {
+                \App\Models\Faq::delete($id);
+                $_SESSION['admin_success'] = 'پرسش متداول حذف گردید.';
+            } elseif ($action === 'toggle' && $id > 0) {
+                $faq = \App\Models\Faq::find($id);
+                if ($faq) {
+                    $newVal = ((int)$faq['is_active'] === 1) ? 0 : 1;
+                    \App\Models\Faq::update($id, ['is_active' => $newVal]);
+                    $_SESSION['admin_success'] = 'وضعیت نمایش سوال متداول بروز شد.';
+                }
+            }
+
+            $this->redirect('admin/faqs');
+        }
+
+        $sectionFilter = trim($_GET['section'] ?? '');
+        $where = "1=1";
+        $params = [];
+        if (!empty($sectionFilter)) {
+            $where = "`section` = :sec";
+            $params['sec'] = $sectionFilter;
+        }
+
+        $faqs = \App\Models\Faq::where($where, $params, "`section` ASC, `sort_order` ASC, `id` ASC");
+
+        $this->view('admin/faqs', [
+            'pageTitle'     => 'مدیریت سوالات متداول (FAQ) و اسکیما | CMS ترموبان',
+            'faqs'          => $faqs,
+            'sectionFilter' => $sectionFilter,
+            'activeNav'     => 'faqs',
+            'success'       => $_SESSION['admin_success'] ?? null,
+            'error'         => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Customer Testimonials & Reviews Manager
+     */
+    public function testimonials(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('testimonials');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['testimonial_id'] ?? 0);
+
+            if ($action === 'create' || $action === 'update') {
+                $name = trim($_POST['customer_name'] ?? '');
+                $city = trim($_POST['customer_city'] ?? '');
+                $serviceType = trim($_POST['service_type'] ?? '');
+                $rating = max(1, min(5, (int) ($_POST['rating'] ?? 5)));
+                $content = trim($_POST['content'] ?? '');
+                $avatar = trim($_POST['avatar'] ?? '');
+                $sort = (int) ($_POST['sort_order'] ?? 0);
+                $isActive = isset($_POST['is_active']) ? 1 : 0;
+                $isFeatured = isset($_POST['is_featured']) ? 1 : 0;
+
+                $data = [
+                    'customer_name' => $name,
+                    'customer_city' => $city,
+                    'service_type'  => $serviceType,
+                    'rating'        => $rating,
+                    'content'       => $content,
+                    'avatar'        => $avatar ?: null,
+                    'sort_order'    => $sort,
+                    'is_active'     => $isActive,
+                    'is_featured'   => $isFeatured
+                ];
+
+                if (!empty($name) && !empty($content)) {
+                    if ($action === 'create') {
+                        \App\Models\Testimonial::create($data);
+                        $_SESSION['admin_success'] = 'نظر و رضایت مشتری با موفقیت افزوده شد.';
+                    } else {
+                        \App\Models\Testimonial::update($id, $data);
+                        $_SESSION['admin_success'] = 'نظر مشتری با موفقیت ویرایش شد.';
+                    }
+                }
+            } elseif ($action === 'delete' && $id > 0) {
+                \App\Models\Testimonial::delete($id);
+                $_SESSION['admin_success'] = 'نظر مشتری حذف شد.';
+            } elseif ($action === 'toggle' && $id > 0) {
+                $test = \App\Models\Testimonial::find($id);
+                if ($test) {
+                    $newVal = ((int)$test['is_active'] === 1) ? 0 : 1;
+                    \App\Models\Testimonial::update($id, ['is_active' => $newVal]);
+                    $_SESSION['admin_success'] = 'وضعیت نمایش نظر تغییر یافت.';
+                }
+            }
+
+            $this->redirect('admin/testimonials');
+        }
+
+        $testimonials = \App\Models\Testimonial::all("`sort_order` ASC, `id` DESC");
+
+        $this->view('admin/testimonials', [
+            'pageTitle'    => 'مدیریت نظرات و رضایت مشتریان | CMS ترموبان',
+            'testimonials' => $testimonials,
+            'activeNav'    => 'testimonials',
+            'success'      => $_SESSION['admin_success'] ?? null,
+            'error'        => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Dealership Branches Manager
+     */
+    public function branches(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('branches');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['branch_id'] ?? 0);
+
+            if ($action === 'create' || $action === 'update') {
+                $name = trim($_POST['name'] ?? '');
+                $city = trim($_POST['city'] ?? 'تهران');
+                $district = trim($_POST['district'] ?? '');
+                $address = trim($_POST['address'] ?? '');
+                $phoneLandline = trim($_POST['phone_landline'] ?? '');
+                $phoneMobile = trim($_POST['phone_mobile'] ?? '');
+                $workingHours = trim($_POST['working_hours'] ?? '');
+                $lat = !empty($_POST['lat']) ? trim($_POST['lat']) : null;
+                $lng = !empty($_POST['lng']) ? trim($_POST['lng']) : null;
+                $sort = (int) ($_POST['sort_order'] ?? 0);
+                $isActive = isset($_POST['is_active']) ? 1 : 0;
+                $isMain = isset($_POST['is_main']) ? 1 : 0;
+
+                $data = [
+                    'name'           => $name,
+                    'city'           => $city,
+                    'district'       => $district,
+                    'address'        => $address,
+                    'phone_landline' => $phoneLandline ?: null,
+                    'phone_mobile'   => $phoneMobile ?: null,
+                    'working_hours'  => $workingHours ?: null,
+                    'lat'            => $lat,
+                    'lng'            => $lng,
+                    'sort_order'     => $sort,
+                    'is_active'      => $isActive,
+                    'is_main'        => $isMain
+                ];
+
+                if (!empty($name) && !empty($district)) {
+                    if ($action === 'create') {
+                        \App\Models\Branch::create($data);
+                        $_SESSION['admin_success'] = 'شعبه نمایندگی با موفقیت افزوده شد.';
+                    } else {
+                        \App\Models\Branch::update($id, $data);
+                        $_SESSION['admin_success'] = 'مشخصات شعبه با موفقیت ویرایش شد.';
+                    }
+                }
+            } elseif ($action === 'delete' && $id > 0) {
+                \App\Models\Branch::delete($id);
+                $_SESSION['admin_success'] = 'شعبه مورد نظر با موفقیت حذف شد.';
+            } elseif ($action === 'toggle' && $id > 0) {
+                $branch = \App\Models\Branch::find($id);
+                if ($branch) {
+                    $newVal = ((int)$branch['is_active'] === 1) ? 0 : 1;
+                    \App\Models\Branch::update($id, ['is_active' => $newVal]);
+                    $_SESSION['admin_success'] = 'وضعیت شعبه بروز شد.';
+                }
+            }
+
+            $this->redirect('admin/branches');
+        }
+
+        $branches = \App\Models\Branch::all("`sort_order` ASC, `id` ASC");
+
+        $this->view('admin/branches', [
+            'pageTitle' => 'مدیریت شعب و دفاتر نمایندگی | CMS ترموبان',
+            'branches'  => $branches,
+            'activeNav' => 'branches',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
      * Helper for single file upload
      */
     private function handleUpload(string $inputName, string $targetFolder = 'uploads/media'): ?string {

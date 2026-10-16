@@ -455,7 +455,7 @@ class SmokeTestRunner {
             'articles', 'comments', 'analytics', 'backups', 'users', 
             'seo', 'gateways', 'sms', 'modules', 'settings',
             'brands', 'media', 'profile', 'addresses', 'tariffs', 'serviceRequests',
-            'migrateDb'
+            'migrateDb', 'schedule', 'menus', 'faqs', 'testimonials', 'branches'
         ];
 
         $failedActions = [];

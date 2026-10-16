@@ -173,6 +173,10 @@ class ServiceOrderController extends Controller {
         $trackingCode = ServiceRequest::generateTrackingCode();
         $userId = Auth::id() ?: null;
 
+        // Coordinates (from Map Picker)
+        $lat = !empty($_POST['lat']) ? (float)$_POST['lat'] : null;
+        $lng = !empty($_POST['lng']) ? (float)$_POST['lng'] : null;
+
         // Save order to database
         $requestId = ServiceRequest::create([
             'tracking_code'  => $trackingCode,
@@ -184,6 +188,8 @@ class ServiceOrderController extends Controller {
             'model'          => $model ?: null,
             'district'       => $district,
             'address'        => $address,
+            'lat'            => $lat,
+            'lng'            => $lng,
             'preferred_date' => $preferredDate,
             'time_slot'      => $timeSlot,
             'urgency'        => $urgency,
@@ -203,6 +209,8 @@ class ServiceOrderController extends Controller {
                 'address'     => $address,
                 'postal_code' => trim($_POST['postal_code'] ?? '') ?: null,
                 'phone'       => $customerPhone,
+                'lat'         => $lat ?: 35.7219,
+                'lng'         => $lng ?: 51.4056,
                 'is_default'  => 0
             ]);
         }

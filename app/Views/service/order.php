@@ -282,6 +282,28 @@
                         </div>
                     </div>
 
+                    <!-- Interactive Leaflet Map Location Picker -->
+                    <div style="margin-top: 14px; margin-bottom: 18px; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; background: #f8fafc;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <span style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">
+                                    <i class="fa-solid fa-map-location-dot" style="color: #0284c7; margin-left: 4px;"></i>
+                                    تعیین موقعیت روی نقشه (جهت سهولت مسیریابی تکنسین):
+                                </span>
+                                <span style="font-size: 0.76rem; color: #64748b; display: block; margin-top: 2px;">روی نقشه کلیک کنید یا نشانگر را به سمت محل سکونت خود حرکت دهید (اختیاری)</span>
+                            </div>
+                            <button type="button" id="btnDetectGpsLocation" class="btn btn-outline" style="font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; border-color: #0284c7; color: #0284c7;">
+                                <i class="fa-solid fa-location-crosshairs"></i> موقعیت فعلی من (GPS)
+                            </button>
+                        </div>
+                        <div id="serviceOrderMapPicker" style="height: 240px; border-radius: 10px; border: 1px solid #cbd5e1; z-index: 1;"></div>
+                        <input type="hidden" name="lat" id="orderLatInput" value="">
+                        <input type="hidden" name="lng" id="orderLngInput" value="">
+                        <div id="mapCoordinatesHint" style="margin-top: 8px; font-size: 0.78rem; color: #059669; font-weight: 600; display: none;">
+                            <i class="fa-solid fa-check-circle"></i> مختصات مکانی شما ثبت شد (<span id="latLngCoordText"></span>).
+                        </div>
+                    </div>
+
                     <?php if ($user): ?>
                         <div style="margin-top: 10px;">
                             <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.86rem; color: #334155;">
@@ -436,4 +458,114 @@ function handleVideoPreview(input) {
         info.innerHTML = '<i class="fa-solid fa-circle-check"></i> ویدیو انتخاب شد: ' + file.name + ' (' + mb + 'MB)';
     }
 }
+
+// Initialize Leaflet Map Location Picker
+(function() {
+    var defaultLat = 35.7219;
+    var defaultLng = 51.4056;
+    var mapEl = document.getElementById('serviceOrderMapPicker');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    var map = L.map('serviceOrderMapPicker', {
+        center: [defaultLat, defaultLng],
+        zoom: 12,
+        zoomControl: true
+    });
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    var marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+    function updateMarkerPos(lat, lng) {
+        document.getElementById('orderLatInput').value = lat.toFixed(6);
+        document.getElementById('orderLngInput').value = lng.toFixed(6);
+        var hint = document.getElementById('mapCoordinatesHint');
+        var text = document.getElementById('latLngCoordText');
+        if (hint && text) {
+            hint.style.display = 'block';
+            text.innerText = lat.toFixed(4) + ', ' + lng.toFixed(4);
+        }
+    }
+
+    marker.on('dragend', function(e) {
+        var pos = marker.getLatLng();
+        updateMarkerPos(pos.lat, pos.lng);
+    });
+
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        updateMarkerPos(e.latlng.lat, e.latlng.lng);
+    });
+
+    var gpsBtn = document.getElementById('btnDetectGpsLocation');
+    if (gpsBtn && navigator.geolocation) {
+        gpsBtn.addEventListener('click', function() {
+            gpsBtn.disabled = true;
+            gpsBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال دریافت...';
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var uLat = position.coords.latitude;
+                var uLng = position.coords.longitude;
+                map.setView([uLat, uLng], 15);
+                marker.setLatLng([uLat, uLng]);
+                updateMarkerPos(uLat, uLng);
+                gpsBtn.disabled = false;
+                gpsBtn.innerHTML = '<i class="fa-solid fa-check"></i> موقعیت دریافت شد';
+            }, function(err) {
+                gpsBtn.disabled = false;
+                gpsBtn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> موقعیت فعلی من (GPS)';
+                alert('امکان دریافت خودکار موقعیت از مرورگر فراهم نشد. لطفاً نشانگر را روی نقشه جابجا فرمایید.');
+            }, { enableHighAccuracy: true, timeout: 8000 });
+        });
+    }
+
+    // Auto pan when district changes
+    var districtCoords = {
+        'منطقه ۱': [35.8070, 51.4330],
+        'منطقه ۲': [35.7824, 51.3712],
+        'منطقه ۳': [35.7610, 51.4620],
+        'منطقه ۴': [35.7310, 51.5280],
+        'منطقه ۵': [35.7620, 51.3320],
+        'منطقه ۶': [35.7250, 51.4080],
+        'منطقه ۷': [35.7200, 51.4400],
+        'منطقه ۸': [35.7280, 51.4900],
+        'منطقه ۹': [35.6900, 51.3400],
+        'منطقه ۱۰': [35.6900, 51.3700],
+        'منطقه ۱۱': [35.6800, 51.4000],
+        'منطقه ۱۲': [35.6800, 51.4300],
+        'منطقه ۱۳': [35.7000, 51.4800],
+        'منطقه ۱۴': [35.6800, 51.4700],
+        'منطقه ۱۵': [35.6400, 51.4700],
+        'منطقه ۱۶': [35.6300, 51.4100],
+        'منطقه ۱۷': [35.6500, 51.3700],
+        'منطقه ۱۸': [35.6400, 51.3100],
+        'منطقه ۱۹': [35.6100, 51.3800],
+        'منطقه ۲۰': [35.5900, 51.4300],
+        'منطقه ۲۱': [35.7000, 51.2400],
+        'منطقه ۲۲': [35.7400, 51.2100],
+        'پردیس': [35.7380, 51.8150],
+        'لواسان': [35.8200, 51.6300]
+    };
+
+    var distSelect = document.getElementById('custDistrictSelect');
+    if (distSelect) {
+        distSelect.addEventListener('change', function() {
+            var val = this.value;
+            for (var d in districtCoords) {
+                if (val.indexOf(d) !== -1) {
+                    var c = districtCoords[d];
+                    map.setView(c, 14);
+                    marker.setLatLng(c);
+                    updateMarkerPos(c[0], c[1]);
+                    break;
+                }
+            }
+        });
+    }
+
+    // Auto resize map when visible
+    setTimeout(function() { map.invalidateSize(); }, 500);
+})();
 </script>

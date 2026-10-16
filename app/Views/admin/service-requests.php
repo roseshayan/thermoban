@@ -215,6 +215,23 @@
                     <div>
                         <strong style="color: #64748b;">مشکل اعلامی:</strong> <span id="modalProblemDesc" style="color: #c2410c; font-weight: 600;"></span>
                     </div>
+
+                    <div id="modalMapLinksRow" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1; display: none;">
+                        <strong style="color: #64748b; font-size: 0.82rem; display: block; margin-bottom: 6px;">
+                            <i class="fa-solid fa-location-dot" style="color: #0284c7;"></i> مسیریابی لوکیشن مشتری برای سرویس‌کار:
+                        </strong>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a id="btnNeshanNav" href="#" target="_blank" rel="noopener" class="btn btn-outline" style="font-size: 0.78rem; padding: 4px 10px; border-radius: 6px; color: #0284c7; border-color: #0284c7;">
+                                <i class="fa-solid fa-diamond-turn-right"></i> نشان (Neshan)
+                            </a>
+                            <a id="btnBaladNav" href="#" target="_blank" rel="noopener" class="btn btn-outline" style="font-size: 0.78rem; padding: 4px 10px; border-radius: 6px; color: #059669; border-color: #059669;">
+                                <i class="fa-solid fa-route"></i> بلد (Balad)
+                            </a>
+                            <a id="btnGoogleNav" href="#" target="_blank" rel="noopener" class="btn btn-outline" style="font-size: 0.78rem; padding: 4px 10px; border-radius: 6px; color: #ea580c; border-color: #ea580c;">
+                                <i class="fa-solid fa-map"></i> گوگل‌مپ
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Media Attachments (Photos & HTML5 Video Player) -->
@@ -299,6 +316,19 @@ function openManageRequestModal(req) {
     document.getElementById('modalEstCost').value = req.estimated_cost || '';
     document.getElementById('modalFinCost').value = req.final_cost || '';
     document.getElementById('modalAdminNotes').value = req.admin_notes || '';
+
+    // Map Location Links
+    var mapRow = document.getElementById('modalMapLinksRow');
+    if (mapRow) {
+        if (req.lat && req.lng) {
+            mapRow.style.display = 'block';
+            document.getElementById('btnNeshanNav').href = 'https://neshan.org/maps/@' + req.lat + ',' + req.lng + ',16z';
+            document.getElementById('btnBaladNav').href = 'https://balad.ir/location?latitude=' + req.lat + '&longitude=' + req.lng;
+            document.getElementById('btnGoogleNav').href = 'https://www.google.com/maps?q=' + req.lat + ',' + req.lng;
+        } else {
+            mapRow.style.display = 'none';
+        }
+    }
 
     // Handle Photos & Video
     var mediaSec = document.getElementById('modalMediaSection');

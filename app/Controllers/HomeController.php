@@ -60,6 +60,18 @@ class HomeController extends Controller {
             } catch (\Throwable $e) {}
         }
 
+        // Dynamic Testimonials
+        $testimonialsList = [];
+        try {
+            $testimonialsList = \App\Models\Testimonial::getActive(6);
+        } catch (\Throwable $e) {}
+
+        // Dynamic FAQs
+        $faqsList = [];
+        try {
+            $faqsList = \App\Models\Faq::getBySection('home');
+        } catch (\Throwable $e) {}
+
         $data = [
             'pageTitle' => 'ترموبان | مرجع تخصصی نصب، تعمیر و فروش پکیج',
             'csrfToken' => Security::generateCsrf(),
@@ -126,6 +138,8 @@ class HomeController extends Controller {
             'brands' => $brandsList,
             'products' => $productsList,
             'articles' => $articlesList,
+            'testimonials' => $testimonialsList,
+            'faqs' => $faqsList,
             'shopEnabled' => $shopEnabled,
             'blogEnabled' => $blogEnabled,
         ];

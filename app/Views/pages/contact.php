@@ -1,4 +1,19 @@
-<?php defined('ROOT_PATH') or exit('No direct script access allowed'); ?>
+<?php defined('ROOT_PATH') or exit('No direct script access allowed'); 
+
+$activeBranches = [];
+try {
+    if (class_exists('\App\Models\Branch')) {
+        $activeBranches = \App\Models\Branch::getActive();
+    }
+} catch (\Throwable $e) {}
+
+if (empty($activeBranches) && !empty($branches)) {
+    $activeBranches = $branches;
+}
+
+$workingHours = site_working_hours();
+$socials = site_socials();
+?>
 
 <!-- Page Hero / Breadcrumbs Banner -->
 <section class="page-banner contact-banner">
@@ -25,26 +40,41 @@
         </div>
 
         <div class="branches-grid">
-            <?php foreach ($branches as $branch): ?>
+            <?php foreach ($activeBranches as $branch): 
+                $bLandline = $branch['phone_landline'] ?? ($branch['phone'] ?? '');
+                $bMobile = $branch['phone_mobile'] ?? ($branch['mobile'] ?? '');
+                $bCallPhone = !empty($bLandline) ? $bLandline : $bMobile;
+            ?>
                 <div class="branch-card">
                     <div class="branch-header">
                         <div class="branch-icon"><?= icon('map-pin', 'text-orange', 22) ?></div>
-                        <h3 class="branch-title"><?= e($branch['area']) ?></h3>
+                        <h3 class="branch-title">
+                            <?= e($branch['name'] ?? ($branch['area'] ?? 'شعبه')) ?>
+                            <?php if (!empty($branch['is_main'])): ?>
+                                <span style="font-size: 0.72rem; background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">مرکزی</span>
+                            <?php endif; ?>
+                        </h3>
                     </div>
-                    <p class="branch-districts"><strong>مناطق تحت پوشش:</strong> <?= e($branch['districts']) ?></p>
+                    <p class="branch-districts"><strong>مناطق تحت پوشش:</strong> <?= e($branch['district'] ?? ($branch['districts'] ?? '')) ?></p>
                     <div class="branch-phones">
-                        <a href="tel:<?= str_replace('-', '', $branch['phone']) ?>" class="branch-phone-link">
-                            <span class="phone-icon"><?= icon('phone', 'text-orange', 16) ?></span>
-                            <span class="phone-text"><?= e($branch['phone']) ?></span>
-                        </a>
-                        <a href="tel:<?= str_replace('-', '', $branch['mobile']) ?>" class="branch-mobile-link">
-                            <span class="phone-icon"><?= icon('mobile', 'text-orange', 16) ?></span>
-                            <span class="phone-text"><?= e($branch['mobile']) ?></span>
-                        </a>
+                        <?php if (!empty($bLandline)): ?>
+                            <a href="tel:<?= e(clean_phone_for_tel($bLandline)) ?>" class="branch-phone-link">
+                                <span class="phone-icon"><?= icon('phone', 'text-orange', 16) ?></span>
+                                <span class="phone-text" dir="ltr"><?= e($bLandline) ?></span>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (!empty($bMobile)): ?>
+                            <a href="tel:<?= e(clean_phone_for_tel($bMobile)) ?>" class="branch-mobile-link">
+                                <span class="phone-icon"><?= icon('mobile', 'text-orange', 16) ?></span>
+                                <span class="phone-text" dir="ltr"><?= e($bMobile) ?></span>
+                            </a>
+                        <?php endif; ?>
                     </div>
-                    <a href="tel:<?= str_replace('-', '', $branch['phone']) ?>" class="btn btn-outline btn-call-branch w-100">
-                        تماس فوری با این شعبه
-                    </a>
+                    <?php if (!empty($bCallPhone)): ?>
+                        <a href="tel:<?= e(clean_phone_for_tel($bCallPhone)) ?>" class="btn btn-outline btn-call-branch w-100">
+                            تماس فوری با این شعبه
+                        </a>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -139,7 +169,7 @@
                     <p class="bale-desc">
                         می‌توانید عکس یا ویدیوی کوتاه از صدای غیرعادی یا کد خطای پکیج خود را در پیام‌رسان بله ارسال فرمایید تا تکنسین کشیک فوراً شما را راهنمایی کند.
                     </p>
-                    <a href="https://ble.ir/thermoban_support" target="_blank" rel="noopener noreferrer" class="btn btn-bale-full w-100">
+                    <a href="<?= e($socials['bale'] ?? 'https://ble.ir/thermoban_support') ?>" target="_blank" rel="noopener noreferrer" class="btn btn-bale-full w-100">
                         <span><?= icon('ticket', '', 18) ?> شروع گفتگو در پیام‌رسان بله</span>
                     </a>
                 </div>
@@ -152,23 +182,25 @@
                             <span class="info-icon"><?= icon('building', 'text-orange', 20) ?></span>
                             <div>
                                 <strong>آدرس دفتر مرکزی:</strong>
-                                <span>تهران، خیابان دماوند، بعد از پل خاقانی، پلاک ۳۴</span>
+                                <span><?= e(site_address()) ?></span>
                             </div>
                         </li>
                         <li>
                             <span class="info-icon"><?= icon('clock', 'text-orange', 20) ?></span>
                             <div>
                                 <strong>ساعات کاری و پذیرش:</strong>
-                                <span>شنبه تا پنجشنبه ۸ صبح الی ۱۰ شب (پشتیبانی تلفنی و تکنسین‌های اضطراری: ۲۴ ساعته)</span>
+                                <span><?= e($workingHours['weekdays']) ?><br><?= e($workingHours['weekend']) ?></span>
                             </div>
                         </li>
+                        <?php $sEmail = site_email(); if (!empty($sEmail)): ?>
                         <li>
                             <span class="info-icon"><?= icon('mail', 'text-orange', 20) ?></span>
                             <div>
                                 <strong>ایمیل پشتیبانی:</strong>
-                                <span>info@devshayan.ir</span>
+                                <span><?= e($sEmail) ?></span>
                             </div>
                         </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
 
@@ -177,3 +209,4 @@
         </div>
     </div>
 </section>
+

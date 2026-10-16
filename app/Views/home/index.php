@@ -397,71 +397,83 @@
         </div>
 
         <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
+            <?php if (!empty($testimonials)): ?>
+                <?php foreach ($testimonials as $t): ?>
+                    <div class="testimonial-card">
+                        <div>
+                            <div class="testimonial-stars">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <i class="<?= ($i <= (int)$t['rating']) ? 'fa-solid' : 'fa-regular' ?> fa-star"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <p class="testimonial-quote">
+                                «<?= e($t['content']) ?>»
+                            </p>
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="author-initials"><?= e(mb_substr($t['customer_name'], 0, 2)) ?></div>
+                            <div class="author-meta">
+                                <strong><?= e($t['customer_name']) ?></strong>
+                                <span><?= e($t['customer_city'] ?? 'تهران') ?><?= !empty($t['service_type']) ? ' • ' . e($t['service_type']) : '' ?></span>
+                            </div>
+                        </div>
                     </div>
-                    <p class="testimonial-quote">
-                        «پکیج ایران رادیاتور L24FF ارور E81 می‌داد و آب حمام کاملاً سرد شده بود. بعد از تماس کمتر از ۴۰ دقیقه تکنسین رسید و با اسیدشویی اصولی مبدل و تنظیم گیج منبع مشکل کاملاً برطرف شد. برخورد عالی و صدور فاکتور شرکتی با ضمانت ۶ ماهه.»
-                    </p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-initials">رس</div>
-                    <div class="author-meta">
-                        <strong>مهندس رامین سلیمانی</strong>
-                        <span>منطقه ۲ تهران (سعادت‌آباد) • تعمیر ایران رادیاتور</span>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="testimonial-card">
+                    <div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-quote">
+                            «پکیج ایران رادیاتور L24FF ارور E81 می‌داد و آب حمام کاملاً سرد شده بود. بعد از تماس کمتر از ۴۰ دقیقه تکنسین رسید و با اسیدشویی اصولی مبدل و تنظیم گیج منبع مشکل کاملاً برطرف شد. برخورد عالی و صدور فاکتور شرکتی با ضمانت ۶ ماهه.»
+                        </p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-initials">رس</div>
+                        <div class="author-meta">
+                            <strong>مهندس رامین سلیمانی</strong>
+                            <span>منطقه ۲ تهران (سعادت‌آباد) • تعمیر ایران رادیاتور</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="testimonial-card">
-                <div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
+                <div class="testimonial-card">
+                    <div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-quote">
+                            «در شب‌های سرد آذر ماه پکیج بوتان ما افت فشار شدید داشت و مدام خاموش می‌شد. با کشیک اضطراری ترموبان هماهنگ شدیم و سرویس‌کار با قطعه اصل منبع انبساط آمد و در حضور خودم تعویض کرد. گارانتی کتبی ارائه دادند و بسیار راضی هستم.»
+                        </p>
                     </div>
-                    <p class="testimonial-quote">
-                        «در شب‌های سرد آذر ماه پکیج بوتان ما افت فشار شدید داشت و مدام خاموش می‌شد. با کشیک اضطراری ترموبان هماهنگ شدیم و سرویس‌کار با قطعه اصل منبع انبساط آمد و در حضور خودم تعویض کرد. گارانتی کتبی ارائه دادند و بسیار راضی هستم.»
-                    </p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-initials">فک</div>
-                    <div class="author-meta">
-                        <strong>دکتر فرزانه کریمی</strong>
-                        <span>منطقه ۳ تهران (پاسداران) • تعویض منبع و سرویس دوره‌ای</span>
+                    <div class="testimonial-author">
+                        <div class="author-initials">فک</div>
+                        <div class="author-meta">
+                            <strong>دکتر فرزانه کریمی</strong>
+                            <span>منطقه ۳ تهران (پاسداران) • تعویض منبع و سرویس دوره‌ای</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="testimonial-card">
-                <div>
-                    <div class="testimonial-stars">
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
-                        <i class="fa-solid fa-star"></i>
+                <div class="testimonial-card">
+                    <div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-quote">
+                            «بزرگترین مزیت ترموبان شفافیت و صداقت در نرخ‌هاست. دقیقاً طبق نرخ مصوب اتحادیه هزینه را دریافت کردند، بدون هیچ هزینه تراشی اضافی و قطعه داغی قبلی را هم تحویل دادند. واقعاً تیمی متعهد و حرفه‌ای هستند.»
+                        </p>
                     </div>
-                    <p class="testimonial-quote">
-                        «بزرگترین مزیت ترموبان شفافیت و صداقت در نرخ‌هاست. دقیقاً طبق نرخ مصوب اتحادیه هزینه را دریافت کردند، بدون هیچ هزینه تراشی اضافی و قطعه داغی قبلی را هم تحویل دادند. واقعاً تیمی متعهد و حرفه‌ای هستند.»
-                    </p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-initials">حم</div>
-                    <div class="author-meta">
-                        <strong>مهندس حامد موسوی</strong>
-                        <span>منطقه ۵ تهران (پونک) • تعمیر برد الکترونیک</span>
+                    <div class="testimonial-author">
+                        <div class="author-initials">حم</div>
+                        <div class="author-meta">
+                            <strong>مهندس حامد موسوی</strong>
+                            <span>منطقه ۵ تهران (پونک) • تعمیر برد الکترونیک</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -478,55 +490,69 @@
         </div>
 
         <div class="faq-accordion">
-            <div class="faq-item">
-                <button type="button" class="faq-question">
-                    <span>اعزام تکنسین چقدر زمان می‌برد؟</span>
-                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
-                </button>
-                <div class="faq-answer">
-                    با توجه به استقرار تکنسین‌های ترموبان در شعب ۴ گانه (شمال، شرق، غرب و مرکز)، پس از ثبت درخواست یا تماس تلفنی، نزدیک‌ترین تکنسین متخصص حداکثر بین ۳۰ الی ۶۰ دقیقه در محل شما حاضر خواهد بود.
+            <?php if (!empty($faqs)): ?>
+                <?php foreach ($faqs as $f): ?>
+                    <div class="faq-item">
+                        <button type="button" class="faq-question">
+                            <span><?= e($f['question']) ?></span>
+                            <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <?= nl2br(e($f['answer'])) ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="faq-item">
+                    <button type="button" class="faq-question">
+                        <span>اعزام تکنسین چقدر زمان می‌برد؟</span>
+                        <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                    </button>
+                    <div class="faq-answer">
+                        با توجه به استقرار تکنسین‌های ترموبان در شعب ۴ گانه (شمال، شرق، غرب و مرکز)، پس از ثبت درخواست یا تماس تلفنی، نزدیک‌ترین تکنسین متخصص حداکثر بین ۳۰ الی ۶۰ دقیقه در محل شما حاضر خواهد بود.
+                    </div>
                 </div>
-            </div>
 
-            <div class="faq-item">
-                <button type="button" class="faq-question">
-                    <span>آیا خدمات و قطعات تعویض شده دارای گارانتی هستند؟</span>
-                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
-                </button>
-                <div class="faq-answer">
-                    بله، کلیه خدمات عیب‌یابی و تعمیراتی ترموبان به همراه تمامی قطعات یدکی اورجینال تعویض شده، دارای ۶ ماه ضمانت کتبی شرکتی با مهر رسمی می‌باشند و در صورت بروز هرگونه مشکل مجدد، خدمات به صورت کاملاً رایگان ارائه خواهد شد.
+                <div class="faq-item">
+                    <button type="button" class="faq-question">
+                        <span>آیا خدمات و قطعات تعویض شده دارای گارانتی هستند؟</span>
+                        <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                    </button>
+                    <div class="faq-answer">
+                        بله، کلیه خدمات عیب‌یابی و تعمیراتی ترموبان به همراه تمامی قطعات یدکی اورجینال تعویض شده، دارای ۶ ماه ضمانت کتبی شرکتی با مهر رسمی می‌باشند و در صورت بروز هرگونه مشکل مجدد، خدمات به صورت کاملاً رایگان ارائه خواهد شد.
+                    </div>
                 </div>
-            </div>
 
-            <div class="faq-item">
-                <button type="button" class="faq-question">
-                    <span>هزینه ایاب و ذهاب و کارشناسی در صورت عدم تمایل به تعمیر چقدر است؟</span>
-                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
-                </button>
-                <div class="faq-answer">
-                    هزینه کارشناسی و عیب‌یابی دستگاه بر طبق نرخنامه مصوب اتحادیه محاسبه می‌گردد. شایان ذکر است در صورتی که عیب‌یابی منتهی به انجام تعمیرات توسط تکنسین ترموبان گردد، هزینه کارشناسی و ایاب و ذهاب کاملاً رایگان منظور خواهد شد.
+                <div class="faq-item">
+                    <button type="button" class="faq-question">
+                        <span>هزینه ایاب و ذهاب و کارشناسی در صورت عدم تمایل به تعمیر چقدر است؟</span>
+                        <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                    </button>
+                    <div class="faq-answer">
+                        هزینه کارشناسی و عیب‌یابی دستگاه بر طبق نرخنامه مصوب اتحادیه محاسبه می‌گردد. شایان ذکر است در صورتی که عیب‌یابی منتهی به انجام تعمیرات توسط تکنسین ترموبان گردد، هزینه کارشناسی و ایاب و ذهاب کاملاً رایگان منظور خواهد شد.
+                    </div>
                 </div>
-            </div>
 
-            <div class="faq-item">
-                <button type="button" class="faq-question">
-                    <span>چه برندهایی از پکیج‌های دیواری را پوشش می‌دهید؟</span>
-                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
-                </button>
-                <div class="faq-answer">
-                    ترموبان دارای کد رسمی مجاز نصب ایران رادیاتور است و خدمات تخصصی تمامی مدل‌های ایران رادیاتور (L, M, K, Eco)، بوتان (پاویا، پرلا، بیتا، اپتیما، بنسر)، لورچ، ایساتیس، تاچی، بوش، آریستون، مرکوری و گلدیران را با قطعات فابریک ارائه می‌دهد.
+                <div class="faq-item">
+                    <button type="button" class="faq-question">
+                        <span>چه برندهایی از پکیج‌های دیواری را پوشش می‌دهید؟</span>
+                        <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                    </button>
+                    <div class="faq-answer">
+                        ترموبان دارای کد رسمی مجاز نصب ایران رادیاتور است و خدمات تخصصی تمامی مدل‌های ایران رادیاتور (L, M, K, Eco)، بوتان (پاویا، پرلا، بیتا، اپتیما، بنسر)، لورچ، ایساتیس، تاچی، بوش، آریستون، مرکوری و گلدیران را با قطعات فابریک ارائه می‌دهد.
+                    </div>
                 </div>
-            </div>
 
-            <div class="faq-item">
-                <button type="button" class="faq-question">
-                    <span>آیا فاکتور رسمی و داغی قطعات تحویل داده می‌شود؟</span>
-                    <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
-                </button>
-                <div class="faq-answer">
-                    بله، پس از اتمام کار و تست کامل دستگاه در حضور شما، فاکتور شرکتی با جزئیات کامل خدمات و قطعات تحویل داده می‌شود و تمامی قطعات داغی و فرسوده تعویض شده به مشتری محترم تحویل داده خواهد شد.
+                <div class="faq-item">
+                    <button type="button" class="faq-question">
+                        <span>آیا فاکتور رسمی و داغی قطعات تحویل داده می‌شود؟</span>
+                        <i class="fa-solid fa-chevron-down faq-icon-arrow"></i>
+                    </button>
+                    <div class="faq-answer">
+                        بله، پس از اتمام کار و تست کامل دستگاه در حضور شما، فاکتور شرکتی با جزئیات کامل خدمات و قطعات تحویل داده می‌شود و تمامی قطعات داغی و فرسوده تعویض شده به مشتری محترم تحویل داده خواهد شد.
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -538,13 +564,13 @@
   "@graph": [
     {
       "@type": "HVACBusiness",
-      "name": "ترموبان | مرکز تخصصی تعمیر و نصب پکیج تهران",
-      "image": "<?= asset('images/logo-thermoban.png') ?>",
-      "telephone": "021-22145678",
+      "name": "<?= e(site_name()) ?>",
+      "image": "<?= site_logo() ?>",
+      "telephone": "<?= e(clean_phone_for_tel(site_emergency_phone() ?: site_phone_mobile())) ?>",
       "priceRange": "$$",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "تهران، مناطق ۲۲ گانه",
+        "streetAddress": "<?= e(site_address()) ?>",
         "addressLocality": "تهران",
         "addressRegion": "تهران",
         "addressCountry": "IR"

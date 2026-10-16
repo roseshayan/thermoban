@@ -118,6 +118,16 @@ class Application {
         $this->router->post('/admin/tariffs', [\App\Controllers\AdminController::class, 'tariffs']);
         $this->router->get('/admin/service-requests', [\App\Controllers\AdminController::class, 'serviceRequests']);
         $this->router->post('/admin/service-requests', [\App\Controllers\AdminController::class, 'serviceRequests']);
+        $this->router->get('/admin/schedule', [\App\Controllers\AdminController::class, 'schedule']);
+        $this->router->post('/admin/schedule', [\App\Controllers\AdminController::class, 'schedule']);
+        $this->router->get('/admin/menus', [\App\Controllers\AdminController::class, 'menus']);
+        $this->router->post('/admin/menus', [\App\Controllers\AdminController::class, 'menus']);
+        $this->router->get('/admin/faqs', [\App\Controllers\AdminController::class, 'faqs']);
+        $this->router->post('/admin/faqs', [\App\Controllers\AdminController::class, 'faqs']);
+        $this->router->get('/admin/testimonials', [\App\Controllers\AdminController::class, 'testimonials']);
+        $this->router->post('/admin/testimonials', [\App\Controllers\AdminController::class, 'testimonials']);
+        $this->router->get('/admin/branches', [\App\Controllers\AdminController::class, 'branches']);
+        $this->router->post('/admin/branches', [\App\Controllers\AdminController::class, 'branches']);
         $this->router->get('/admin/seo', [\App\Controllers\AdminController::class, 'seo']);
         $this->router->post('/admin/seo', [\App\Controllers\AdminController::class, 'seo']);
         $this->router->get('/admin/gateways', [\App\Controllers\AdminController::class, 'gateways']);

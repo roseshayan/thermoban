@@ -7138,3 +7138,139 @@ input, button, select, textarea {
 .password-field-wrapper .btn-toggle-password:hover { color: #EF5C16; transform: translateY(-50%) scale(1.1); }
 .password-field-wrapper .btn-toggle-password:focus { outline: none; }
 
+/* Navigation Dropdown & Mega Menu Styles */
+.nav-item.has-dropdown,
+.nav-item.has-megamenu {
+    position: relative;
+}
+
+.nav-badge-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    background: #EF5C16;
+    color: #fff;
+    border-radius: 6px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 220px;
+    background: #011C39;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 8px 0;
+    margin-top: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.25s ease;
+    z-index: 1000;
+    list-style: none;
+}
+
+.nav-dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background: #011C39;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    transform: rotate(-45deg);
+}
+
+.nav-dropdown-menu li a {
+    display: block;
+    padding: 10px 18px;
+    color: #cbd5e1;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-dropdown-menu li a:hover {
+    color: #EF5C16;
+    background: rgba(255, 255, 255, 0.05);
+    padding-right: 22px;
+}
+
+.nav-item.has-dropdown:hover .nav-dropdown-menu,
+.nav-item.has-megamenu:hover .nav-megamenu-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nav-megamenu-panel {
+    position: absolute;
+    top: 100%;
+    right: -100px;
+    width: 650px;
+    background: #011C39;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    padding: 22px;
+    margin-top: 12px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.25s ease;
+    z-index: 1000;
+}
+
+.nav-megamenu-panel::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 120px;
+    width: 12px;
+    height: 12px;
+    background: #011C39;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    transform: rotate(-45deg);
+}
+
+.megamenu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.megamenu-col-title {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #f97316;
+    margin: 0 0 12px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.megamenu-col-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.megamenu-col-list li a {
+    display: block;
+    padding: 6px 0;
+    color: #e2e8f0;
+    font-size: 0.84rem;
+    transition: color 0.2s ease, padding-right 0.2s ease;
+}
+
+.megamenu-col-list li a:hover {
+    color: #fdba74;
+    padding-right: 4px;
+}
+

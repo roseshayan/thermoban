@@ -101,9 +101,29 @@ $smsActive = $isSuperAdmin || (($modSettings['module_sms'] ?? '1') === '1');
                 <i class="fa-solid fa-screwdriver-wrench" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>سفارشات خدمات</span>
             </a>
+            <a href="<?= url('admin/schedule') ?>" class="admin-nav-item <?= ($activeNav === 'schedule') ? 'active' : '' ?>">
+                <i class="fa-solid fa-calendar-days" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>تقویم و برنامه اعزام</span>
+            </a>
             <a href="<?= url('admin/tariffs') ?>" class="admin-nav-item <?= ($activeNav === 'tariffs') ? 'active' : '' ?>">
                 <i class="fa-solid fa-file-invoice-dollar" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>نرخ مصوب اتحادیه</span>
+            </a>
+            <a href="<?= url('admin/menus') ?>" class="admin-nav-item <?= ($activeNav === 'menus') ? 'active' : '' ?>">
+                <i class="fa-solid fa-bars-staggered" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>منوها و مگامنو</span>
+            </a>
+            <a href="<?= url('admin/faqs') ?>" class="admin-nav-item <?= ($activeNav === 'faqs') ? 'active' : '' ?>">
+                <i class="fa-solid fa-circle-question" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>سوالات متداول (FAQ)</span>
+            </a>
+            <a href="<?= url('admin/testimonials') ?>" class="admin-nav-item <?= ($activeNav === 'testimonials') ? 'active' : '' ?>">
+                <i class="fa-solid fa-star-half-stroke" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>رضایت و نظرات مشتریان</span>
+            </a>
+            <a href="<?= url('admin/branches') ?>" class="admin-nav-item <?= ($activeNav === 'branches') ? 'active' : '' ?>">
+                <i class="fa-solid fa-store" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>شعب نمایندگی</span>
             </a>
             <a href="<?= url('admin/users') ?>" class="admin-nav-item <?= ($activeNav === 'users') ? 'active' : '' ?>">
                 <i class="fa-solid fa-users" style="font-size: 1.1rem; width: 22px;"></i>
