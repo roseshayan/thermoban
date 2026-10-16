@@ -146,6 +146,9 @@ class Router {
                 echo "<h1 style='text-align:center;'>۴۰۴ - صفحه یافت نشد</h1>";
             }
         } catch (\Throwable $e) {
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
             error_log($e->getMessage() . "\n" . $e->getTraceAsString());
             http_response_code(500);
             if (file_exists(VIEW_PATH . '/errors/500.php')) {

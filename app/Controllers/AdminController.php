@@ -23,6 +23,12 @@ class AdminController extends Controller {
             header('Location: ' . url('login'));
             exit;
         }
+
+        try {
+            \App\Services\DatabaseMigrationService::run();
+        } catch (\Throwable $e) {
+            error_log("Admin migration run error: " . $e->getMessage());
+        }
     }
 
     /**

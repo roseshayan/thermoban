@@ -411,6 +411,11 @@ class DatabaseMigrationService {
 
         // 11. Ensure all settings exist
         $defaultSettings = [
+            'site_name' => defined('SITE_NAME') ? SITE_NAME : 'ترموبان | مرجع تخصصی نصب، تعمیر و فروش پکیج',
+            'site_phone_1' => defined('SITE_PHONE_1') ? SITE_PHONE_1 : '۰۹۱۲-۳۴۵-۶۷۸۹',
+            'site_phone_2' => defined('SITE_PHONE_2') ? SITE_PHONE_2 : '۰۲۱-۱۲۳۴۵۶۷۸',
+            'site_email' => defined('SITE_EMAIL') ? SITE_EMAIL : 'info@thermoban.ir',
+            'site_address' => defined('SITE_ADDRESS') ? SITE_ADDRESS : 'تهران، خیابان کمالی، خیابان غفاری، پلاک ۱۷۵',
             'module_shop' => '1',
             'module_blog' => '1',
             'module_tickets' => '1',

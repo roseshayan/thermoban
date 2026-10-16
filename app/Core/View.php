@@ -14,15 +14,31 @@ class View {
 
         // Start output buffering for view content
         ob_start();
-        require $viewFile;
-        $content = ob_get_clean();
+        try {
+            require $viewFile;
+            $content = ob_get_clean();
+        } catch (\Throwable $e) {
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            throw $e;
+        }
 
         // If layout specified, render inside layout
         if ($layout) {
             $layoutFile = self::resolveViewFile($layout);
             if ($layoutFile) {
-                require $layoutFile;
-                return;
+                ob_start();
+                try {
+                    require $layoutFile;
+                    echo ob_get_clean();
+                    return;
+                } catch (\Throwable $e) {
+                    while (ob_get_level() > 0) {
+                        ob_end_clean();
+                    }
+                    throw $e;
+                }
             }
         }
 

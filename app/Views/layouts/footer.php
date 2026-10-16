@@ -8,7 +8,14 @@ $siteAddress = site_address();
 $workingHours = site_working_hours();
 $socials = site_socials();
 $trustBadges = site_trust_badges();
-$footerMenus = \App\Models\Menu::getTree('footer');
+$footerMenus = [];
+try {
+    if (class_exists('\App\Models\Menu')) {
+        $footerMenus = \App\Models\Menu::getTree('footer');
+    }
+} catch (\Throwable $e) {
+    $footerMenus = [];
+}
 ?>
 
 <!-- Floating CTA Consultation Banner -->

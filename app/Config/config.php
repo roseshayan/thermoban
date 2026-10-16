@@ -287,61 +287,90 @@ function csrf_field(): string {
  * Site dynamic setting helpers
  */
 function site_name(): string {
-    return \App\Models\Setting::get('site_name', defined('SITE_NAME') ? SITE_NAME : 'ترموبان');
+    $val = \App\Models\Setting::get('site_name');
+    if ($val !== null && trim($val) !== '') {
+        return (string)$val;
+    }
+    return defined('SITE_NAME') ? (string)SITE_NAME : 'ترموبان';
 }
 
 function site_phone_mobile(): string {
-    return \App\Models\Setting::get('site_phone_1', defined('SITE_PHONE_1') ? SITE_PHONE_1 : '');
+    $val = \App\Models\Setting::get('site_phone_1');
+    if ($val !== null && trim($val) !== '') {
+        return (string)$val;
+    }
+    return defined('SITE_PHONE_1') ? (string)SITE_PHONE_1 : '';
 }
 
 function site_phone_landline(): string {
-    return \App\Models\Setting::get('site_phone_2', '');
+    $val = \App\Models\Setting::get('site_phone_2');
+    if ($val !== null && trim($val) !== '') {
+        return (string)$val;
+    }
+    return defined('SITE_PHONE_2') ? (string)SITE_PHONE_2 : '';
 }
 
 function site_emergency_phone(): string {
-    $p = \App\Models\Setting::get('site_phone_emergency', '');
-    if (!empty($p)) return $p;
+    $p = \App\Models\Setting::get('site_phone_emergency');
+    if ($p !== null && trim($p) !== '') {
+        return (string)$p;
+    }
     $p2 = site_phone_landline();
-    return !empty($p2) ? $p2 : site_phone_mobile();
+    if ($p2 !== '') {
+        return $p2;
+    }
+    $p1 = site_phone_mobile();
+    return $p1 !== '' ? $p1 : '';
 }
 
 function site_email(): string {
-    return \App\Models\Setting::get('site_email', defined('SITE_EMAIL') ? SITE_EMAIL : '');
+    $val = \App\Models\Setting::get('site_email');
+    if ($val !== null && trim($val) !== '') {
+        return (string)$val;
+    }
+    return defined('SITE_EMAIL') ? (string)SITE_EMAIL : '';
 }
 
 function site_address(): string {
-    return \App\Models\Setting::get('site_address', defined('SITE_ADDRESS') ? SITE_ADDRESS : '');
+    $val = \App\Models\Setting::get('site_address');
+    if ($val !== null && trim($val) !== '') {
+        return (string)$val;
+    }
+    return defined('SITE_ADDRESS') ? (string)SITE_ADDRESS : '';
 }
 
 function site_working_hours(): array {
+    $weekdays = \App\Models\Setting::get('site_working_hours_weekdays');
+    $weekend  = \App\Models\Setting::get('site_working_hours_weekend');
     return [
-        'weekdays' => \App\Models\Setting::get('site_working_hours_weekdays', 'شنبه تا چهارشنبه: ۸:۰۰ الی ۲۰:۰۰'),
-        'weekend'  => \App\Models\Setting::get('site_working_hours_weekend', 'پنج‌شنبه‌ها: ۸:۰۰ الی ۱۶:۰۰ | جمعه و ایام تعطیل: اعزام اضطراری شبانه‌روزی')
+        'weekdays' => ($weekdays !== null && trim($weekdays) !== '') ? (string)$weekdays : 'شنبه تا چهارشنبه: ۸:۰۰ الی ۲۰:۰۰',
+        'weekend'  => ($weekend !== null && trim($weekend) !== '') ? (string)$weekend : 'پنج‌شنبه‌ها: ۸:۰۰ الی ۱۶:۰۰ | جمعه و ایام تعطیل: اعزام اضطراری شبانه‌روزی'
     ];
 }
 
 function site_socials(): array {
     return [
-        'instagram' => \App\Models\Setting::get('social_instagram', ''),
-        'telegram'  => \App\Models\Setting::get('social_telegram', ''),
-        'eitaa'     => \App\Models\Setting::get('social_eitaa', ''),
-        'rubika'    => \App\Models\Setting::get('social_rubika', ''),
-        'whatsapp'  => \App\Models\Setting::get('social_whatsapp', ''),
-        'bale'      => \App\Models\Setting::get('bale_support_url', 'https://ble.ir/thermoban_support')
+        'instagram' => (string)(\App\Models\Setting::get('social_instagram', '') ?? ''),
+        'telegram'  => (string)(\App\Models\Setting::get('social_telegram', '') ?? ''),
+        'eitaa'     => (string)(\App\Models\Setting::get('social_eitaa', '') ?? ''),
+        'rubika'    => (string)(\App\Models\Setting::get('social_rubika', '') ?? ''),
+        'whatsapp'  => (string)(\App\Models\Setting::get('social_whatsapp', '') ?? ''),
+        'bale'      => (string)(\App\Models\Setting::get('bale_support_url', 'https://ble.ir/thermoban_support') ?? 'https://ble.ir/thermoban_support')
     ];
 }
 
 function site_trust_badges(): array {
     return [
         'active'        => \App\Models\Setting::get('trust_badges_active', '1') === '1',
-        'enamad_code'   => \App\Models\Setting::get('enamad_code', ''),
-        'samandehi_code'=> \App\Models\Setting::get('samandehi_code', ''),
-        'union_license' => \App\Models\Setting::get('union_license_text', 'پروانه کسب رسمی اتحادیه شوفاژکاران تهران - کد جواز مجاز')
+        'enamad_code'   => (string)(\App\Models\Setting::get('enamad_code', '') ?? ''),
+        'samandehi_code'=> (string)(\App\Models\Setting::get('samandehi_code', '') ?? ''),
+        'union_license' => (string)(\App\Models\Setting::get('union_license_text', 'پروانه کسب رسمی اتحادیه شوفاژکاران تهران - کد جواز مجاز') ?? 'پروانه کسب رسمی اتحادیه شوفاژکاران تهران - کد جواز مجاز')
     ];
 }
 
-function clean_phone_for_tel(string $phone): string {
-    $en = en_num($phone);
+function clean_phone_for_tel(?string $phone = ''): string {
+    if (empty($phone)) return '';
+    $en = en_num((string)$phone);
     return preg_replace('/[^0-9+]/', '', $en);
 }
 
