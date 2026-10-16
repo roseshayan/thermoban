@@ -1,0 +1,33 @@
+name: Deploy Thermoban to cPanel Host
+
+on:
+  push:
+    branches:
+      - master # یا master بر اساس نام برنچ اصلی شما
+
+jobs:
+  web-deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📂 Sync files to Host via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/ # مسیر قرارگیری سایت روی هاست
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/tests/**
+            **/scripts/**
+            app/Config/config.php
+            public/uploads/**
+            storage/**
+            .env
