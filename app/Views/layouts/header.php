@@ -6,8 +6,8 @@ $cartItemsCount = count($_SESSION['cart'] ?? []);
 <header class="site-header">
     <div class="header-container">
         <!-- Logo -->
-        <a href="<?= url() ?>" class="header-logo" title="ترموبان">
-            <img src="<?= asset('images/logo-thermoban.png') ?>" alt="ترموبان THERMOBAN" class="logo-img">
+        <a href="<?= url() ?>" class="header-logo" title="<?= e(SITE_NAME) ?>">
+            <img src="<?= site_logo() ?>" alt="<?= e(SITE_NAME) ?>" class="logo-img">
         </a>
 
         <!-- Desktop Navigation Menu -->

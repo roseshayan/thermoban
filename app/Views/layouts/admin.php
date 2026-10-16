@@ -15,7 +15,7 @@ $smsActive = $isSuperAdmin || (($modSettings['module_sms'] ?? '1') === '1');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle ?? 'پنل مدیریت اختصاصی ترموبان') ?></title>
-    <link rel="icon" type="image/png" href="<?= asset('images/logo-icon.png') ?>">
+    <link rel="icon" type="image/png" href="<?= site_favicon() ?>">
     <link rel="stylesheet" href="<?= asset('css/fonts.css') ?>">
     <link rel="stylesheet" href="<?= asset('vendor/bootstrap/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= asset('vendor/fontawesome/css/all.min.css') ?>">
@@ -32,7 +32,7 @@ $smsActive = $isSuperAdmin || (($modSettings['module_sms'] ?? '1') === '1');
     <!-- Admin Sidebar -->
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-brand">
-            <img src="<?= asset('images/logo-icon.png') ?>" alt="ترموبان">
+            <img src="<?= site_favicon() ?>" alt="<?= e(SITE_NAME) ?>">
             <div class="admin-brand-text">
                 <h2>پنل مدیریت ترموبان</h2>
                 <span>نمایندگی کد ۷۲۷۳</span>

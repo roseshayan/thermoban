@@ -9,7 +9,7 @@
     <meta name="keywords" content="تعمیر پکیج, نصب پکیج, فروش پکیج, سرویس دوره‌ای پکیج, ایران رادیاتور, بوتان, لورچ, بوش">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?= asset('images/logo-icon.png') ?>">
+    <link rel="icon" type="image/png" href="<?= site_favicon() ?>">
     
     <!-- Local Fonts (Installed via npm, 100% Offline / No CDN) -->
     <link rel="stylesheet" href="<?= asset('css/fonts.css') ?>">

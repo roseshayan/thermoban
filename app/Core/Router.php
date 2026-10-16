@@ -50,8 +50,11 @@ class Router {
             }
         }
 
-        // Track visitor log if analytics enabled
-        \App\Models\VisitorLog::track();
+        // If install route, skip analytics, maintenance and module guards that query DB
+        if (!$isInstallRoute) {
+            // Track visitor log if analytics enabled
+            \App\Models\VisitorLog::track();
+        }
 
         // 1. Dynamic Sitemap & Robots.txt handling
         if ($uri === '/sitemap.xml') {
@@ -66,39 +69,41 @@ class Router {
             return;
         }
 
-        // 2. Check Maintenance Mode
-        $isMaintenance = \App\Models\Setting::get('maintenance_mode', '0') === '1';
-        if ($isMaintenance && !Auth::isAdmin()) {
-            $isAuthRoute = (strpos($uri, '/login') === 0 || strpos($uri, '/logout') === 0 || strpos($uri, '/admin') === 0);
-            if (!$isAuthRoute) {
-                http_response_code(503);
-                $title = \App\Models\Setting::get('maintenance_title');
-                $message = \App\Models\Setting::get('maintenance_message');
-                $phone = \App\Models\Setting::get('maintenance_phone');
-                require VIEW_PATH . '/errors/maintenance.php';
-                return;
+        if (!$isInstallRoute) {
+            // 2. Check Maintenance Mode
+            $isMaintenance = \App\Models\Setting::get('maintenance_mode', '0') === '1';
+            if ($isMaintenance && !Auth::isAdmin()) {
+                $isAuthRoute = (strpos($uri, '/login') === 0 || strpos($uri, '/logout') === 0 || strpos($uri, '/admin') === 0);
+                if (!$isAuthRoute) {
+                    http_response_code(503);
+                    $title = \App\Models\Setting::get('maintenance_title');
+                    $message = \App\Models\Setting::get('maintenance_message');
+                    $phone = \App\Models\Setting::get('maintenance_phone');
+                    require VIEW_PATH . '/errors/maintenance.php';
+                    return;
+                }
             }
-        }
 
-        // 3. Check Module Flags (Shop, Blog, Tickets)
-        $isShopRoute = (strpos($uri, '/shop') === 0 || strpos($uri, '/product') === 0 || strpos($uri, '/cart') === 0 || strpos($uri, '/checkout') === 0);
-        if ($isShopRoute && \App\Models\Setting::get('module_shop', '1') === '0' && !Auth::isAdmin()) {
-            $_SESSION['site_notice'] = 'بخش فروشگاه آنلاین موقتاً طبق صلاح‌دید مدیریت غیرفعال شده است. لطفاً جهت استعلام و سفارش پکیج با تلفن نمایندگی تماس بگیرید.';
-            header('Location: ' . url());
-            exit;
-        }
+            // 3. Check Module Flags (Shop, Blog, Tickets)
+            $isShopRoute = (strpos($uri, '/shop') === 0 || strpos($uri, '/product') === 0 || strpos($uri, '/cart') === 0 || strpos($uri, '/checkout') === 0);
+            if ($isShopRoute && \App\Models\Setting::get('module_shop', '1') === '0' && !Auth::isAdmin()) {
+                $_SESSION['site_notice'] = 'بخش فروشگاه آنلاین موقتاً طبق صلاح‌دید مدیریت غیرفعال شده است. لطفاً جهت استعلام و سفارش پکیج با تلفن نمایندگی تماس بگیرید.';
+                header('Location: ' . url());
+                exit;
+            }
 
-        $isBlogRoute = (strpos($uri, '/blog') === 0 || strpos($uri, '/articles') === 0);
-        if ($isBlogRoute && \App\Models\Setting::get('module_blog', '1') === '0' && !Auth::isAdmin()) {
-            header('Location: ' . url());
-            exit;
-        }
+            $isBlogRoute = (strpos($uri, '/blog') === 0 || strpos($uri, '/articles') === 0);
+            if ($isBlogRoute && \App\Models\Setting::get('module_blog', '1') === '0' && !Auth::isAdmin()) {
+                header('Location: ' . url());
+                exit;
+            }
 
-        $isRegisterRoute = (strpos($uri, '/register') === 0);
-        if ($isRegisterRoute && \App\Models\Setting::get('module_registration', '1') === '0' && !Auth::isAdmin()) {
-            $_SESSION['auth_error'] = 'ثبت‌نام مستقیم کاربران در حال حاضر طبق صلاحدید مدیریت غیرفعال است.';
-            header('Location: ' . url('login'));
-            exit;
+            $isRegisterRoute = (strpos($uri, '/register') === 0);
+            if ($isRegisterRoute && \App\Models\Setting::get('module_registration', '1') === '0' && !Auth::isAdmin()) {
+                $_SESSION['auth_error'] = 'ثبت‌نام مستقیم کاربران در حال حاضر طبق صلاحدید مدیریت غیرفعال است.';
+                header('Location: ' . url('login'));
+                exit;
+            }
         }
 
         try {

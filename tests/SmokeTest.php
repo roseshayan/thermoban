@@ -391,6 +391,18 @@ class SmokeTestRunner {
         $this->assert("Installer View Template Exists", file_exists(VIEW_PATH . '/install/index.php'));
         $this->assert("Database v2 Schema File Exists", file_exists(ROOT_PATH . '/database/v2_update.sql'));
         $this->assert("Database v3 Schema File Exists", file_exists(ROOT_PATH . '/database/v3_update.sql'));
+
+        // Test Installer Health Checks Engine
+        $reqs = \App\Controllers\InstallController::getRequirements();
+        $this->assert("Installer Requirements Returns PHP Version Check", isset($reqs['php']) && !empty($reqs['php']['current']));
+        $this->assert("Installer Requirements Returns Extensions Suite", isset($reqs['extensions']['pdo_mysql']) && isset($reqs['extensions']['curl']));
+        $this->assert("Installer Requirements Returns Directives Check", isset($reqs['directives']['memory_limit']));
+        $this->assert("Installer Requirements Returns Permissions Check", isset($reqs['permissions']['storage']));
+        $this->assert("Installer Ini Byte Parser Accuracy", \App\Controllers\InstallController::parseIniBytes('128M') === 134217728);
+
+        // Test Dynamic Branding Helpers
+        $this->assert("Helper site_logo() Exists & Returns URL", function_exists('site_logo') && !empty(site_logo()));
+        $this->assert("Helper site_favicon() Exists & Returns URL", function_exists('site_favicon') && !empty(site_favicon()));
     }
 
     private function testZeroCdnCompliance(): void {

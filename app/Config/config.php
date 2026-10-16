@@ -101,6 +101,40 @@ function avatar_url(?string $avatar = ''): string {
 }
 
 /**
+ * Return website logo URL (uploaded custom logo or default fallback)
+ */
+function site_logo(): string {
+    try {
+        if (class_exists('\App\Models\Setting')) {
+            $logo = \App\Models\Setting::get('site_logo');
+            if (!empty($logo)) {
+                return upload_url($logo);
+            }
+        }
+    } catch (\Throwable $e) {
+        // Fallback gracefully
+    }
+    return asset('images/logo-thermoban.png');
+}
+
+/**
+ * Return website favicon URL (uploaded custom favicon or default fallback)
+ */
+function site_favicon(): string {
+    try {
+        if (class_exists('\App\Models\Setting')) {
+            $fav = \App\Models\Setting::get('site_favicon');
+            if (!empty($fav)) {
+                return upload_url($fav);
+            }
+        }
+    } catch (\Throwable $e) {
+        // Fallback gracefully
+    }
+    return asset('images/logo-icon.png');
+}
+
+/**
  * Format Gregorian date/timestamp to Solar Hijri (Shamsi / Jalali)
  */
 function to_shamsi($datetime = null, string $format = 'Y/m/d', bool $persianDigits = true): string {
