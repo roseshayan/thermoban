@@ -10,7 +10,7 @@
                 <span class="current">خدمات ما</span>
             </nav>
             <h1 class="page-title">خدمات تخصصی نصب، تعمیر و سرویس دوره‌ای پکیج دیواری</h1>
-            <p class="page-subtitle">ارائه فاکتور رسمی، نرخ مصوب اتحادیه و ۶ ماه ضمانت کتبی شرکتی با کد مجاز ۷۲۷۳</p>
+            <p class="page-subtitle">ارائه فاکتور رسمی، نرخ مصوب اتحادیه و ۶ ماه ضمانت کتبی شرکتی با کد مجاز </p>
         </div>
     </div>
 </section>
@@ -53,9 +53,9 @@
                             <?= icon('shield', 'text-orange', 16) ?> <?= e($srv['guarantee']) ?>
                         </div>
                         <div class="service-cta-buttons">
-                            <button type="button" class="btn btn-primary" onclick="openServiceBooking('<?= e($srv['title']) ?>')">
-                                ثبت درخواست این خدمت
-                            </button>
+                            <a href="<?= url('service-order?service=' . urlencode($srv['title'])) ?>" class="btn btn-primary">
+                                ثبت آنلاین درخواست این خدمت
+                            </a>
                             <a href="tel:02177428596" class="btn btn-outline">
                                 <?= icon('phone', '', 16) ?> مشاوره تلفنی فوری
                             </a>

@@ -927,7 +927,7 @@ window.submitTicketQuickReply = function(btn, ticketId) {
         Swal.fire({
             icon: 'success',
             title: 'پاسخ شما با موفقیت ثبت شد',
-            text: 'پاسخ شما به تیکت ' + ticketId + ' اضافه شد و کارشناس پشتیبانی نمایندگی ۷۲۷۳ در اسرع وقت پاسخ خواهد داد.',
+            text: 'پاسخ شما به تیکت ' + ticketId + ' اضافه شد و کارشناس پشتیبانی نمایندگی  در اسرع وقت پاسخ خواهد داد.',
             confirmButtonText: 'متشکرم'
         });
     } else {
@@ -1756,16 +1756,16 @@ document.addEventListener('click', function(e) {
     var icon = btn.querySelector('i');
     if (input.type === 'password') {
         input.type = 'text';
-        btn.setAttribute('aria-label', '���� ���� ���� ����');
-        btn.setAttribute('title', '���� ���� ���� ����');
+        btn.setAttribute('aria-label', '���� ���� ���� ����');
+        btn.setAttribute('title', '���� ���� ���� ����');
         if (icon) {
             icon.classList.remove('fa-eye');
             icon.classList.add('fa-eye-slash');
         }
     } else {
         input.type = 'password';
-        btn.setAttribute('aria-label', '����� ���� ����');
-        btn.setAttribute('title', '����� ���� ����');
+        btn.setAttribute('aria-label', '����� ���� ����');
+        btn.setAttribute('title', '����� ���� ����');
         if (icon) {
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');

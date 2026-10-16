@@ -18,7 +18,7 @@
     <form action="<?= url('admin/settings') ?>" method="POST" class="js-validate-form">
         <div class="form-group">
             <label>عنوان اصلی وب‌سایت <span class="required">*</span></label>
-            <input type="text" name="settings[site_name]" class="form-control" value="<?= e($settings['site_name'] ?? 'ترموبان | نمایندگی کد ۷۲۷۳ ایران رادیاتور و بوتان') ?>" required>
+            <input type="text" name="settings[site_name]" class="form-control" value="<?= e($settings['site_name'] ?? 'ترموبان | نمایندگی کد  ایران رادیاتور و بوتان') ?>" required>
         </div>
 
         <div class="form-row-2">

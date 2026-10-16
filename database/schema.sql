@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS `users` (
     `phone` VARCHAR(20) UNIQUE NOT NULL,
     `national_id` VARCHAR(10) NULL,
     `email` VARCHAR(150) NULL,
-    `password_hash` VARCHAR(255) NOT NULL,
-    `role` ENUM('user', 'admin') DEFAULT 'user',
+    `role` ENUM('user', 'technician', 'admin', 'super_admin') DEFAULT 'user',
+    `status` ENUM('active', 'blocked') DEFAULT 'active',
     `avatar` VARCHAR(255) DEFAULT 'hero-technician.jpg',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -239,7 +239,7 @@ ON DUPLICATE KEY UPDATE `title`=VALUES(`title`);
 
 -- Brands
 INSERT INTO `brands` (`id`, `name`, `slug`, `logo`, `badge`, `description`) VALUES
-(1, 'ایران رادیاتور', 'iran-radiator', 'brand-iranradiator.png', 'نمایندگی رسمی کد ۷۲۷۳', 'بزرگترین و معتبرترین تولیدکننده پکیج شوفاژ دیواری و رادیاتور آلومینیومی در خاورمیانه'),
+(1, 'ایران رادیاتور', 'iran-radiator', 'brand-iranradiator.png', 'نمایندگی رسمی کد ', 'بزرگترین و معتبرترین تولیدکننده پکیج شوفاژ دیواری و رادیاتور آلومینیومی در خاورمیانه'),
 (2, 'بوتان', 'butane', 'brand-butane.png', 'نمایندگی مجاز', 'انتخابی مطمئن با بیش از ۶ دهه سابقه درخشان در صنعت تأسیسات حرارتی ایران')
 ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
 
@@ -276,7 +276,7 @@ ON DUPLICATE KEY UPDATE `title`=VALUES(`title`);
 
 -- System Settings
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
-('site_name', 'ترموبان | نمایندگی کد ۷۲۷۳ ایران رادیاتور و بوتان'),
+('site_name', 'ترموبان | نمایندگی کد  ایران رادیاتور و بوتان'),
 ('site_phone_1', '۰۹۱۲-۳۴۵-۶۷۸۹'),
 ('site_phone_2', '۰۲۱-۷۷۴۲۸۵۹۶'),
 ('site_address', 'تهران، خیابان دماوند، بعد از پل خاقانی، پلاک ۳۴'),
@@ -286,5 +286,65 @@ INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
 ('module_blog', '1'),
 ('module_tickets', '1'),
 ('module_gateways', '0'),
-('module_sms', '0')
+('module_sms', '0'),
+('module_chat', '0'),
+('chat_provider', 'goftino'),
+('chat_goftino_key', ''),
+('chat_raychat_key', '')
 ON DUPLICATE KEY UPDATE `setting_value`=VALUES(`setting_value`);
+
+-- 14. Service Tariffs Table (Official Approved Rates)
+CREATE TABLE IF NOT EXISTS `service_tariffs` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `service_key` VARCHAR(50) UNIQUE NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `subtitle` VARCHAR(255) NULL,
+    `price` VARCHAR(150) NOT NULL,
+    `guarantee` VARCHAR(150) NOT NULL,
+    `features` TEXT NOT NULL,
+    `sort_order` INT DEFAULT 0,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Service Tariffs Seed
+INSERT INTO `service_tariffs` (`id`, `service_key`, `title`, `subtitle`, `price`, `guarantee`, `features`, `sort_order`, `is_active`) VALUES
+(1, 'repair', 'تعمیر تخصصی پکیج شوفاژ دیواری', 'عیب‌یابی پیشرفته و رفع ارورها در محل در کمتر از ۱ ساعت', 'شروع اجرت از ۳۵۰,۰۰۰ تومان (طبق نرخنامه اتحادیه)', '۶ ماه ضمانت کتبی شرکتی', '["تعمیر یا تعویض پمپ سیرکولاتور گراندفوس و ویلو","رفع نشتی آب و افت فشار بار دستگاه","تعمیر تخصصی برد الکترونیک با تجهیزات روز","رفع عیب انفجاری روشن شدن و خاموش شدن مشعل","تنظیم شعله ماژولیشن و تست شیر گاز"]', 1, 1),
+(2, 'maintenance', 'سرویس دوره‌ای و اسیدشویی مبدل‌ها', 'رسوب‌زدایی کامل با پمپ مخصوص اسید و مواد دیسکلر بدون آسیب به مس', 'سرویس کامل دوره ای از ۴۵۰,۰۰۰ تومان', 'تضمین داغی آب و گرمایش یکنواخت', '["اسیدشویی مبدل اصلی و مبدل ثانویه صفحه‌ای","تخلیه لجن و رسوبات رادیاتورها با دستگاه شستشو","شارژ باد منبع انبساط با گیج دیجیتال دقیق","تنظیم الکترودهای جرقه و سنسور یون","نظافت کامل محفظه احتراق و شیپوره فن"]', 2, 1),
+(3, 'install', 'نصب اصولی و استاندارد پکیج دیواری', 'دارای کد رسمی نصب ایران رادیاتور و فعال‌سازی فوری گارانتی', 'نصب دستگاه‌های خریداری شده رایگان', 'فعال سازی گارانتی ۲۴ ماهه رسمی', '["نصب شابلون و اتصالات استاندارد ۵ تایی","نصب دودکش استاندارد دوجداره با شیب مجاز","نصب رسوب‌گیر مغناطیسی و فیلتر پلی‌فسفات","هواگیری و تست فشار اولیه مدار گرمایش","مهر کردن دفترچه گارانتی رسمی شرکت"]', 3, 1),
+(4, 'setup', 'راه‌اندازی فصلی و تنظیمات هوشمند', 'تبدیل حالت تابستانه به زمستانه و بالعکس همراه با بهینه‌سازی مصرف', 'از ۲۵۰,۰۰۰ تومان', 'تست کامل عملکرد در حضور مشتری', '["تنظیم درجه حرارت رادیاتورها و آب مصرفی","هواگیری کلیه رادیاتورهای واحد مسکونی","تنظیم سنسورهای اتاقی جهت کاهش قبض گاز","تست نهایی عملکرد بدون ایجاد سر و صدا"]', 4, 1),
+(5, 'sale', 'فروش بی‌واسطه پکیج و رادیاتور', 'عرضه مستقیم به قیمت کارخانه با ارسال فوری به سراسر تهران', 'قیمت مصوب نمایندگی با تخفیف نقدی', 'گارانتی اصالت کالا و کد نمایندگی رسمی', '["ارائه پیش‌فاکتور رسمی برای پروژه‌ها","مشاوره رایگان تلفنی جهت انتخاب بهترین ظرفیت","ارسال اکسپرس و تحویل درب منزل در تهران","نصب رایگان در صورت خرید دستگاه کامل"]', 5, 1)
+ON DUPLICATE KEY UPDATE `title`=VALUES(`title`);
+
+-- 15. Service Requests (Comprehensive Booking System with Media Attachments)
+CREATE TABLE IF NOT EXISTS `service_requests` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `tracking_code` VARCHAR(50) UNIQUE NOT NULL,
+    `user_id` INT NULL,
+    `customer_name` VARCHAR(150) NOT NULL,
+    `customer_phone` VARCHAR(20) NOT NULL,
+    `service_type` VARCHAR(100) NOT NULL,
+    `brand` VARCHAR(100) NOT NULL,
+    `model` VARCHAR(100) NULL,
+    `district` VARCHAR(50) NOT NULL,
+    `address` TEXT NOT NULL,
+    `preferred_date` VARCHAR(50) NOT NULL,
+    `time_slot` VARCHAR(50) NOT NULL,
+    `urgency` ENUM('urgent', 'normal', 'scheduled') DEFAULT 'normal',
+    `problem_type` VARCHAR(150) NULL,
+    `description` TEXT NULL,
+    `photos` JSON NULL,
+    `video_path` VARCHAR(255) NULL,
+    `technician_id` INT NULL,
+    `technician_name` VARCHAR(150) NULL,
+    `status` ENUM('pending', 'assigned', 'in_progress', 'completed', 'canceled') DEFAULT 'pending',
+    `estimated_cost` INT NULL,
+    `final_cost` INT NULL,
+    `admin_notes` TEXT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`technician_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

@@ -54,5 +54,63 @@
         };
     </script>
     <script src="<?= asset('js/main.js') ?>"></script>
+
+    <?php
+    $chatEnabled = \App\Models\Setting::get('module_chat', '0') === '1';
+    if ($chatEnabled):
+        $chatProvider = \App\Models\Setting::get('chat_provider', 'goftino');
+        $chatUser = \App\Core\Auth::user();
+        if ($chatProvider === 'goftino'):
+            $goftinoKey = \App\Models\Setting::get('chat_goftino_key', '');
+            if (!empty($goftinoKey)):
+    ?>
+    <!-- Goftino Live Chat Widget -->
+    <script type="text/javascript">
+      !function(){var i="<?= e($goftinoKey) ?>",a=window,d=document;function g(){var g=d.createElement("script"),s="https://www.goftino.com/widget/"+i,l=localStorage.getItem("goftino_"+i);g.async=!0,g.src=l?s+"?o="+l:s;d.getElementsByTagName("head")[0].appendChild(g);}"complete"===d.readyState?g():a.attachEvent?a.attachEvent("onload",g):a.addEventListener("load",g,!1);}();
+      <?php if ($chatUser): ?>
+      window.addEventListener('goftino_ready', function () {
+          if (typeof Goftino !== 'undefined' && Goftino.setUser) {
+              Goftino.setUser({
+                  name: "<?= e(addslashes($chatUser['name'] ?? '')) ?>",
+                  phone: "<?= e(addslashes($chatUser['phone'] ?? '')) ?>",
+                  email: "<?= e(addslashes($chatUser['email'] ?? '')) ?>"
+              });
+          }
+      });
+      <?php endif; ?>
+    </script>
+    <?php
+            endif;
+        elseif ($chatProvider === 'raychat'):
+            $raychatKey = \App\Models\Setting::get('chat_raychat_key', '');
+            if (!empty($raychatKey)):
+    ?>
+    <!-- Raychat Live Chat Widget -->
+    <script type="text/javascript">
+      window.RAYCHAT_TOKEN = "<?= e($raychatKey) ?>";
+      (function () {
+        var d = document, s = d.createElement("script");
+        s.src = "https://widget-react.raychat.io/install/widget.js";
+        s.async = 1;
+        d.getElementsByTagName("head")[0].appendChild(s);
+      })();
+      <?php if ($chatUser): ?>
+      window.addEventListener('raychat_ready', function (ets) {
+          if (window.Raychat && window.Raychat.setUser) {
+              window.Raychat.setUser({
+                  name: "<?= e(addslashes($chatUser['name'] ?? '')) ?>",
+                  phone: "<?= e(addslashes($chatUser['phone'] ?? '')) ?>",
+                  email: "<?= e(addslashes($chatUser['email'] ?? '')) ?>",
+                  updateOnce: false
+              });
+          }
+      });
+      <?php endif; ?>
+    </script>
+    <?php
+            endif;
+        endif;
+    endif;
+    ?>
 </body>
 </html>

@@ -61,8 +61,9 @@ $cartItemsCount = count($_SESSION['cart'] ?? []);
                 <span class="user-text-label"><?= \App\Core\Auth::check() ? 'پروفایل من' : 'ورود / عضویت' ?></span>
             </a>
 
-            <a href="<?= url('#quick-order') ?>" class="btn btn-primary btn-header">
-                ثبت سفارش سریع
+            <a href="<?= url('service-order') ?>" class="btn btn-primary btn-header" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-screwdriver-wrench" style="font-size: 0.85rem;"></i>
+                <span>سفارش خدمات</span>
             </a>
 
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="منوی موبایل">
@@ -81,7 +82,9 @@ $cartItemsCount = count($_SESSION['cart'] ?? []);
         </div>
         <ul class="mobile-nav-list">
             <li><a href="<?= url() ?>" class="mobile-nav-link <?= ($currentPage ?? 'home') === 'home' ? 'active' : '' ?>"><?= icon('building', '', 18) ?> <span>صفحه اصلی</span></a></li>
-            <li><a href="<?= url('services') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>"><?= icon('wrench', '', 18) ?> <span>خدمات ما</span></a></li>
+            <li><a href="<?= url('service-order') ?>" class="mobile-nav-link" style="color: var(--color-primary); font-weight: 800;"><?= icon('wrench', '', 18) ?> <span>سفارش آنلاین خدمات</span></a></li>
+            <li><a href="<?= url('service-order/tracking') ?>" class="mobile-nav-link"><?= icon('check', '', 18) ?> <span>پیگیری سفارشات</span></a></li>
+            <li><a href="<?= url('services') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>"><?= icon('wrench', '', 18) ?> <span>نرخ مصوب خدمات</span></a></li>
             <?php if ($shopEnabled): ?>
             <li><a href="<?= url('shop') ?>" class="mobile-nav-link <?= ($currentPage ?? '') === 'shop' ? 'active' : '' ?>"><?= icon('flame', '', 18) ?> <span>فروشگاه پکیج</span></a></li>
             <?php endif; ?>

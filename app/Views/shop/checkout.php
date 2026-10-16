@@ -176,7 +176,7 @@
                         </div>
 
                         <div class="summary-row">
-                            <span class="sum-label">اجرت نصب رسمی (کد ۷۲۷۳):</span>
+                            <span class="sum-label">اجرت نصب رسمی (کد ):</span>
                             <span class="sum-value text-green">رایگان</span>
                         </div>
 

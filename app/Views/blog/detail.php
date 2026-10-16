@@ -204,7 +204,7 @@
                 <div class="sidebar-widget widget-transparent-price">
                     <h4 class="widget-title">مزایای سرویس توسط ترموبان</h4>
                     <ul class="widget-benefits-list">
-                        <li>✔️ دارای کد مجاز نمایندگی ۷۲۷۳</li>
+                        <li>✔️ دارای کد مجاز نمایندگی </li>
                         <li>✔️ صدور فاکتور رسمی و شرکتی</li>
                         <li>✔️ ۶ ماه ضمانت کتبی کلیه تعمیرات</li>
                         <li>✔️ قطعات ۱۰۰٪ اصل با هولوگرام</li>

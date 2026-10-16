@@ -121,7 +121,7 @@
 
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="font-weight: 700; font-size: 0.84rem; color: #011C39; margin-bottom: 6px; display: block;">متن پیامک تست</label>
-                    <textarea name="test_message" class="form-control" rows="3">تست ارتباط وب‌سرویس پیامکی نمایندگی مجاز ترموبان کد ۷۲۷۳</textarea>
+                    <textarea name="test_message" class="form-control" rows="3">تست ارتباط وب‌سرویس پیامکی نمایندگی مجاز ترموبان کد </textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100" style="padding: 10px; font-size: 0.9rem; font-weight: 700;">

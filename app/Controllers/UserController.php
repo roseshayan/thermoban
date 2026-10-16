@@ -152,7 +152,7 @@ class UserController extends Controller {
                 'payable_amount' => 28500000,
                 'total_price' => '۲۸,۵۰۰,۰۰۰',
                 'payment_method' => 'پرداخت اینترنتی شاپرک',
-                'technician' => 'مهندس کاظمی (کد تکنسین ۷۲۷۳)',
+                'technician' => 'مهندس کاظمی (کد تکنسین )',
                 'guarantee' => 'فعال - ۲۴ ماه ضمانت طلایی',
                 'items' => [
                     [
@@ -180,7 +180,7 @@ class UserController extends Controller {
                 ];
             }
             $order['total_price'] = number_format($order['payable_amount']);
-            $order['technician'] = $order['technician_name'] ?: 'تکنسین مجاز کد ۷۲۷۳';
+            $order['technician'] = $order['technician_name'] ?: 'تکنسین مجاز کد ';
             $order['guarantee'] = 'فعال - ۲۴ ماه ضمانت طلایی شرکتی';
             $order['payment_method'] = match($order['payment_method'] ?? 'online') {
                 'cod' => 'پرداخت در محل (کارتخوان سیار)',

@@ -35,11 +35,39 @@ class NotificationService {
                 ['lr' => $lastRead]
             )['c'] ?? 0);
 
+            $pendingServices = 0;
+            try {
+                $pendingServices = (int)(Database::fetchOne(
+                    "SELECT COUNT(*) as c FROM `service_requests` WHERE `status` = 'pending' AND `created_at` > :lr",
+                    ['lr' => $lastRead]
+                )['c'] ?? 0);
+            } catch (\Throwable $e) {}
+
             $totalLeads = $unreadContact + $pendingLeads;
-            $totalAlerts = $openTickets + $totalLeads + $pendingComments;
+            $totalAlerts = $openTickets + $totalLeads + $pendingComments + $pendingServices;
 
             // Fetch top recent unread/recent alerts for quick preview
             $recent = [];
+
+            // Recent Service Requests
+            try {
+                $services = Database::fetchAll(
+                    "SELECT id, tracking_code, customer_name, service_type, created_at, status FROM `service_requests` WHERE `status` = 'pending' ORDER BY id DESC LIMIT 3"
+                );
+                foreach ($services as $srv) {
+                    $recent[] = [
+                        'type'     => 'service',
+                        'title'    => 'سفارش خدمات: ' . $srv['customer_name'] . ' (' . $srv['service_type'] . ')',
+                        'time'     => Jalali::timeAgo($srv['created_at']),
+                        'url'      => url('admin/service-requests'),
+                        'icon'     => 'screwdriver-wrench',
+                        'color'    => '#EF5C16',
+                        'badge'    => 'سفارش خدمات',
+                        'is_new'   => ($srv['created_at'] > $lastRead)
+                    ];
+                }
+            } catch (\Throwable $e) {}
+
 
             // Recent tickets
             $tickets = Database::fetchAll(

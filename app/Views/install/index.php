@@ -288,7 +288,7 @@
         <div class="installer-header">
             <img src="<?= asset('images/logo-icon.png') ?>" alt="ترموبان">
             <h1>سامانه راه‌انداز هوشمند ترموبان (بسته نصب هاست)</h1>
-            <p>نمایندگی رسمی کد ۷۲۷۳ ایران رادیاتور و بوتان | آماده‌سازی و تحویل به مشتری</p>
+            <p>نمایندگی رسمی کد  ایران رادیاتور و بوتان | آماده‌سازی و تحویل به مشتری</p>
         </div>
 
         <!-- Progress Steps -->
@@ -501,7 +501,7 @@
 
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label style="font-weight: 700; font-size: 0.84rem; display: block; margin-bottom: 4px;">عنوان رسمی وب‌سایت <span class="required">*</span></label>
-                    <input type="text" id="site_name" class="form-control" value="ترموبان | نمایندگی کد ۷۲۷۳ ایران رادیاتور و بوتان" required>
+                    <input type="text" id="site_name" class="form-control" value="ترموبان | نمایندگی کد  ایران رادیاتور و بوتان" required>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
@@ -511,13 +511,13 @@
                     </div>
                     <div class="form-group">
                         <label style="font-weight: 700; font-size: 0.84rem; display: block; margin-bottom: 4px;">کد نمایندگی مجاز</label>
-                        <input type="text" id="agency_code" class="form-control" value="۷۲۷۳">
+                        <input type="text" id="agency_code" class="form-control" value="">
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label style="font-weight: 700; font-size: 0.84rem; display: block; margin-bottom: 4px;">توضیحات کوتاه سایت (سئو و فوتر)</label>
-                    <textarea id="site_description" class="form-control" rows="2">مرکز تخصصی نصب، سرویس و تعمیرات انواع پکیج شوفاژ دیواری با کد رسمی مجاز ۷۲۷۳ و ضمانت طلایی قطعات</textarea>
+                    <textarea id="site_description" class="form-control" rows="2">مرکز تخصصی نصب، سرویس و تعمیرات انواع پکیج شوفاژ دیواری با کد رسمی مجاز  و ضمانت طلایی قطعات</textarea>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">

@@ -76,4 +76,8 @@ class CaptchaService {
             <input type="text" name="honeypot" style="display:none !important;" tabindex="-1" autocomplete="off">
         </div>';
     }
+
+    public static function render(): string {
+        return self::renderHtml();
+    }
 }

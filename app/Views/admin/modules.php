@@ -215,6 +215,54 @@
             </p>
         </div>
 
+        <!-- Module Card: Online Live Chat (Goftino / Raychat) -->
+        <div class="admin-card" style="background: #fff; border-radius: 14px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.03); grid-column: span 1;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <div style="display: flex; gap: 14px; align-items: center;">
+                    <div style="width: 48px; height: 48px; background: #ecfdf5; color: #059669; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #011C39; font-weight: 800;">چت آنلاین و پشتیبانی زنده</h3>
+                        <span style="font-size: 0.78rem; color: #64748b;">یکپارچه‌سازی رسمی با گفتینو (Goftino) و رایچت (Raychat)</span>
+                    </div>
+                </div>
+                <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                    <input type="checkbox" name="module_chat" value="1" <?= ($settings['module_chat'] ?? '0') === '1' ? 'checked' : '' ?> style="opacity: 0; width: 0; height: 0;">
+                    <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px;"></span>
+                </label>
+            </div>
+            <p style="font-size: 0.84rem; color: #475569; line-height: 1.6; margin-bottom: 14px;">
+                امکان فعال‌سازی ابزارک چت آنلاین اختصاصی. به صورت پیش‌فرض غیرفعال است. مشخصات کاربران لاگین شده (نام، موبایل و ایمیل) به صورت خودکار به پنل چت شما ارسال می‌گردد.
+            </p>
+
+            <div style="background: #f8fafc; border-radius: 10px; padding: 14px; border: 1px solid #e2e8f0;">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #1e293b; margin-bottom: 6px; display: block;">انتخاب ارائه‌دهنده چت آنلاین:</label>
+                    <select name="chat_provider" class="form-control" style="font-size: 0.85rem; height: 38px; border-radius: 6px;">
+                        <option value="goftino" <?= (($settings['chat_provider'] ?? 'goftino') === 'goftino') ? 'selected' : '' ?>>گفتینو (Goftino) - پیشنهاد شده</option>
+                        <option value="raychat" <?= (($settings['chat_provider'] ?? '') === 'raychat') ? 'selected' : '' ?>>رایچت (Raychat)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="font-weight: 600; font-size: 0.78rem; color: #334155; margin: 0;">کلید ویجت گفتینو (Goftino Token):</label>
+                        <a href="https://www.goftino.com/docs" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; color: #0284c7; text-decoration: none;">مستندات گفتینو</a>
+                    </div>
+                    <input type="text" name="chat_goftino_key" class="form-control" dir="ltr" value="<?= e($settings['chat_goftino_key'] ?? '') ?>" placeholder="مثال: abcdef123456" style="font-size: 0.82rem; padding: 7px 10px; font-family: monospace;">
+                </div>
+
+                <div class="form-group" style="margin: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="font-weight: 600; font-size: 0.78rem; color: #334155; margin: 0;">توکن رایچت (Raychat Token):</label>
+                        <a href="https://raychat.io/documentation" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; color: #0284c7; text-decoration: none;">مستندات رایچت</a>
+                    </div>
+                    <input type="text" name="chat_raychat_key" class="form-control" dir="ltr" value="<?= e($settings['chat_raychat_key'] ?? '') ?>" placeholder="مثال: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="font-size: 0.82rem; padding: 7px 10px; font-family: monospace;">
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Maintenance Mode Settings Section -->

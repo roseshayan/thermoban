@@ -659,7 +659,11 @@ class AdminController extends Controller {
                 'maintenance_mode'    => isset($_POST['maintenance_mode']) ? '1' : '0',
                 'maintenance_title'   => trim($_POST['maintenance_title'] ?? ''),
                 'maintenance_message' => trim($_POST['maintenance_message'] ?? ''),
-                'maintenance_phone'   => trim($_POST['maintenance_phone'] ?? '۰۲۱-۷۷۴۲۸۵۹۶')
+                'maintenance_phone'   => trim($_POST['maintenance_phone'] ?? '۰۲۱-۷۷۴۲۸۵۹۶'),
+                'module_chat'         => isset($_POST['module_chat']) ? '1' : '0',
+                'chat_provider'       => in_array($_POST['chat_provider'] ?? '', ['goftino', 'raychat'], true) ? $_POST['chat_provider'] : 'goftino',
+                'chat_goftino_key'    => trim($_POST['chat_goftino_key'] ?? ''),
+                'chat_raychat_key'    => trim($_POST['chat_raychat_key'] ?? '')
             ];
 
             foreach ($modules as $k => $v) {
@@ -814,6 +818,9 @@ class AdminController extends Controller {
     /**
      * Manage Users (CRUD, Roles, Block/Active)
      */
+    /**
+     * Manage Users (CRUD, Roles, Block/Active) - Strict Super Admin Immutability
+     */
     public function users(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? '';
@@ -826,6 +833,10 @@ class AdminController extends Controller {
                 $password = $_POST['password'] ?? '123456';
                 $role = $_POST['role'] ?? 'user';
                 $status = $_POST['status'] ?? 'active';
+
+                if ($role === 'super_admin' && !Auth::isSuperAdmin()) {
+                    $role = 'user';
+                }
 
                 if (!empty($name) && !empty($phone)) {
                     if (User::findByPhone($phone)) {
@@ -848,10 +859,13 @@ class AdminController extends Controller {
                 $role = $_POST['role'] ?? 'user';
                 $status = $_POST['status'] ?? 'active';
 
-                // Prevent changing super_admin role if not super_admin
                 $target = User::find($userId);
-                if ($target && $target['role'] === 'super_admin' && !Auth::isSuperAdmin()) {
-                    $_SESSION['admin_error'] = 'شما دسترسی لازم برای تغییر نقش سوپر ادمین را ندارید.';
+                if (!$target) {
+                    $_SESSION['admin_error'] = 'کاربر مورد نظر یافت نشد.';
+                } elseif ($target['role'] === 'super_admin' && !Auth::isSuperAdmin()) {
+                    $_SESSION['admin_error'] = 'دسترسی غیرمجاز: مدیر سیستم اجازه تغییر نقش مدیر ارشد (سوپر ادمین) را ندارد.';
+                } elseif ($role === 'super_admin' && !Auth::isSuperAdmin()) {
+                    $_SESSION['admin_error'] = 'دسترسی غیرمجاز: تنها سوپر ادمین می‌تواند نقش سوپر ادمین را تعیین یا اعطا کند.';
                 } else {
                     User::update($userId, [
                         'role'   => $role,
@@ -862,7 +876,11 @@ class AdminController extends Controller {
             } elseif ($action === 'update_info') {
                 $userId = (int) $_POST['user_id'];
                 $target = User::find($userId);
-                if ($target) {
+                if (!$target) {
+                    $_SESSION['admin_error'] = 'کاربر مورد نظر یافت نشد.';
+                } elseif ($target['role'] === 'super_admin' && !Auth::isSuperAdmin()) {
+                    $_SESSION['admin_error'] = 'دسترسی غیرمجاز: مدیر سیستم اجازه ویرایش اطلاعات مدیر ارشد (سوپر ادمین) را ندارد.';
+                } else {
                     $name = trim($_POST['name'] ?? $target['name']);
                     $phone = trim($_POST['phone'] ?? $target['phone']);
                     $nationalId = trim($_POST['national_id'] ?? ($target['national_id'] ?? ''));
@@ -870,35 +888,47 @@ class AdminController extends Controller {
                     $role = $_POST['role'] ?? $target['role'];
                     $status = $_POST['status'] ?? $target['status'];
 
-                    if ($target['role'] === 'super_admin' && !Auth::isSuperAdmin()) {
-                        $_SESSION['admin_error'] = 'شما دسترسی لازم برای ویرایش اطلاعات سوپر ادمین را ندارید.';
-                    } else {
-                        User::update($userId, [
-                            'name'        => $name,
-                            'phone'       => $phone,
-                            'national_id' => $nationalId ?: null,
-                            'email'       => $email ?: null,
-                            'role'        => $role,
-                            'status'      => $status
-                        ]);
-                        $_SESSION['admin_success'] = "اطلاعات کاربر {$name} با موفقیت ویرایش شد.";
+                    if ($role === 'super_admin' && !Auth::isSuperAdmin()) {
+                        $role = $target['role'];
                     }
+
+                    User::update($userId, [
+                        'name'        => $name,
+                        'phone'       => $phone,
+                        'national_id' => $nationalId ?: null,
+                        'email'       => $email ?: null,
+                        'role'        => $role,
+                        'status'      => $status
+                    ]);
+                    $_SESSION['admin_success'] = "اطلاعات کاربر {$name} با موفقیت ویرایش شد.";
                 }
             } elseif ($action === 'reset_password') {
                 $userId = (int) $_POST['user_id'];
-                $newPassword = $_POST['new_password'] ?? '';
-                if (!empty($newPassword) && strlen($newPassword) >= 6) {
-                    User::update($userId, [
-                        'password_hash' => Auth::hashPassword($newPassword)
-                    ]);
-                    $_SESSION['admin_success'] = 'کلمه عبور کاربر با موفقیت تغییر یافت.';
+                $target = User::find($userId);
+                if (!$target) {
+                    $_SESSION['admin_error'] = 'کاربر مورد نظر یافت نشد.';
+                } elseif ($target['role'] === 'super_admin' && !Auth::isSuperAdmin()) {
+                    $_SESSION['admin_error'] = 'دسترسی غیرمجاز: مدیر سیستم اجازه تغییر کلمه عبور مدیر ارشد (سوپر ادمین) را ندارد.';
                 } else {
-                    $_SESSION['admin_error'] = 'کلمه عبور باید حداقل ۶ رقم باشد.';
+                    $newPassword = $_POST['new_password'] ?? '';
+                    if (!empty($newPassword) && strlen($newPassword) >= 6) {
+                        User::update($userId, [
+                            'password_hash' => Auth::hashPassword($newPassword)
+                        ]);
+                        $_SESSION['admin_success'] = 'کلمه عبور کاربر با موفقیت تغییر یافت.';
+                    } else {
+                        $_SESSION['admin_error'] = 'کلمه عبور باید حداقل ۶ رقم باشد.';
+                    }
                 }
             } elseif ($action === 'delete') {
                 $userId = (int) $_POST['user_id'];
-                if ($userId === Auth::id()) {
+                $target = User::find($userId);
+                if (!$target) {
+                    $_SESSION['admin_error'] = 'کاربر مورد نظر یافت نشد.';
+                } elseif ($userId === Auth::id()) {
                     $_SESSION['admin_error'] = 'امکان حذف حساب کاربری جاری خودتان وجود ندارد.';
+                } elseif ($target['role'] === 'super_admin') {
+                    $_SESSION['admin_error'] = 'دسترسی غیرمجاز: حساب مدیر ارشد (سوپر ادمین) تحت هیچ شرایطی قابل حذف نمی‌باشد.';
                 } else {
                     User::delete($userId);
                     $_SESSION['admin_success'] = 'کاربر با موفقیت حذف گردید.';
@@ -906,6 +936,7 @@ class AdminController extends Controller {
             }
 
             $this->redirect('admin/users');
+            return;
         }
 
         $search = trim($_GET['q'] ?? '');
@@ -918,6 +949,19 @@ class AdminController extends Controller {
             $users = User::all('id DESC');
         }
 
+        // Attach saved addresses to each user
+        $addresses = Database::fetchAll("SELECT * FROM `user_addresses` ORDER BY `is_default` DESC, `id` DESC");
+        $userAddressesMap = [];
+        foreach ($addresses as $addr) {
+            $userAddressesMap[$addr['user_id']][] = $addr;
+        }
+
+        foreach ($users as &$u) {
+            $u['addresses'] = $userAddressesMap[$u['id']] ?? [];
+            $u['addresses_count'] = count($u['addresses']);
+            $u['default_address'] = !empty($u['addresses']) ? $u['addresses'][0] : null;
+        }
+
         $this->view('admin/users', [
             'pageTitle' => 'مدیریت جامع کاربران و سطوح دسترسی | CMS ترموبان',
             'users'     => $users,
@@ -925,6 +969,219 @@ class AdminController extends Controller {
             'activeNav' => 'users',
             'success'   => $_SESSION['admin_success'] ?? null,
             'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * User Addresses Management
+     */
+    public function addresses(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['address_id'] ?? 0);
+
+            if ($action === 'delete') {
+                Database::query("DELETE FROM `user_addresses` WHERE `id` = :id", ['id' => $id]);
+                $_SESSION['admin_success'] = 'آدرس با موفقیت حذف گردید.';
+            } elseif ($action === 'set_default') {
+                $addr = Database::fetchOne("SELECT * FROM `user_addresses` WHERE `id` = :id", ['id' => $id]);
+                if ($addr) {
+                    Database::query("UPDATE `user_addresses` SET `is_default` = 0 WHERE `user_id` = :uid", ['uid' => $addr['user_id']]);
+                    Database::query("UPDATE `user_addresses` SET `is_default` = 1 WHERE `id` = :id", ['id' => $id]);
+                    $_SESSION['admin_success'] = 'آدرس به عنوان پیش‌فرض این کاربر تنظیم شد.';
+                }
+            }
+
+            $this->redirect('admin/addresses');
+        }
+
+        $search = trim($_GET['q'] ?? '');
+        $userIdFilter = !empty($_GET['user_id']) ? (int) $_GET['user_id'] : null;
+
+        $addresses = \App\Models\UserAddress::getAllWithUser($search, $userIdFilter);
+        $users = User::all('name ASC');
+
+        $this->view('admin/addresses', [
+            'pageTitle'    => 'مدیریت آدرس‌های ذخیره شده کاربران | CMS ترموبان',
+            'addresses'    => $addresses,
+            'users'        => $users,
+            'search'       => $search,
+            'userIdFilter' => $userIdFilter,
+            'activeNav'    => 'addresses',
+            'success'      => $_SESSION['admin_success'] ?? null,
+            'error'        => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Official Approved Service Tariffs (نرخ مصوب اتحادیه)
+     */
+    public function tariffs(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? 'update';
+
+            if ($action === 'create') {
+                $key = trim($_POST['service_key'] ?? '') ?: ('srv_' . time());
+                $title = trim($_POST['title'] ?? '');
+                $subtitle = trim($_POST['subtitle'] ?? '');
+                $price = trim($_POST['price'] ?? '');
+                $guarantee = trim($_POST['guarantee'] ?? '');
+                $sort = (int) ($_POST['sort_order'] ?? 0);
+                $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+                $featuresRaw = trim($_POST['features'] ?? '');
+                $featuresLines = array_values(array_filter(array_map('trim', explode("\n", $featuresRaw))));
+                $featuresJson = json_encode($featuresLines, JSON_UNESCAPED_UNICODE);
+
+                if (!empty($title) && !empty($price)) {
+                    \App\Models\ServiceTariff::create([
+                        'service_key' => $key,
+                        'title'       => $title,
+                        'subtitle'    => $subtitle ?: null,
+                        'price'       => $price,
+                        'guarantee'   => $guarantee,
+                        'features'    => $featuresJson,
+                        'sort_order'  => $sort,
+                        'is_active'   => $isActive
+                    ]);
+                    $_SESSION['admin_success'] = "تعرفه «{$title}» با موفقیت افزوده شد.";
+                } else {
+                    $_SESSION['admin_error'] = 'عنوان خدمت و نرخ مصوب الزامی هستند.';
+                }
+            } elseif ($action === 'update') {
+                $id = (int) ($_POST['tariff_id'] ?? 0);
+                $tariff = \App\Models\ServiceTariff::find($id);
+                if ($tariff) {
+                    $title = trim($_POST['title'] ?? $tariff['title']);
+                    $subtitle = trim($_POST['subtitle'] ?? $tariff['subtitle']);
+                    $price = trim($_POST['price'] ?? $tariff['price']);
+                    $guarantee = trim($_POST['guarantee'] ?? $tariff['guarantee']);
+                    $sort = isset($_POST['sort_order']) ? (int)$_POST['sort_order'] : $tariff['sort_order'];
+                    $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+                    $featuresRaw = trim($_POST['features'] ?? '');
+                    $featuresLines = array_values(array_filter(array_map('trim', explode("\n", $featuresRaw))));
+                    $featuresJson = json_encode($featuresLines, JSON_UNESCAPED_UNICODE);
+
+                    \App\Models\ServiceTariff::update($id, [
+                        'title'      => $title,
+                        'subtitle'   => $subtitle ?: null,
+                        'price'      => $price,
+                        'guarantee'  => $guarantee,
+                        'features'   => $featuresJson,
+                        'sort_order' => $sort,
+                        'is_active'  => $isActive
+                    ]);
+                    $_SESSION['admin_success'] = "نرخ مصوب «{$title}» با موفقیت بروزرسانی شد.";
+                }
+            } elseif ($action === 'toggle_status') {
+                $id = (int) ($_POST['tariff_id'] ?? 0);
+                $tariff = \App\Models\ServiceTariff::find($id);
+                if ($tariff) {
+                    $newStatus = ($tariff['is_active'] ?? 1) ? 0 : 1;
+                    \App\Models\ServiceTariff::update($id, ['is_active' => $newStatus]);
+                    $_SESSION['admin_success'] = 'وضعیت نمایش تعرفه تغییر یافت.';
+                }
+            } elseif ($action === 'delete') {
+                $id = (int) ($_POST['tariff_id'] ?? 0);
+                \App\Models\ServiceTariff::delete($id);
+                $_SESSION['admin_success'] = 'تعرفه با موفقیت حذف گردید.';
+            }
+
+            $this->redirect('admin/tariffs');
+        }
+
+        $tariffs = Database::fetchAll("SELECT * FROM `service_tariffs` ORDER BY `sort_order` ASC, `id` ASC");
+        foreach ($tariffs as &$t) {
+            $dec = json_decode($t['features'] ?? '', true);
+            $t['features_list'] = is_array($dec) ? $dec : [];
+        }
+
+        $this->view('admin/tariffs', [
+            'pageTitle' => 'مدیریت نرخ‌های مصوب اتحادیه و تعرفه خدمات | CMS ترموبان',
+            'tariffs'   => $tariffs,
+            'activeNav' => 'tariffs',
+            'success'   => $_SESSION['admin_success'] ?? null,
+            'error'     => $_SESSION['admin_error'] ?? null
+        ], 'layouts/admin');
+        unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Comprehensive Service Requests & Technician Dispatch Management
+     */
+    public function serviceRequests(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            $id = (int) ($_POST['request_id'] ?? 0);
+
+            if ($action === 'update_status') {
+                $status = $_POST['status'] ?? 'pending';
+                $techId = !empty($_POST['technician_id']) ? (int)$_POST['technician_id'] : null;
+                $techName = null;
+                if ($techId) {
+                    $tech = User::find($techId);
+                    $techName = $tech['name'] ?? null;
+                }
+
+                $adminNotes = trim($_POST['admin_notes'] ?? '');
+                $estCost = !empty($_POST['estimated_cost']) ? (int)$_POST['estimated_cost'] : null;
+                $finCost = !empty($_POST['final_cost']) ? (int)$_POST['final_cost'] : null;
+
+                $updateData = [
+                    'status'         => $status,
+                    'technician_id'  => $techId,
+                    'technician_name'=> $techName,
+                    'admin_notes'    => $adminNotes ?: null,
+                ];
+                if ($estCost !== null) $updateData['estimated_cost'] = $estCost;
+                if ($finCost !== null) $updateData['final_cost'] = $finCost;
+
+                Database::update('service_requests', $updateData, '`id` = :id', ['id' => $id]);
+                $_SESSION['admin_success'] = 'وضعیت سفارش و اعزام تکنسین با موفقیت بروزرسانی شد.';
+            } elseif ($action === 'delete') {
+                $req = Database::fetchOne("SELECT * FROM `service_requests` WHERE `id` = :id", ['id' => $id]);
+                if ($req) {
+                    // Remove attached video if exists
+                    if (!empty($req['video_path'])) {
+                        $vPath = ROOT_PATH . '/public/' . ltrim($req['video_path'], '/');
+                        if (file_exists($vPath)) @unlink($vPath);
+                    }
+                    // Remove attached photos
+                    if (!empty($req['photos'])) {
+                        $photos = json_decode($req['photos'], true);
+                        if (is_array($photos)) {
+                            foreach ($photos as $p) {
+                                $pPath = ROOT_PATH . '/public/' . ltrim($p, '/');
+                                if (file_exists($pPath)) @unlink($pPath);
+                            }
+                        }
+                    }
+                    Database::query("DELETE FROM `service_requests` WHERE `id` = :id", ['id' => $id]);
+                    $_SESSION['admin_success'] = 'درخواست خدمات و فایل‌های پیوست آن حذف گردید.';
+                }
+            }
+
+            $this->redirect('admin/service-requests');
+        }
+
+        $statusFilter = trim($_GET['status'] ?? '');
+        $search = trim($_GET['q'] ?? '');
+
+        $requests = \App\Models\ServiceRequest::getAllWithDetails($statusFilter, $search);
+        $technicians = Database::fetchAll("SELECT * FROM `users` WHERE `role` IN ('technician', 'admin', 'super_admin') AND `status` = 'active' ORDER BY `name` ASC");
+
+        $this->view('admin/service-requests', [
+            'pageTitle'    => 'مدیریت سفارشات خدمات و اعزام تکنسین | CMS ترموبان',
+            'requests'     => $requests,
+            'technicians'  => $technicians,
+            'statusFilter' => $statusFilter,
+            'search'       => $search,
+            'activeNav'    => 'service-requests',
+            'success'      => $_SESSION['admin_success'] ?? null,
+            'error'        => $_SESSION['admin_error'] ?? null
         ], 'layouts/admin');
         unset($_SESSION['admin_success'], $_SESSION['admin_error']);
     }

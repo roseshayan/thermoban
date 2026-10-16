@@ -7,7 +7,7 @@ use App\Core\Security;
 class PageController extends Controller {
     public function about(): void {
         $data = [
-            'pageTitle' => 'درباره ما | نمایندگی رسمی ایران رادیاتور کد ۷۲۷۳ | ترموبان',
+            'pageTitle' => 'درباره ما | نمایندگی رسمی ایران رادیاتور کد  | ترموبان',
             'currentPage' => 'about',
             'csrfToken' => Security::generateCsrf(),
             'stats' => [
@@ -19,7 +19,7 @@ class PageController extends Controller {
             'values' => [
                 [
                     'icon' => 'gold-shield-medal.png',
-                    'title' => 'نمایندگی رسمی و کد مجاز ۷۲۷۳',
+                    'title' => 'نمایندگی رسمی و کد مجاز ',
                     'desc' => 'دارای مجوز رسمی از شرکت‌های ایران رادیاتور و بوتان با نرخ مصوب اتحادیه تأسیسات مکانیکی.'
                 ],
                 [
@@ -100,11 +100,25 @@ class PageController extends Controller {
     }
 
     public function services(): void {
-        $data = [
-            'pageTitle' => 'خدمات تخصصی پکیج و رادیاتور در ۲۲ منطقه تهران | ترموبان',
-            'currentPage' => 'services',
-            'csrfToken' => Security::generateCsrf(),
-            'services' => [
+        $tariffs = [];
+        try {
+            $tariffs = \App\Models\ServiceTariff::getActive();
+        } catch (\Throwable $e) {}
+
+        $servicesList = [];
+        if (!empty($tariffs)) {
+            foreach ($tariffs as $t) {
+                $servicesList[] = [
+                    'id'        => $t['service_key'],
+                    'title'     => $t['title'],
+                    'subtitle'  => $t['subtitle'] ?? '',
+                    'features'  => $t['features_array'] ?? [],
+                    'price'     => $t['price'],
+                    'guarantee' => $t['guarantee']
+                ];
+            }
+        } else {
+            $servicesList = [
                 [
                     'id' => 'repair',
                     'title' => 'تعمیر تخصصی پکیج شوفاژ دیواری',
@@ -173,7 +187,14 @@ class PageController extends Controller {
                     'price' => 'قیمت مصوب شرکتی با تخفیف ویژه نقدی',
                     'guarantee' => 'ضمانت اصالت فیزیکی و هولوگرام'
                 ]
-            ]
+            ];
+        }
+
+        $data = [
+            'pageTitle' => 'خدمات تخصصی پکیج و رادیاتور در ۲۲ منطقه تهران | ترموبان',
+            'currentPage' => 'services',
+            'csrfToken' => Security::generateCsrf(),
+            'services' => $servicesList
         ];
 
         $this->view('pages/services', $data);

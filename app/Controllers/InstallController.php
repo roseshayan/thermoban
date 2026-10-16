@@ -233,12 +233,35 @@ class InstallController extends Controller {
 
         $reqData = self::getRequirements();
 
-        // Render standalone view without main site layout
-        $this->view('install/index', [
-            'pageTitle'    => 'نصب‌کننده هوشمند سامانه ترموبان | بسته نصب سریع هاست',
-            'reqData'      => $reqData,
-            'allPassed'    => $reqData['allPassed']
-        ], '');
+        try {
+            // Render standalone view without main site layout
+            $this->view('install/index', [
+                'pageTitle'    => 'نصب‌کننده هوشمند سامانه ترموبان | بسته نصب سریع هاست',
+                'reqData'      => $reqData,
+                'allPassed'    => $reqData['allPassed']
+            ], '');
+        } catch (\Throwable $e) {
+            // Direct file fallback based on Controller directory if standard resolution encounters host discrepancy
+            $candidates = [
+                __DIR__ . '/../Views/install/index.php',
+                __DIR__ . '/../views/install/index.php',
+                ROOT_PATH . '/app/Views/install/index.php',
+                ROOT_PATH . '/app/views/install/index.php',
+            ];
+            $rendered = false;
+            foreach ($candidates as $candidate) {
+                if (file_exists($candidate)) {
+                    $pageTitle = 'نصب‌کننده هوشمند سامانه ترموبان | بسته نصب سریع هاست';
+                    $allPassed = $reqData['allPassed'];
+                    require $candidate;
+                    $rendered = true;
+                    break;
+                }
+            }
+            if (!$rendered) {
+                throw $e;
+            }
+        }
     }
 
     /**
@@ -302,10 +325,10 @@ class InstallController extends Controller {
         $dbPass = $_POST['db_pass'] ?? '';
 
         // 2. Site identity inputs
-        $siteName = trim($_POST['site_name'] ?? 'ترموبان | نمایندگی کد ۷۲۷۳ ایران رادیاتور و بوتان');
+        $siteName = trim($_POST['site_name'] ?? 'ترموبان | نمایندگی کد  ایران رادیاتور و بوتان');
         $siteTitle = trim($_POST['site_title'] ?? 'نمایندگی رسمی نصب و تعمیرات پکیج دیواری');
-        $siteDescription = trim($_POST['site_description'] ?? 'مرکز تخصصی نصب، سرویس و تعمیرات انواع پکیج شوفاژ دیواری با کد رسمی مجاز ۷۲۷۳');
-        $agencyCode = trim($_POST['agency_code'] ?? '۷۲۷۳');
+        $siteDescription = trim($_POST['site_description'] ?? 'مرکز تخصصی نصب، سرویس و تعمیرات انواع پکیج شوفاژ دیواری با کد رسمی مجاز ');
+        $agencyCode = trim($_POST['agency_code'] ?? '');
         $sitePhone1 = trim($_POST['site_phone_1'] ?? '۰۹۱۲-۳۴۵-۶۷۸۹');
         $sitePhone2 = trim($_POST['site_phone_2'] ?? '۰۲۱-۱۲۳۴۵۶۷۸');
         $siteEmail = trim($_POST['site_email'] ?? 'info@thermoban.ir');
@@ -343,7 +366,22 @@ class InstallController extends Controller {
                     // Filter out any stray CREATE DATABASE or USE statements for cPanel portability
                     $sql = preg_replace('/CREATE\s+DATABASE\s+[^;]+;/i', '', $sql);
                     $sql = preg_replace('/USE\s+[^;]+;/i', '', $sql);
-                    $pdo->exec($sql);
+                    
+                    try {
+                        $pdo->exec($sql);
+                    } catch (\Throwable $e) {
+                        // If multi-query produces warnings or errors, run statements individually
+                        $queries = array_filter(array_map('trim', explode(';', $sql)));
+                        foreach ($queries as $query) {
+                            if (!empty($query)) {
+                                try {
+                                    $pdo->exec($query);
+                                } catch (\Throwable $subE) {
+                                    // Ignore benign duplicate column or existing table notices
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -400,6 +438,17 @@ class InstallController extends Controller {
             foreach ($settingsMap as $key => $val) {
                 $stmtSetting->execute(['k' => $key, 'v' => $val]);
             }
+
+            // 4.5. Guarantee users table schema allows 'super_admin' and has 'status' column
+            try {
+                $pdo->exec("ALTER TABLE `users` MODIFY COLUMN `role` ENUM('user', 'technician', 'admin', 'super_admin') DEFAULT 'user'");
+            } catch (\Throwable $e) {}
+            try {
+                $colCheck = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'status'")->fetch();
+                if (!$colCheck) {
+                    $pdo->exec("ALTER TABLE `users` ADD COLUMN `status` ENUM('active', 'blocked') DEFAULT 'active' AFTER `role`");
+                }
+            } catch (\Throwable $e) {}
 
             // 5. Create or Update Super Admin Account (Full access ready for customer handover)
             $hash = password_hash($adminPass, PASSWORD_BCRYPT, ['cost' => 12]);

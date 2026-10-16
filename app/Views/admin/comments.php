@@ -95,7 +95,7 @@
                                 </div>
                                 <?php if (!empty($c['reply'])): ?>
                                     <div style="background: #f8fafc; border-right: 3px solid #EF5C16; padding: 8px 12px; border-radius: 4px; font-size: 0.82rem; color: #475569;">
-                                        <strong style="color: #EF5C16; display: block; margin-bottom: 2px;">پاسخ مدیریت نمایندگی ۷۲۷۳:</strong>
+                                        <strong style="color: #EF5C16; display: block; margin-bottom: 2px;">پاسخ مدیریت نمایندگی :</strong>
                                         <?= nl2br(e($c['reply'])) ?>
                                     </div>
                                 <?php endif; ?>
@@ -190,7 +190,7 @@ function openReplyModal(commentId, authorName, currentReply) {
             title: 'پاسخ رسمی مدیریت به ' + authorName,
             html: `
                 <div style="text-align: right; font-family: Vazirmatn, sans-serif; font-size: 0.9rem;">
-                    <label style="display:block; margin-bottom: 8px; font-weight: 700;">متن پاسخ نمایندگی رسمی ترموبان (کد ۷۲۷۳):</label>
+                    <label style="display:block; margin-bottom: 8px; font-weight: 700;">متن پاسخ نمایندگی رسمی ترموبان (کد ):</label>
                     <textarea id="swalReplyText" class="form-control" rows="4" style="width: 100%; border-radius: 8px; padding: 10px;" placeholder="پاسخ خود را بنویسید...">${currentReply}</textarea>
                 </div>
             `,

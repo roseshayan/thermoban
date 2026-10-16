@@ -504,7 +504,7 @@
                     <div class="panel-header-flex">
                         <div>
                             <h2 class="panel-main-title">سامانه جامع پشتیبانی، رزرو تکنسین و گارانتی</h2>
-                            <p class="panel-subtitle">ارتباط مستقیم با کارشناسان فنی نمایندگی کد ۷۲۷۳ ایران رادیاتور و بوتان</p>
+                            <p class="panel-subtitle">ارتباط مستقیم با کارشناسان فنی نمایندگی کد  ایران رادیاتور و بوتان</p>
                         </div>
                         <button type="button" class="btn btn-primary btn-new-ticket-glow" id="btnOpenNewTicket">
                             <?= icon('plus', '', 16) ?>
@@ -652,7 +652,7 @@
                                                         <span class="bubble-author">
                                                             <?= e($msg['sender_name']) ?>
                                                             <?php if ($isSupport): ?>
-                                                                <span class="verified-agent-tag" title="پاسخ رسمی نمایندگی ۷۲۷۳">
+                                                                <span class="verified-agent-tag" title="پاسخ رسمی نمایندگی ">
                                                                     <?= icon('circle-check', '', 14) ?>
                                                                     <span>کارشناس مجاز</span>
                                                                 </span>

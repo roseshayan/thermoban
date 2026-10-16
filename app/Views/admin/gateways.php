@@ -126,7 +126,7 @@
                 </div>
                 <div>
                     <h4 style="margin: 0; font-size: 1.05rem; color: #011C39; font-weight: 800;">پرداخت در محل پس از تحویل و نصب پکیج (کارتخوان سیار)</h4>
-                    <span style="font-size: 0.78rem; color: #64748b;">تسویه نهایی پس از راه‌اندازی دستگاه توسط تکنسین مجاز کد ۷۲۷۳</span>
+                    <span style="font-size: 0.78rem; color: #64748b;">تسویه نهایی پس از راه‌اندازی دستگاه توسط تکنسین مجاز کد </span>
                 </div>
             </div>
             <label style="display: flex; align-items: center; gap: 6px; font-size: 0.86rem; font-weight: 700; color: #011C39;">

@@ -75,6 +75,14 @@ class Application {
         $this->router->get('/services', [\App\Controllers\PageController::class, 'services']);
         $this->router->post('/api/contact', [\App\Controllers\PageController::class, 'submitContact']);
 
+        // Comprehensive Service Booking & Tracking
+        $this->router->get('/service-order', [\App\Controllers\ServiceOrderController::class, 'index']);
+        $this->router->get('/order-service', [\App\Controllers\ServiceOrderController::class, 'index']);
+        $this->router->post('/service-order', [\App\Controllers\ServiceOrderController::class, 'submit']);
+        $this->router->get('/service-order/success', [\App\Controllers\ServiceOrderController::class, 'success']);
+        $this->router->get('/service-order/tracking', [\App\Controllers\ServiceOrderController::class, 'tracking']);
+        $this->router->get('/tracking', [\App\Controllers\ServiceOrderController::class, 'tracking']);
+
         // Authentication & Password Recovery
         $this->router->get('/login', [\App\Controllers\AuthController::class, 'showLogin']);
         $this->router->post('/login', [\App\Controllers\AuthController::class, 'processLogin']);
@@ -104,6 +112,12 @@ class Application {
         $this->router->post('/admin/articles/edit/{id}', [\App\Controllers\AdminController::class, 'editArticle']);
         $this->router->get('/admin/users', [\App\Controllers\AdminController::class, 'users']);
         $this->router->post('/admin/users', [\App\Controllers\AdminController::class, 'users']);
+        $this->router->get('/admin/addresses', [\App\Controllers\AdminController::class, 'addresses']);
+        $this->router->post('/admin/addresses', [\App\Controllers\AdminController::class, 'addresses']);
+        $this->router->get('/admin/tariffs', [\App\Controllers\AdminController::class, 'tariffs']);
+        $this->router->post('/admin/tariffs', [\App\Controllers\AdminController::class, 'tariffs']);
+        $this->router->get('/admin/service-requests', [\App\Controllers\AdminController::class, 'serviceRequests']);
+        $this->router->post('/admin/service-requests', [\App\Controllers\AdminController::class, 'serviceRequests']);
         $this->router->get('/admin/seo', [\App\Controllers\AdminController::class, 'seo']);
         $this->router->post('/admin/seo', [\App\Controllers\AdminController::class, 'seo']);
         $this->router->get('/admin/gateways', [\App\Controllers\AdminController::class, 'gateways']);

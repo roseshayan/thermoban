@@ -43,7 +43,7 @@ class BackupService {
         $sql .= "-- Thermoban Automated Backup Dump\n";
         $sql .= "-- Date: " . date('Y-m-d H:i:s') . "\n";
         $sql .= "-- Database: {$dbName}\n";
-        $sql .= "-- Dealership Code: 7273\n";
+        $sql .= "-- Dealership Code: \n";
         $sql .= "-- ========================================================\n\n";
         $sql .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
 

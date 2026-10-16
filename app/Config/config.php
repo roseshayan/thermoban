@@ -7,7 +7,15 @@ date_default_timezone_set('Asia/Tehran');
 
 // Base paths
 define('APP_PATH', ROOT_PATH . DIRECTORY_SEPARATOR . 'app');
-define('VIEW_PATH', APP_PATH . DIRECTORY_SEPARATOR . 'Views');
+if (!defined('VIEW_PATH')) {
+    if (is_dir(APP_PATH . DIRECTORY_SEPARATOR . 'Views')) {
+        define('VIEW_PATH', APP_PATH . DIRECTORY_SEPARATOR . 'Views');
+    } elseif (is_dir(APP_PATH . DIRECTORY_SEPARATOR . 'views')) {
+        define('VIEW_PATH', APP_PATH . DIRECTORY_SEPARATOR . 'views');
+    } else {
+        define('VIEW_PATH', APP_PATH . DIRECTORY_SEPARATOR . 'Views');
+    }
+}
 define('PUBLIC_PATH', ROOT_PATH . DIRECTORY_SEPARATOR . 'public');
 
 // Database configuration

@@ -35,7 +35,7 @@ $smsActive = $isSuperAdmin || (($modSettings['module_sms'] ?? '1') === '1');
             <img src="<?= site_favicon() ?>" alt="<?= e(SITE_NAME) ?>">
             <div class="admin-brand-text">
                 <h2>پنل مدیریت ترموبان</h2>
-                <span>نمایندگی کد ۷۲۷۳</span>
+                <span>نمایندگی کد </span>
             </div>
             <button type="button" class="admin-sidebar-close" id="adminSidebarClose" aria-label="بستن منو">
                 <i class="fa-solid fa-xmark"></i>
@@ -97,9 +97,21 @@ $smsActive = $isSuperAdmin || (($modSettings['module_sms'] ?? '1') === '1');
                     <span>پشتیبان‌گیری و بازیابی</span>
                 </a>
             <?php endif; ?>
+            <a href="<?= url('admin/service-requests') ?>" class="admin-nav-item <?= ($activeNav === 'service-requests') ? 'active' : '' ?>">
+                <i class="fa-solid fa-screwdriver-wrench" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>سفارشات خدمات</span>
+            </a>
+            <a href="<?= url('admin/tariffs') ?>" class="admin-nav-item <?= ($activeNav === 'tariffs') ? 'active' : '' ?>">
+                <i class="fa-solid fa-file-invoice-dollar" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>نرخ مصوب اتحادیه</span>
+            </a>
             <a href="<?= url('admin/users') ?>" class="admin-nav-item <?= ($activeNav === 'users') ? 'active' : '' ?>">
                 <i class="fa-solid fa-users" style="font-size: 1.1rem; width: 22px;"></i>
                 <span>مدیریت کاربران</span>
+            </a>
+            <a href="<?= url('admin/addresses') ?>" class="admin-nav-item <?= ($activeNav === 'addresses') ? 'active' : '' ?>">
+                <i class="fa-solid fa-location-dot" style="font-size: 1.1rem; width: 22px;"></i>
+                <span>آدرس‌های کاربران</span>
             </a>
             <a href="<?= url('admin/seo') ?>" class="admin-nav-item <?= ($activeNav === 'seo') ? 'active' : '' ?>">
                 <i class="fa-solid fa-chart-line" style="font-size: 1.1rem; width: 22px;"></i>

@@ -74,7 +74,7 @@ class ShopController extends Controller {
         }
 
         $this->view('shop/index', [
-            'pageTitle'        => 'فروشگاه پکیج شوفاژ دیواری | نمایندگی کد ۷۲۷۳ | ترموبان',
+            'pageTitle'        => 'فروشگاه پکیج شوفاژ دیواری | نمایندگی کد  | ترموبان',
             'currentPage'      => 'shop',
             'csrfToken'        => Security::generateCsrf(),
             'products'         => $products,
@@ -179,7 +179,7 @@ class ShopController extends Controller {
             'subtotal'    => number_format($subtotal),
             'discount'    => '۰',
             'shipping'    => 'رایگان',
-            'install'     => 'رایگان (کد ۷۲۷۳)',
+            'install'     => 'رایگان (کد )',
             'total'       => number_format($total)
         ]);
     }

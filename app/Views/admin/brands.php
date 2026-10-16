@@ -241,7 +241,7 @@
 
             <div class="admin-form-group">
                 <label class="admin-label">نشان / بج اختصاصی</label>
-                <input type="text" name="badge" id="editBrandBadge" class="admin-input" placeholder="مثال: نمایندگی رسمی کد ۷۲۷۳">
+                <input type="text" name="badge" id="editBrandBadge" class="admin-input" placeholder="مثال: نمایندگی رسمی کد ">
             </div>
 
             <div class="admin-form-group">

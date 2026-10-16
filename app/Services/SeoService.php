@@ -10,7 +10,7 @@ class SeoService {
      * Render full SEO tags in <head>
      */
     public static function renderHeadTags(array $pageSeo = []): string {
-        $siteName = Setting::get('site_name', 'ترموبان | نمایندگی کد ۷۲۷۳ ایران رادیاتور و بوتان');
+        $siteName = Setting::get('site_name', 'ترموبان | نمایندگی کد  ایران رادیاتور و بوتان');
         $rawTitle = $pageSeo['title'] ?? 'فروش، نصب و تعمیر پکیج دیواری در تهران';
         $titleTemplate = Setting::get('seo_meta_title_template', '%title% | %sitename%');
 
@@ -20,8 +20,8 @@ class SeoService {
             $titleTemplate
         );
 
-        $description = $pageSeo['description'] ?? Setting::get('seo_meta_description', 'مرکز تخصصی فروش، نصب و تعمیرات پکیج دیواری ایران رادیاتور و بوتان در ۲۲ منطقه تهران با کد مجاز ۷۲۷۳');
-        $keywords = $pageSeo['keywords'] ?? Setting::get('seo_meta_keywords', 'تعمیر پکیج, نصب پکیج, ایران رادیاتور, بوتان, نمایندگی کد ۷۲۷۳');
+        $description = $pageSeo['description'] ?? Setting::get('seo_meta_description', 'مرکز تخصصی فروش، نصب و تعمیرات پکیج دیواری ایران رادیاتور و بوتان در ۲۲ منطقه تهران با کد مجاز ');
+        $keywords = $pageSeo['keywords'] ?? Setting::get('seo_meta_keywords', 'تعمیر پکیج, نصب پکیج, ایران رادیاتور, بوتان, نمایندگی کد ');
         $canonical = $pageSeo['canonical'] ?? (rtrim(Setting::get('seo_canonical_url', url()), '/') . '/' . ltrim($_SERVER['REQUEST_URI'] ?? '', '/'));
         $image = !empty($pageSeo['image']) ? asset($pageSeo['image']) : asset(Setting::get('seo_og_image', 'images/hero-technician.jpg'));
         $type = $pageSeo['type'] ?? 'website';
@@ -73,7 +73,7 @@ class SeoService {
         $schemas[] = [
             '@context' => 'https://schema.org',
             '@type' => 'HVACBusiness',
-            'name' => 'نمایندگی رسمی ترموبان - کد ۷۲۷۳',
+            'name' => 'نمایندگی رسمی ترموبان - کد ',
             'image' => asset('images/logo-thermoban.png'),
             'telephone' => Setting::get('site_phone_2', '۰۲۱-۷۷۴۲۸۵۹۶'),
             'priceRange' => '$$',
@@ -106,7 +106,7 @@ class SeoService {
                 '@type' => 'Product',
                 'name' => $prod['title'],
                 'image' => asset('images/' . ($prod['image'] ?? 'product-iranradiator-l24ff.png')),
-                'description' => 'پکیج دیواری با ظرفیت ' . ($prod['capacity'] ?? 24000) . ' کیلوکالری، گارانتی ۲۴ ماهه و نصب رایگان نمایندگی ۷۲۷۳',
+                'description' => 'پکیج دیواری با ظرفیت ' . ($prod['capacity'] ?? 24000) . ' کیلوکالری، گارانتی ۲۴ ماهه و نصب رایگان نمایندگی ',
                 'brand' => [
                     '@type' => 'Brand',
                     'name' => $prod['brand_name'] ?? 'ایران رادیاتور'

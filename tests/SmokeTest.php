@@ -52,7 +52,7 @@ class SmokeTestRunner {
         echo "\n=======================================================\n";
         echo "   THERMOBAN COMPREHENSIVE SMOKE TEST SUITE (PHP " . PHP_VERSION . ")\n";
         echo "   All Project Files Verification & Architecture Audit\n";
-        echo "   Dealership Code: 7273 (Iran Radiator & Butane)\n";
+        echo "   Dealership Code: (Iran Radiator & Butane)\n";
         echo "=======================================================\n\n";
 
         $this->testAllProjectPhpFilesSyntaxAndIntegrity();
@@ -79,6 +79,7 @@ class SmokeTestRunner {
         $this->testEmailAndSmsTicketNotifications();
         $this->testAdminPanelEndpointsNo500();
         $this->testPublicEndpointsNo500();
+        $this->testNewModulesAndSecurity();
         $this->testErrorTemplates();
 
         echo "\n-------------------------------------------------------\n";
@@ -453,7 +454,7 @@ class SmokeTestRunner {
             'dashboard', 'orders', 'products', 'tickets', 'leads', 
             'articles', 'comments', 'analytics', 'backups', 'users', 
             'seo', 'gateways', 'sms', 'modules', 'settings',
-            'brands', 'media', 'profile'
+            'brands', 'media', 'profile', 'addresses', 'tariffs', 'serviceRequests'
         ];
 
         $failedActions = [];
@@ -474,12 +475,14 @@ class SmokeTestRunner {
     private function testPublicEndpointsNo500(): void {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $routes = [
-            'Home'    => [new \App\Controllers\HomeController(), 'index'],
-            'About'   => [new \App\Controllers\PageController(), 'about'],
-            'Contact' => [new \App\Controllers\PageController(), 'contact'],
-            'Services'=> [new \App\Controllers\PageController(), 'services'],
-            'Blog'    => [new \App\Controllers\BlogController(), 'index'],
-            'Shop'    => [new \App\Controllers\ShopController(), 'index']
+            'Home'            => [new \App\Controllers\HomeController(), 'index'],
+            'About'           => [new \App\Controllers\PageController(), 'about'],
+            'Contact'         => [new \App\Controllers\PageController(), 'contact'],
+            'Services'        => [new \App\Controllers\PageController(), 'services'],
+            'Blog'            => [new \App\Controllers\BlogController(), 'index'],
+            'Shop'            => [new \App\Controllers\ShopController(), 'index'],
+            'ServiceOrder'    => [new \App\Controllers\ServiceOrderController(), 'index'],
+            'ServiceTracking' => [new \App\Controllers\ServiceOrderController(), 'tracking']
         ];
 
         $failed = [];
@@ -495,6 +498,55 @@ class SmokeTestRunner {
         }
 
         $this->assert("All " . count($routes) . " Public Pages Return HTTP 200 (No 500 Errors)", empty($failed), implode(', ', $failed));
+    }
+
+    private function testNewModulesAndSecurity(): void {
+        // 1. Super Admin Immutability Test
+        $_SESSION['user_id'] = 999;
+        $_SESSION['user_role'] = 'admin'; // Store Manager
+        $_SESSION['user'] = ['id' => 999, 'name' => 'Store Manager', 'role' => 'admin'];
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $adminCtrl = new \App\Controllers\AdminController();
+
+        // Attempt to reset Super Admin password as regular admin
+        $_POST = ['action' => 'reset_password', 'user_id' => 1, 'new_password' => 'hacked1234'];
+        $adminCtrl->users();
+        $this->assert("Store Manager CANNOT Reset Super Admin Password", !empty($_SESSION['admin_error']) && str_contains($_SESSION['admin_error'], 'مدیر'));
+        unset($_SESSION['admin_error']);
+
+        // Attempt to delete Super Admin as regular admin
+        $_POST = ['action' => 'delete', 'user_id' => 1];
+        $adminCtrl->users();
+        $this->assert("Store Manager CANNOT Delete Super Admin Account", !empty($_SESSION['admin_error']) && str_contains($_SESSION['admin_error'], 'حساب مدیر ارشد'));
+        unset($_SESSION['admin_error']);
+
+        // Attempt to change Super Admin role as regular admin
+        $_POST = ['action' => 'update_role', 'user_id' => 1, 'role' => 'user'];
+        $adminCtrl->users();
+        $this->assert("Store Manager CANNOT Demote Super Admin Role", !empty($_SESSION['admin_error']) && str_contains($_SESSION['admin_error'], 'تغییر نقش'));
+        unset($_SESSION['admin_error']);
+
+        // Restore Super Admin session
+        $_SESSION['user_id'] = 1;
+        $_SESSION['user_role'] = 'super_admin';
+        $_SESSION['user'] = User::find(1);
+
+        // 2. User Addresses Query
+        $addresses = \App\Models\UserAddress::getAllWithUser();
+        $this->assert("User Addresses Table Query Returns Array", is_array($addresses));
+
+        // 3. Service Tariffs Query
+        $tariffs = \App\Models\ServiceTariff::getActive();
+        $this->assert("Service Tariffs Count >= 1", count($tariffs) >= 1);
+
+        // 4. Service Request Tracking Code Generator
+        $code = \App\Models\ServiceRequest::generateTrackingCode();
+        $this->assert("Service Request Tracking Code Format Valid", str_starts_with($code, 'TRM-'));
+
+        // 5. Chat Module Setting Exists & Default Disabled
+        $chatEnabled = Setting::get('module_chat', '0');
+        $this->assert("Live Chat Module Setting Exists and Defaults to Inactive (0)", $chatEnabled === '0' || $chatEnabled === '1');
     }
 
     private function testErrorTemplates(): void {

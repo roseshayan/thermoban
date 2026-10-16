@@ -11,10 +11,16 @@
                 مشاهده فهرست کاربران ثبت‌نامی، افزودن کاربر جدید توسط مدیر، تغییر نقش، مسدودسازی و بازنشانی کلمه عبور
             </p>
         </div>
-        <button type="button" class="btn btn-primary" onclick="openNewUserModal()" style="font-size: 0.88rem; padding: 10px 20px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-user-plus"></i>
-            <span>افزودن کاربر جدید</span>
-        </button>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <a href="<?= url('admin/addresses') ?>" class="btn btn-outline" style="font-size: 0.88rem; padding: 10px 18px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; background: #fff; text-decoration: none;">
+                <i class="fa-solid fa-location-dot" style="color: #10b981;"></i>
+                <span>فهرست کل آدرس‌های کاربران</span>
+            </a>
+            <button type="button" class="btn btn-primary" onclick="openNewUserModal()" style="font-size: 0.88rem; padding: 10px 20px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>افزودن کاربر جدید</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -86,11 +92,22 @@
                             <?php if (!empty($u['national_id'])): ?>
                                 <span style="display: block; font-size: 0.76rem; color: #94a3b8; font-weight: 500;">کد ملی: <?= e($u['national_id']) ?></span>
                             <?php endif; ?>
+                            <?php if (!empty($u['addresses_count'])): ?>
+                                <a href="<?= url('admin/addresses?user_id=' . $u['id']) ?>" style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.73rem; background: #f0fdf4; color: #166534; padding: 2px 7px; border-radius: 5px; border: 1px solid #bbf7d0; text-decoration: none; margin-top: 5px; font-weight: 600;" title="مشاهده آدرس‌های ثبت‌شده این کاربر">
+                                    <i class="fa-solid fa-location-dot" style="color: #22c55e;"></i>
+                                    <span><?= fa_num($u['addresses_count']) ?> آدرس ذخیره شده</span>
+                                </a>
+                            <?php else: ?>
+                                <span style="display: block; font-size: 0.72rem; color: #94a3b8; margin-top: 3px;">فاقد آدرس ثبت‌شده</span>
+                            <?php endif; ?>
                         </td>
                         <td style="padding: 14px; font-family: monospace; text-align: right;" dir="ltr"><?= e($u['phone']) ?></td>
                         <td style="padding: 14px;">
                             <?php if ($u['role'] === 'super_admin'): ?>
-                                <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">سوپر ادمین</span>
+                                <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-crown"></i>
+                                    سوپر ادمین
+                                </span>
                             <?php elseif ($u['role'] === 'admin'): ?>
                                 <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">مدیر فروشگاه</span>
                             <?php elseif ($u['role'] === 'technician'): ?>
@@ -112,26 +129,33 @@
                         </td>
                         <td style="padding: 14px; color: #64748b; font-size: 0.8rem;"><?= to_shamsi($u['created_at']) ?></td>
                         <td style="padding: 14px; text-align: center;">
-                            <div style="display: inline-flex; gap: 8px; justify-content: center;">
-                                <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.78rem; border-radius: 6px;" onclick="openEditModal(<?= htmlspecialchars(json_encode($u)) ?>)">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    <span>ویرایش</span>
-                                </button>
-                                <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.78rem; color: #d97706; border-color: #fde68a; border-radius: 6px;" onclick="openPasswordModal(<?= $u['id'] ?>, '<?= e($u['name']) ?>')">
-                                    <i class="fa-solid fa-key"></i>
-                                    <span>رمز</span>
-                                </button>
-                                <?php if ($u['id'] !== \App\Core\Auth::id() && $u['role'] !== 'super_admin'): ?>
-                                    <form action="<?= url('admin/users') ?>" method="POST" onsubmit="return confirm('آیا از حذف این کاربر اطمینان دارید؟');" style="display: inline;">
-                                        <?= csrf_field() ?>
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                                        <button type="submit" class="btn btn-outline" style="padding: 6px 10px; font-size: 0.78rem; color: #dc2626; border-color: #fca5a5; border-radius: 6px;" title="حذف کاربر">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-                            </div>
+                            <?php if ($u['role'] === 'super_admin' && !\App\Core\Auth::isSuperAdmin()): ?>
+                                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; font-size: 0.76rem; border-radius: 6px; background: #fef2f2; color: #991b1b; font-weight: 700; border: 1px solid #fecaca;" title="تنها شخص سوپر ادمین اجازه تغییر مشخصات خود را دارد">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <span>حساب محافظت‌شده</span>
+                                </span>
+                            <?php else: ?>
+                                <div style="display: inline-flex; gap: 8px; justify-content: center;">
+                                    <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.78rem; border-radius: 6px;" onclick="openEditModal(<?= htmlspecialchars(json_encode($u)) ?>)">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <span>ویرایش</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.78rem; color: #d97706; border-color: #fde68a; border-radius: 6px;" onclick="openPasswordModal(<?= $u['id'] ?>, '<?= e($u['name']) ?>')">
+                                        <i class="fa-solid fa-key"></i>
+                                        <span>رمز</span>
+                                    </button>
+                                    <?php if ($u['id'] !== \App\Core\Auth::id() && $u['role'] !== 'super_admin'): ?>
+                                        <form action="<?= url('admin/users') ?>" method="POST" onsubmit="return confirm('آیا از حذف این کاربر اطمینان دارید؟');" style="display: inline;">
+                                            <?= csrf_field() ?>
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
+                                            <button type="submit" class="btn btn-outline" style="padding: 6px 10px; font-size: 0.78rem; color: #dc2626; border-color: #fca5a5; border-radius: 6px;" title="حذف کاربر">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
