@@ -11,6 +11,7 @@ class UserAddress extends Model {
      * Get all addresses with user details
      */
     public static function getAllWithUser(string $search = '', ?int $userId = null): array {
+        \App\Services\DatabaseMigrationService::ensureTable('user_addresses');
         $sql = "SELECT ua.*, u.name as user_name, u.phone as user_account_phone, u.role as user_role
                 FROM `user_addresses` ua
                 LEFT JOIN `users` u ON ua.user_id = u.id
@@ -36,6 +37,7 @@ class UserAddress extends Model {
      * Get user addresses list
      */
     public static function getByUser(int $userId): array {
+        \App\Services\DatabaseMigrationService::ensureTable('user_addresses');
         return Database::fetchAll(
             "SELECT * FROM `user_addresses` WHERE `user_id` = :uid ORDER BY `is_default` DESC, `id` DESC",
             ['uid' => $userId]

@@ -11,6 +11,7 @@ class ServiceTariff extends Model {
      * Get all active tariffs ordered by sort_order
      */
     public static function getActive(): array {
+        \App\Services\DatabaseMigrationService::ensureTable('service_tariffs');
         $rows = static::where("`is_active` = 1", [], "`sort_order` ASC, `id` ASC");
         foreach ($rows as &$row) {
             if (!empty($row['features']) && is_string($row['features'])) {
@@ -27,6 +28,7 @@ class ServiceTariff extends Model {
      * Find by service key
      */
     public static function findByKey(string $key): ?array {
+        \App\Services\DatabaseMigrationService::ensureTable('service_tariffs');
         return static::first("`service_key` = :key", ['key' => $key]);
     }
 }

@@ -822,6 +822,7 @@ class AdminController extends Controller {
      * Manage Users (CRUD, Roles, Block/Active) - Strict Super Admin Immutability
      */
     public function users(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('user_addresses');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? '';
 
@@ -977,6 +978,7 @@ class AdminController extends Controller {
      * User Addresses Management
      */
     public function addresses(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('user_addresses');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? '';
             $id = (int) ($_POST['address_id'] ?? 0);
@@ -1019,6 +1021,7 @@ class AdminController extends Controller {
      * Official Approved Service Tariffs (نرخ مصوب اتحادیه)
      */
     public function tariffs(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('service_tariffs');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? 'update';
 
@@ -1113,6 +1116,7 @@ class AdminController extends Controller {
      * Comprehensive Service Requests & Technician Dispatch Management
      */
     public function serviceRequests(): void {
+        \App\Services\DatabaseMigrationService::ensureTable('service_requests');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? '';
             $id = (int) ($_POST['request_id'] ?? 0);
@@ -1184,6 +1188,20 @@ class AdminController extends Controller {
             'error'        => $_SESSION['admin_error'] ?? null
         ], 'layouts/admin');
         unset($_SESSION['admin_success'], $_SESSION['admin_error']);
+    }
+
+    /**
+     * Run all pending database migrations (Super Admin only)
+     */
+    public function migrateDb(): void {
+        $this->requireSuperAdmin();
+        try {
+            $executed = \App\Services\DatabaseMigrationService::run();
+            $_SESSION['admin_success'] = 'همگام‌سازی و ارتقای ساختار پایگاه داده با موفقیت انجام شد: ' . implode('، ', $executed);
+        } catch (\Throwable $e) {
+            $_SESSION['admin_error'] = 'خطا در ارتقای دیتابیس: ' . $e->getMessage();
+        }
+        $this->redirect('admin/settings');
     }
 
     /**

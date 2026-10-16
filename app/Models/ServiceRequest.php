@@ -11,6 +11,7 @@ class ServiceRequest extends Model {
      * Find by tracking code
      */
     public static function findByTrackingCode(string $code): ?array {
+        \App\Services\DatabaseMigrationService::ensureTable('service_requests');
         $code = trim($code);
         return Database::fetchOne(
             "SELECT sr.*, u.name as user_name, u.phone as user_phone, tech.name as assigned_tech_name, tech.phone as assigned_tech_phone
@@ -26,6 +27,7 @@ class ServiceRequest extends Model {
      * Get all with user and technician details
      */
     public static function getAllWithDetails(string $statusFilter = '', string $search = ''): array {
+        \App\Services\DatabaseMigrationService::ensureTable('service_requests');
         $sql = "SELECT sr.*, u.name as user_account_name, tech.name as tech_name, tech.phone as tech_phone
                 FROM `service_requests` sr
                 LEFT JOIN `users` u ON sr.user_id = u.id

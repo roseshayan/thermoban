@@ -54,3 +54,23 @@
         </button>
     </form>
 </div>
+
+<?php if (\App\Core\Auth::isSuperAdmin()): ?>
+<div class="dashboard-block" style="background: #fff; max-width: 800px; margin-top: 25px; border-right: 4px solid #16a34a;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+        <div>
+            <h3 style="font-size: 1rem; font-weight:700; color:#1e293b; margin:0 0 5px 0;">
+                <i class="fa-solid fa-database" style="color:#16a34a; margin-left:6px;"></i>
+                ارتقا و همگام‌سازی ساختار پایگاه داده
+            </h3>
+            <p style="font-size:0.85rem; color:#64748b; margin:0;">
+                در صورت استقرار کدهای جدید (جداول نرخ‌های مصوب، سفارشات خدمات، آدرس‌ها یا تنظیمات جدید)، با این دکمه ساختار دیتابیس را بدون نیاز به phpMyAdmin فوراً ارتقا دهید.
+            </p>
+        </div>
+        <a href="<?= url('admin/migrate-db') ?>" class="btn btn-outline-success" style="border-radius:10px; font-weight:600; padding:10px 18px; border:1.5px solid #16a34a; color:#16a34a; display:inline-flex; align-items:center; gap:8px;" onclick="return confirm('آیا از اجرای همگام‌سازی ساختار دیتابیس اطمینان دارید؟');">
+            <i class="fa-solid fa-rotate"></i>
+            <span>همگام‌سازی ساختار دیتابیس</span>
+        </a>
+    </div>
+</div>
+<?php endif; ?>

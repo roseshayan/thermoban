@@ -128,6 +128,8 @@ class Application {
         $this->router->post('/admin/modules', [\App\Controllers\AdminController::class, 'modules']);
         $this->router->get('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
         $this->router->post('/admin/settings', [\App\Controllers\AdminController::class, 'settings']);
+        $this->router->get('/admin/migrate-db', [\App\Controllers\AdminController::class, 'migrateDb']);
+        $this->router->post('/admin/migrate-db', [\App\Controllers\AdminController::class, 'migrateDb']);
         
         $this->router->get('/admin/brands', [\App\Controllers\AdminController::class, 'brands']);
         $this->router->post('/admin/brands', [\App\Controllers\AdminController::class, 'brands']);
