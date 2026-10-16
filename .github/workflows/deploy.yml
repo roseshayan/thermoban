@@ -3,7 +3,9 @@ name: Deploy Thermoban to cPanel Host
 on:
   push:
     branches:
-      - master # یا master بر اساس نام برنچ اصلی شما
+      - master
+      - main
+  workflow_dispatch:
 
 jobs:
   web-deploy:
