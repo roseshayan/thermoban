@@ -16,6 +16,11 @@ if (session_status() === PHP_SESSION_NONE) {
 // Load configuration
 require_once ROOT_PATH . '/app/Config/config.php';
 
+// Load global helpers
+if (file_exists(ROOT_PATH . '/app/Helpers/helpers.php')) {
+    require_once ROOT_PATH . '/app/Helpers/helpers.php';
+}
+
 // Run Application
 require_once ROOT_PATH . '/app/Core/Application.php';
 \App\Core\Application::run();

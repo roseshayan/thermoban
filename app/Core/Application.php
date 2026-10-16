@@ -10,6 +10,12 @@ class Application {
     }
 
     public static function run(): void {
+        // Load global helpers
+        $helpersPath = defined('APP_PATH') ? APP_PATH . '/Helpers/helpers.php' : (defined('ROOT_PATH') ? ROOT_PATH . '/app/Helpers/helpers.php' : __DIR__ . '/../Helpers/helpers.php');
+        if (file_exists($helpersPath)) {
+            require_once $helpersPath;
+        }
+
         spl_autoload_register(function ($class) {
             $prefix = 'App\\';
             $base_dir = APP_PATH . DIRECTORY_SEPARATOR;

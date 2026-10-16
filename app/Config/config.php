@@ -18,6 +18,11 @@ if (!defined('VIEW_PATH')) {
 }
 define('PUBLIC_PATH', ROOT_PATH . DIRECTORY_SEPARATOR . 'public');
 
+// Load global helpers
+if (file_exists(APP_PATH . DIRECTORY_SEPARATOR . 'Helpers' . DIRECTORY_SEPARATOR . 'helpers.php')) {
+    require_once APP_PATH . DIRECTORY_SEPARATOR . 'Helpers' . DIRECTORY_SEPARATOR . 'helpers.php';
+}
+
 // Database configuration
 define('DB_HOST', '127.0.0.1');
 define('DB_NAME', 'thermoban_db');
@@ -58,7 +63,9 @@ function get_base_url(): string {
     return $protocol . $host . '/' . $dir . '/';
 }
 
-define('BASE_URL', rtrim(get_base_url(), '/') . '/');
+if (!defined('BASE_URL')) {
+    define('BASE_URL', rtrim(get_base_url(), '/') . '/');
+}
 
 /**
  * Return absolute URL for a given path
